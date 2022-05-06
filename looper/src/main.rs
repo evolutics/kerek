@@ -5,7 +5,7 @@ use action::inspect;
 use action::run;
 use clap::Parser;
 
-fn main() {
+fn main() -> Result<(), String> {
     let arguments = Arguments::parse();
 
     match arguments.action {

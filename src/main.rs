@@ -1,4 +1,5 @@
 mod action;
+mod library;
 
 use action::clean;
 use action::inspect;

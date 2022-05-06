@@ -1,3 +1,3 @@
-pub fn go() {
+pub fn go() -> Result<(), String> {
     todo!()
 }

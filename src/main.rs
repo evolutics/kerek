@@ -2,7 +2,7 @@ mod action;
 mod library;
 
 use action::clear;
-use action::inspect;
+use action::diagnose;
 use action::run;
 use clap::Parser;
 
@@ -11,7 +11,7 @@ fn main() -> Result<(), String> {
 
     match arguments.action {
         Action::Clear => clear::go(),
-        Action::Inspect => inspect::go(),
+        Action::Diagnose => diagnose::go(),
         Action::Run => run::go(),
     }
 }
@@ -26,6 +26,6 @@ struct Arguments {
 #[derive(clap::Subcommand)]
 enum Action {
     Clear,
-    Inspect,
+    Diagnose,
     Run,
 }

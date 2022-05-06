@@ -1,3 +1,3 @@
 pub mod clear;
-pub mod inspect;
+pub mod diagnose;
 pub mod run;

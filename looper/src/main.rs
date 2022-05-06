@@ -1,7 +1,8 @@
-mod clean;
-mod inspect;
-mod run;
+mod action;
 
+use action::clean;
+use action::inspect;
+use action::run;
 use clap::Parser;
 
 fn main() {

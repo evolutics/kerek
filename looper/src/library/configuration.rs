@@ -2,9 +2,9 @@ use super::constants;
 use std::fs;
 use std::io;
 
-pub fn get() -> Result<Data, String> {
-    let file = fs::File::open(constants::CONFIGURATION_FILE).map_err(|error| format!("{error}"))?;
-    serde_json::from_reader(io::BufReader::new(file)).map_err(|error| format!("{error}"))
+pub fn get() -> anyhow::Result<Data> {
+    let file = fs::File::open(constants::CONFIGURATION_FILE)?;
+    Ok(serde_json::from_reader(io::BufReader::new(file))?)
 }
 
 #[derive(Debug, serde::Deserialize)]

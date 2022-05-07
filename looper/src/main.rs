@@ -6,7 +6,7 @@ use action::diagnose;
 use action::run;
 use clap::Parser;
 
-fn main() -> Result<(), String> {
+fn main() -> anyhow::Result<()> {
     let arguments = Arguments::parse();
 
     match arguments.action {

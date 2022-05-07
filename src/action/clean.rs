@@ -10,11 +10,7 @@ pub fn go() -> anyhow::Result<()> {
 }
 
 fn remove_vm_if_exists() -> anyhow::Result<()> {
-    let vagrantfile = [constants::WORK_FOLDER, "Vagrantfile"]
-        .iter()
-        .collect::<path::PathBuf>();
-
-    if vagrantfile.exists() {
+    if constants::vagrantfile().exists() {
         run_command::go(
             process::Command::new("vagrant")
                 .args(["destroy", "--force"])

@@ -1,5 +1,6 @@
 use crate::library::constants;
 use crate::library::run_command;
+use std::path;
 use std::process;
 
 pub fn go() -> Result<(), String> {
@@ -10,7 +11,11 @@ pub fn go() -> Result<(), String> {
 }
 
 fn remove_vm_if_exists() -> Result<(), String> {
-    if constants::vagrantfile().exists() {
+    let vagrantfile = [constants::WORK_FOLDER, "Vagrantfile"]
+        .iter()
+        .collect::<path::PathBuf>();
+
+    if vagrantfile.exists() {
         run_command::go(
             process::Command::new("vagrant")
                 .args(["destroy", "--force"])

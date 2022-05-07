@@ -1,3 +1,7 @@
+use crate::library::configuration;
+
 pub fn go() -> Result<(), String> {
-    todo!()
+    let configuration = configuration::get()?;
+    eprintln!("{configuration:#?}");
+    Ok(())
 }

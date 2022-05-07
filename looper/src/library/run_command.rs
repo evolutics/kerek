@@ -2,12 +2,12 @@ use std::process;
 
 pub fn go(command: &mut process::Command) -> Result<(), String> {
     match command.status() {
-        Result::Err(error) => Result::Err(format!("{command:?}: {error}")),
-        Result::Ok(status) => {
+        Err(error) => Err(format!("{command:?}: {error}")),
+        Ok(status) => {
             if status.success() {
-                Result::Ok(())
+                Ok(())
             } else {
-                Result::Err(format!("{command:?}: {status}"))
+                Err(format!("{command:?}: {status}"))
             }
         }
     }

@@ -12,6 +12,9 @@ pub fn get() -> anyhow::Result<Data> {
 #[derive(Debug, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Data {
+    #[serde(default = "default_provision_extras")]
+    pub provision_extras: String,
+
     #[serde(default = "default_test_base")]
     pub test_base: String,
     #[serde(default = "default_test_staging")]
@@ -21,6 +24,10 @@ pub struct Data {
 
     #[serde(default = "default_production_kubeconfig")]
     pub production_kubeconfig: String,
+}
+
+fn default_provision_extras() -> String {
+    String::from("scripts/provision_extras.sh")
 }
 
 fn default_test_base() -> String {

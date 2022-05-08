@@ -10,7 +10,7 @@ pub fn go() -> anyhow::Result<()> {
 }
 
 fn remove_vm_if_exists() -> anyhow::Result<()> {
-    if constants::vagrantfile().exists() {
+    if constants::vagrantfile_file().exists() {
         run_command::go(
             process::Command::new("vagrant")
                 .args(["destroy", "--force"])

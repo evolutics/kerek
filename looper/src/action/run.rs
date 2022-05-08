@@ -26,6 +26,7 @@ fn set_up_work_folder() -> anyhow::Result<()> {
     let path = constants::WORK_FOLDER;
     fs::create_dir(path)
         .with_context(|| format!("Unable to create folder, consider cleaning: {path}"))?;
+    fs::write(constants::provision_base_file(), constants::PROVISION_BASE)?;
     fs::write(constants::vagrantfile_file(), constants::VAGRANTFILE)?;
     Ok(())
 }

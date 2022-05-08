@@ -6,6 +6,8 @@ pub const STAGING_IP: &str = "192.168.63.63";
 
 pub const VAGRANTFILE: &str = include_str!("Vagrantfile");
 
+pub const VM_NAME: &str = "default";
+
 pub const WORK_FOLDER: &str = ".kerek";
 
 pub fn provision_base_file() -> String {

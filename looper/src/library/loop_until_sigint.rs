@@ -4,7 +4,7 @@ use std::sync::mpsc;
 pub fn go<F: Fn() -> anyhow::Result<()>, G: Fn() -> anyhow::Result<()>, H: Fn()>(
     set_up: F,
     iterate: G,
-    clean_up: H,
+    tear_down: H,
 ) -> anyhow::Result<()> {
     let result = set_up().and_then(|_| {
         let (sender, receiver) = mpsc::channel();
@@ -26,6 +26,6 @@ pub fn go<F: Fn() -> anyhow::Result<()>, G: Fn() -> anyhow::Result<()>, H: Fn()>
         }
     });
 
-    clean_up();
+    tear_down();
     result
 }

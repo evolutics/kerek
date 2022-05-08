@@ -11,6 +11,11 @@ pub const WORK_FOLDER: &str = ".kerek";
 pub fn provision_base_file() -> String {
     format!("{WORK_FOLDER}/provision_base.sh")
 }
+
+pub fn ssh_configuration_file() -> String {
+    format!("{WORK_FOLDER}/ssh_configuration")
+}
+
 pub fn vagrantfile_file() -> String {
     format!("{WORK_FOLDER}/Vagrantfile")
 }

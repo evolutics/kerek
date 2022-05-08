@@ -19,7 +19,8 @@ pub fn go() -> anyhow::Result<()> {
 
 fn set_up() -> anyhow::Result<()> {
     set_up_work_folder()?;
-    start_staging_vm()
+    start_staging_vm()?;
+    provision_staging_vm()
 }
 
 fn set_up_work_folder() -> anyhow::Result<()> {
@@ -37,6 +38,20 @@ fn start_staging_vm() -> anyhow::Result<()> {
             .arg("up")
             .current_dir(constants::WORK_FOLDER)
             .env("KEREK_IP", constants::STAGING_IP),
+    )
+}
+
+fn provision_staging_vm() -> anyhow::Result<()> {
+    dump_ssh_configuration()
+}
+
+fn dump_ssh_configuration() -> anyhow::Result<()> {
+    let file = fs::File::create(constants::ssh_configuration_file())?;
+    run_command::go(
+        process::Command::new("vagrant")
+            .arg("ssh-config")
+            .stdout(file)
+            .current_dir(constants::WORK_FOLDER),
     )
 }
 

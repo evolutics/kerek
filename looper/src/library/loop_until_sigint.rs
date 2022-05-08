@@ -1,7 +1,6 @@
 use anyhow::Context;
 use std::sync::mpsc;
 
-#[allow(dead_code)]
 pub fn go<F: Fn() -> anyhow::Result<()>, G: Fn()>(iterate: F, clean_up: G) -> anyhow::Result<()> {
     let (sender, receiver) = mpsc::channel();
 

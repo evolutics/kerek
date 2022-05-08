@@ -11,11 +11,11 @@ use std::process;
 pub fn go() -> anyhow::Result<()> {
     let configuration = configuration::get()?;
 
-    loop_until_sigint::go(
-        || set_up(&configuration),
-        || iterate(&configuration),
-        || clean::go().expect("Unable to clean."),
-    )
+    loop_until_sigint::go(loop_until_sigint::In {
+        set_up: || set_up(&configuration),
+        iterate: || iterate(&configuration),
+        tear_down: || clean::go().expect("Unable to clean."),
+    })
 }
 
 fn set_up(configuration: &configuration::Data) -> anyhow::Result<()> {

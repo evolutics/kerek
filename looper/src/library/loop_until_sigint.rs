@@ -2,11 +2,9 @@ use anyhow::Context;
 use std::sync::mpsc;
 
 pub fn go<F: Fn() -> anyhow::Result<()>, G: Fn() -> anyhow::Result<()>, H: Fn()>(
-    set_up: F,
-    iterate: G,
-    tear_down: H,
+    in_: In<F, G, H>,
 ) -> anyhow::Result<()> {
-    let result = set_up().and_then(|_| {
+    let result = (in_.set_up)().and_then(|_| {
         let (sender, receiver) = mpsc::channel();
 
         ctrlc::set_handler(move || {
@@ -19,13 +17,19 @@ pub fn go<F: Fn() -> anyhow::Result<()>, G: Fn() -> anyhow::Result<()>, H: Fn()>
                 Err(mpsc::TryRecvError::Empty) => (),
                 result => break result.context("Unable to receive from channel."),
             }
-            let result = iterate();
+            let result = (in_.iterate)();
             if result.is_err() {
                 break result;
             }
         }
     });
 
-    tear_down();
+    (in_.tear_down)();
     result
+}
+
+pub struct In<F, G, H> {
+    pub set_up: F,
+    pub iterate: G,
+    pub tear_down: H,
 }

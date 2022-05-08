@@ -1,9 +1,11 @@
 use super::constants;
+use anyhow::Context;
 use std::fs;
 use std::io;
 
 pub fn get() -> anyhow::Result<Data> {
-    let file = fs::File::open(constants::CONFIGURATION_FILE)?;
+    let path = constants::CONFIGURATION_FILE;
+    let file = fs::File::open(path).with_context(|| format!("Unable to open file: {path}"))?;
     Ok(serde_json::from_reader(io::BufReader::new(file))?)
 }
 

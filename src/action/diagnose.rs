@@ -10,5 +10,7 @@ pub fn go() -> anyhow::Result<()> {
         "Skaffold {{.Version}}\n",
     ]))?;
 
+    run_command::go(process::Command::new("ssh").arg("-V"))?;
+
     run_command::go(process::Command::new("vagrant").arg("--version"))
 }

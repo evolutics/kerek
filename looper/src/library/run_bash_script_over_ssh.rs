@@ -2,7 +2,6 @@ use super::run_command;
 use std::fs;
 use std::process;
 
-#[allow(dead_code)]
 pub fn go(in_: In) -> anyhow::Result<()> {
     let script = fs::File::open(in_.script_file)?;
     run_command::go(

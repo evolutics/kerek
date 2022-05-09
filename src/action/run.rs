@@ -49,6 +49,8 @@ fn provision_staging_vm(configuration: &configuration::Data) -> anyhow::Result<(
         provision::In {
             ssh_configuration_file: &constants::ssh_configuration_file(),
             ssh_hostname: constants::VM_NAME,
+            kubeconfig_file: &constants::staging_kubeconfig_file(),
+            public_ip: constants::STAGING_IP,
         },
     )
 }

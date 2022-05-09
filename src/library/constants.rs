@@ -18,6 +18,10 @@ pub fn ssh_configuration_file() -> String {
     format!("{WORK_FOLDER}/ssh_configuration")
 }
 
+pub fn staging_kubeconfig_file() -> String {
+    format!("{WORK_FOLDER}/staging_kubeconfig")
+}
+
 pub fn vagrantfile_file() -> String {
     format!("{WORK_FOLDER}/Vagrantfile")
 }

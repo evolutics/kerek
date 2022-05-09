@@ -66,6 +66,5 @@ fn dump_ssh_configuration() -> anyhow::Result<()> {
 }
 
 fn iterate(configuration: &configuration::Data) -> anyhow::Result<()> {
-    eprintln!("{configuration:#?}");
-    Ok(())
+    run_command::go(&mut process::Command::new(&configuration.test_base))
 }

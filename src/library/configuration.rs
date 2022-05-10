@@ -3,7 +3,7 @@ use anyhow::Context;
 use std::fs;
 use std::io;
 
-pub fn get() -> anyhow::Result<Data> {
+pub fn get() -> anyhow::Result<Main> {
     let path = constants::CONFIGURATION_FILE;
     let file = fs::File::open(path).with_context(|| format!("Unable to open file: {path}"))?;
     let configuration =
@@ -11,7 +11,7 @@ pub fn get() -> anyhow::Result<Data> {
     Ok(configuration.into())
 }
 
-pub struct Data {
+pub struct Main {
     pub provision_extras: String,
     pub test_base: String,
     pub staging: EnvironmentConfiguration,
@@ -71,7 +71,7 @@ fn default_production_kubeconfig() -> String {
     String::from("safe/production_kubeconfig")
 }
 
-impl From<UserFacingConfiguration> for Data {
+impl From<UserFacingConfiguration> for Main {
     fn from(configuration: UserFacingConfiguration) -> Self {
         let work_folder = constants::WORK_FOLDER;
 

@@ -5,7 +5,7 @@ use super::run_command;
 use std::fs;
 use std::process;
 
-pub fn go(configuration: &configuration::Data, in_: In) -> anyhow::Result<()> {
+pub fn go(configuration: &configuration::Main, in_: In) -> anyhow::Result<()> {
     provision_base(&in_)?;
     provision_extras(configuration, &in_)?;
     dump_kubeconfig(&in_)
@@ -26,7 +26,7 @@ fn provision_base(in_: &In) -> anyhow::Result<()> {
     })
 }
 
-fn provision_extras(configuration: &configuration::Data, in_: &In) -> anyhow::Result<()> {
+fn provision_extras(configuration: &configuration::Main, in_: &In) -> anyhow::Result<()> {
     run_bash_script_over_ssh::go(run_bash_script_over_ssh::In {
         configuration_file: in_.ssh_configuration_file,
         host: in_.ssh_host,

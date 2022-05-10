@@ -18,7 +18,7 @@ pub fn go() -> anyhow::Result<()> {
     })
 }
 
-fn set_up(configuration: &configuration::Data) -> anyhow::Result<()> {
+fn set_up(configuration: &configuration::Main) -> anyhow::Result<()> {
     set_up_work_folder()?;
     start_staging_vm(configuration)?;
     provision_staging_vm(configuration)
@@ -33,7 +33,7 @@ fn set_up_work_folder() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn start_staging_vm(configuration: &configuration::Data) -> anyhow::Result<()> {
+fn start_staging_vm(configuration: &configuration::Main) -> anyhow::Result<()> {
     run_command::go(
         process::Command::new("vagrant")
             .arg("up")
@@ -42,7 +42,7 @@ fn start_staging_vm(configuration: &configuration::Data) -> anyhow::Result<()> {
     )
 }
 
-fn provision_staging_vm(configuration: &configuration::Data) -> anyhow::Result<()> {
+fn provision_staging_vm(configuration: &configuration::Main) -> anyhow::Result<()> {
     dump_ssh_configuration(configuration)?;
     provision::go(
         configuration,
@@ -55,7 +55,7 @@ fn provision_staging_vm(configuration: &configuration::Data) -> anyhow::Result<(
     )
 }
 
-fn dump_ssh_configuration(configuration: &configuration::Data) -> anyhow::Result<()> {
+fn dump_ssh_configuration(configuration: &configuration::Main) -> anyhow::Result<()> {
     let file = fs::File::create(&configuration.staging.ssh_configuration_file)?;
     run_command::go(
         process::Command::new("vagrant")
@@ -65,6 +65,6 @@ fn dump_ssh_configuration(configuration: &configuration::Data) -> anyhow::Result
     )
 }
 
-fn iterate(configuration: &configuration::Data) -> anyhow::Result<()> {
+fn iterate(configuration: &configuration::Main) -> anyhow::Result<()> {
     run_command::go(&mut process::Command::new(&configuration.test_base))
 }

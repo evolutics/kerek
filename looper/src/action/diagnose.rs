@@ -1,8 +1,14 @@
 use crate::library::run_command;
+use std::io;
+use std::io::Write;
 use std::process;
 
 pub fn go() -> anyhow::Result<()> {
     run_command::go(process::Command::new("git").arg("version"))?;
+
+    print!("kubectl ");
+    io::stdout().flush()?;
+    run_command::go(process::Command::new("kubectl").args(["version", "--client", "--short"]))?;
 
     run_command::go(process::Command::new("skaffold").args([
         "version",

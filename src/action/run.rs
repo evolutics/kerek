@@ -66,5 +66,5 @@ fn provision_staging(configuration: &configuration::Main) -> anyhow::Result<()> 
 }
 
 fn iterate(configuration: &configuration::Main) -> anyhow::Result<()> {
-    run_command::go(&mut process::Command::new(&configuration.test_base))
+    run_command::go(&mut process::Command::new(&configuration.base_test))
 }

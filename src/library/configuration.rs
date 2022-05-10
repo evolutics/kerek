@@ -40,12 +40,12 @@ struct UserFacingConfiguration {
     #[serde(default = "default_smoke_test")]
     pub smoke_test: String,
 
-    #[serde(default = "default_production_ssh_configuration")]
-    pub production_ssh_configuration: String,
-    pub production_ssh_host: String,
-    #[serde(default = "default_production_kubeconfig")]
-    pub production_kubeconfig: String,
-    pub production_public_ip: String,
+    #[serde(default = "default_ssh_configuration")]
+    pub ssh_configuration: String,
+    pub ssh_host: String,
+    #[serde(default = "default_kubeconfig")]
+    pub kubeconfig: String,
+    pub public_ip: String,
 }
 
 fn default_provision_extras() -> String {
@@ -64,12 +64,12 @@ fn default_smoke_test() -> String {
     String::from("scripts/smoke_test.sh")
 }
 
-fn default_production_ssh_configuration() -> String {
-    String::from("safe/production_ssh_configuration")
+fn default_ssh_configuration() -> String {
+    String::from("safe/ssh_configuration")
 }
 
-fn default_production_kubeconfig() -> String {
-    String::from("safe/production_kubeconfig")
+fn default_kubeconfig() -> String {
+    String::from("safe/kubeconfig")
 }
 
 impl From<UserFacingConfiguration> for Main {
@@ -88,10 +88,10 @@ impl From<UserFacingConfiguration> for Main {
                 public_ip: String::from("192.168.63.63"),
             },
             production: EnvironmentConfiguration {
-                ssh_configuration_file: configuration.production_ssh_configuration,
-                ssh_host: configuration.production_ssh_host,
-                kubeconfig_file: configuration.production_kubeconfig,
-                public_ip: configuration.production_public_ip,
+                ssh_configuration_file: configuration.ssh_configuration,
+                ssh_host: configuration.ssh_host,
+                kubeconfig_file: configuration.kubeconfig,
+                public_ip: configuration.public_ip,
             },
         }
     }

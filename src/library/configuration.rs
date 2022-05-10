@@ -37,10 +37,10 @@ struct UserFacingConfiguration {
     pub production_ssh_configuration: String,
     #[allow(dead_code)]
     pub production_ssh_host: String,
-    #[allow(dead_code)]
-    pub production_public_ip: String,
     #[serde(default = "default_production_kubeconfig")]
     pub production_kubeconfig: String,
+    #[allow(dead_code)]
+    pub production_public_ip: String,
 }
 
 fn default_provision_extras() -> String {

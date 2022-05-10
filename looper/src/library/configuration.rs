@@ -32,6 +32,11 @@ struct UserFacingConfiguration {
     #[serde(default = "default_test_production")]
     pub test_production: String,
 
+    #[allow(dead_code)]
+    #[serde(default = "default_production_ssh_configuration")]
+    pub production_ssh_configuration: String,
+    #[allow(dead_code)]
+    pub production_ssh_host: String,
     #[serde(default = "default_production_kubeconfig")]
     pub production_kubeconfig: String,
 }
@@ -50,6 +55,10 @@ fn default_test_staging() -> String {
 
 fn default_test_production() -> String {
     String::from("scripts/test_production.sh")
+}
+
+fn default_production_ssh_configuration() -> String {
+    String::from("safe/production_ssh_configuration")
 }
 
 fn default_production_kubeconfig() -> String {

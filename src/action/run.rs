@@ -20,8 +20,8 @@ pub fn go() -> anyhow::Result<()> {
 
 fn set_up(configuration: &configuration::Main) -> anyhow::Result<()> {
     set_up_work_folder()?;
-    start_staging_vm(configuration)?;
-    provision_staging_vm(configuration)
+    start_staging(configuration)?;
+    provision_staging(configuration)
 }
 
 fn set_up_work_folder() -> anyhow::Result<()> {
@@ -33,7 +33,7 @@ fn set_up_work_folder() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn start_staging_vm(configuration: &configuration::Main) -> anyhow::Result<()> {
+fn start_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
     run_command::go(
         process::Command::new("vagrant")
             .arg("up")
@@ -42,7 +42,7 @@ fn start_staging_vm(configuration: &configuration::Main) -> anyhow::Result<()> {
     )
 }
 
-fn provision_staging_vm(configuration: &configuration::Main) -> anyhow::Result<()> {
+fn provision_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
     dump_ssh_configuration(configuration)?;
     provision::go(
         configuration,

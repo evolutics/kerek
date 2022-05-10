@@ -13,7 +13,7 @@ pub fn go(configuration: &configuration::Data, in_: In) -> anyhow::Result<()> {
 
 pub struct In<'a> {
     pub ssh_configuration_file: &'a str,
-    pub ssh_hostname: &'a str,
+    pub ssh_host: &'a str,
     pub kubeconfig_file: &'a str,
     pub public_ip: &'a str,
 }
@@ -21,7 +21,7 @@ pub struct In<'a> {
 fn provision_base(in_: &In) -> anyhow::Result<()> {
     run_bash_script_over_ssh::go(run_bash_script_over_ssh::In {
         configuration_file: in_.ssh_configuration_file,
-        hostname: in_.ssh_hostname,
+        host: in_.ssh_host,
         script_file: &constants::provision_base_file(),
     })
 }
@@ -29,7 +29,7 @@ fn provision_base(in_: &In) -> anyhow::Result<()> {
 fn provision_extras(configuration: &configuration::Data, in_: &In) -> anyhow::Result<()> {
     run_bash_script_over_ssh::go(run_bash_script_over_ssh::In {
         configuration_file: in_.ssh_configuration_file,
-        hostname: in_.ssh_hostname,
+        host: in_.ssh_host,
         script_file: &configuration.provision_extras,
     })
 }
@@ -46,7 +46,7 @@ fn copy_local_kubeconfig(in_: &In) -> anyhow::Result<()> {
             .args([
                 "-F",
                 in_.ssh_configuration_file,
-                in_.ssh_hostname,
+                in_.ssh_host,
                 "sudo cat /etc/rancher/k3s/k3s.yaml",
             ])
             .stdout(file),

@@ -20,7 +20,7 @@ pub fn go() -> anyhow::Result<()> {
 
 fn set_up(configuration: &configuration::Data) -> anyhow::Result<()> {
     set_up_work_folder()?;
-    start_staging_vm()?;
+    start_staging_vm(configuration)?;
     provision_staging_vm(configuration)
 }
 
@@ -33,30 +33,30 @@ fn set_up_work_folder() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn start_staging_vm() -> anyhow::Result<()> {
+fn start_staging_vm(configuration: &configuration::Data) -> anyhow::Result<()> {
     run_command::go(
         process::Command::new("vagrant")
             .arg("up")
             .current_dir(constants::WORK_FOLDER)
-            .env("KEREK_IP", constants::STAGING_IP),
+            .env("KEREK_IP", &configuration.staging.public_ip),
     )
 }
 
 fn provision_staging_vm(configuration: &configuration::Data) -> anyhow::Result<()> {
-    dump_ssh_configuration()?;
+    dump_ssh_configuration(configuration)?;
     provision::go(
         configuration,
         provision::In {
-            ssh_configuration_file: &constants::ssh_configuration_file(),
-            ssh_host: constants::VM_NAME,
-            kubeconfig_file: &constants::staging_kubeconfig_file(),
-            public_ip: constants::STAGING_IP,
+            ssh_configuration_file: &configuration.staging.ssh_configuration_file,
+            ssh_host: &configuration.staging.ssh_host,
+            kubeconfig_file: &configuration.staging.kubeconfig_file,
+            public_ip: &configuration.staging.public_ip,
         },
     )
 }
 
-fn dump_ssh_configuration() -> anyhow::Result<()> {
-    let file = fs::File::create(constants::ssh_configuration_file())?;
+fn dump_ssh_configuration(configuration: &configuration::Data) -> anyhow::Result<()> {
+    let file = fs::File::create(&configuration.staging.ssh_configuration_file)?;
     run_command::go(
         process::Command::new("vagrant")
             .arg("ssh-config")

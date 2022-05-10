@@ -19,7 +19,7 @@ pub struct Data {
     pub production_kubeconfig: String,
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct UserFacingConfiguration {
     #[serde(default = "default_provision_extras")]

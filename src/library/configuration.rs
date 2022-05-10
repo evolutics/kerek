@@ -81,7 +81,7 @@ impl From<UserFacingConfiguration> for Data {
             staging: EnvironmentConfiguration {
                 ssh_configuration_file: format!("{work_folder}/ssh_configuration"),
                 ssh_host: String::from("default"),
-                kubeconfig_file: format!("{work_folder}/staging_kubeconfig"),
+                kubeconfig_file: format!("{work_folder}/kubeconfig"),
                 public_ip: String::from("192.168.63.63"),
                 test_file: configuration.test_staging,
             },

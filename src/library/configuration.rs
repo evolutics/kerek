@@ -75,7 +75,7 @@ impl From<UserFacingConfiguration> for Data {
     fn from(configuration: UserFacingConfiguration) -> Self {
         let work_folder = constants::WORK_FOLDER;
 
-        Data {
+        Self {
             provision_extras: configuration.provision_extras,
             test_base: configuration.test_base,
             staging: EnvironmentConfiguration {

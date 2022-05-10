@@ -14,9 +14,16 @@ pub fn get() -> anyhow::Result<Data> {
 pub struct Data {
     pub provision_extras: String,
     pub test_base: String,
-    pub test_staging: String,
-    pub test_production: String,
-    pub production_kubeconfig: String,
+    pub staging: EnvironmentConfiguration,
+    pub production: EnvironmentConfiguration,
+}
+
+pub struct EnvironmentConfiguration {
+    pub ssh_configuration_file: String,
+    pub ssh_host: String,
+    pub kubeconfig_file: String,
+    pub public_ip: String,
+    pub test_file: String,
 }
 
 #[derive(serde::Deserialize)]
@@ -32,14 +39,11 @@ struct UserFacingConfiguration {
     #[serde(default = "default_test_production")]
     pub test_production: String,
 
-    #[allow(dead_code)]
     #[serde(default = "default_production_ssh_configuration")]
     pub production_ssh_configuration: String,
-    #[allow(dead_code)]
     pub production_ssh_host: String,
     #[serde(default = "default_production_kubeconfig")]
     pub production_kubeconfig: String,
-    #[allow(dead_code)]
     pub production_public_ip: String,
 }
 
@@ -69,12 +73,25 @@ fn default_production_kubeconfig() -> String {
 
 impl From<UserFacingConfiguration> for Data {
     fn from(configuration: UserFacingConfiguration) -> Self {
+        let work_folder = constants::WORK_FOLDER;
+
         Data {
             provision_extras: configuration.provision_extras,
             test_base: configuration.test_base,
-            test_staging: configuration.test_staging,
-            test_production: configuration.test_production,
-            production_kubeconfig: configuration.production_kubeconfig,
+            staging: EnvironmentConfiguration {
+                ssh_configuration_file: format!("{work_folder}/ssh_configuration"),
+                ssh_host: String::from("default"),
+                kubeconfig_file: format!("{work_folder}/staging_kubeconfig"),
+                public_ip: String::from("192.168.63.63"),
+                test_file: configuration.test_staging,
+            },
+            production: EnvironmentConfiguration {
+                ssh_configuration_file: configuration.production_ssh_configuration,
+                ssh_host: configuration.production_ssh_host,
+                kubeconfig_file: configuration.production_kubeconfig,
+                public_ip: configuration.production_public_ip,
+                test_file: configuration.test_production,
+            },
         }
     }
 }

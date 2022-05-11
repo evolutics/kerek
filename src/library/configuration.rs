@@ -4,9 +4,8 @@ use std::fs;
 use std::io;
 use std::path;
 
-pub fn get() -> anyhow::Result<Main> {
-    let path = constants::CONFIGURATION_FILE;
-    let file = fs::File::open(path).with_context(|| format!("Unable to open file: {path}"))?;
+pub fn get(path: path::PathBuf) -> anyhow::Result<Main> {
+    let file = fs::File::open(&path).with_context(|| format!("Unable to open file: {path:?}"))?;
     let configuration =
         serde_json::from_reader::<_, UserFacingConfiguration>(io::BufReader::new(file))?;
     Ok(configuration.into())

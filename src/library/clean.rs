@@ -13,7 +13,8 @@ fn remove_vm_if_exists() -> anyhow::Result<()> {
     if path::Path::new(&constants::vagrantfile_file()).exists() {
         run_command::go(
             process::Command::new("vagrant")
-                .args(["destroy", "--force"])
+                .arg("destroy")
+                .arg("--force")
                 .current_dir(constants::WORK_FOLDER),
         )
     } else {

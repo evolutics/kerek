@@ -45,8 +45,6 @@ struct UserFacingConfiguration {
 }
 
 fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
-    let work_folder = constants::WORK_FOLDER;
-
     Main {
         provisioning_scripts: [
             Some(constants::provision_base_file()),
@@ -65,12 +63,7 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
         smoke_test: configuration
             .smoke_test
             .unwrap_or_else(|| root.join("scripts/smoke_test.sh")),
-        staging: EnvironmentConfiguration {
-            ssh_configuration_file: root.join(format!("{work_folder}/ssh_configuration")),
-            ssh_host: String::from("default"),
-            kubeconfig_file: root.join(format!("{work_folder}/kubeconfig")),
-            public_ip: String::from("192.168.63.63"),
-        },
+        staging: staging(root),
         production: EnvironmentConfiguration {
             ssh_configuration_file: configuration
                 .ssh_configuration
@@ -81,5 +74,15 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
                 .unwrap_or_else(|| root.join("safe/kubeconfig")),
             public_ip: configuration.public_ip,
         },
+    }
+}
+
+fn staging(root: &path::Path) -> EnvironmentConfiguration {
+    let work_folder = constants::WORK_FOLDER;
+    EnvironmentConfiguration {
+        ssh_configuration_file: root.join(format!("{work_folder}/ssh_configuration")),
+        ssh_host: String::from("default"),
+        kubeconfig_file: root.join(format!("{work_folder}/kubeconfig")),
+        public_ip: String::from("192.168.63.63"),
     }
 }

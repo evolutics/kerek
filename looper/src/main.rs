@@ -5,6 +5,7 @@ use action::clean;
 use action::diagnose;
 use action::run;
 use clap::Parser;
+use std::path;
 
 fn main() -> anyhow::Result<()> {
     let arguments = Arguments::parse();
@@ -12,7 +13,7 @@ fn main() -> anyhow::Result<()> {
     match arguments.action {
         Action::Clean => clean::go(),
         Action::Diagnose => diagnose::go(),
-        Action::Run => run::go(),
+        Action::Run { configuration } => run::go(configuration),
     }
 }
 
@@ -27,5 +28,8 @@ struct Arguments {
 enum Action {
     Clean,
     Diagnose,
-    Run,
+    Run {
+        #[clap(default_value = "kerek.json", long, parse(from_os_str))]
+        configuration: path::PathBuf,
+    },
 }

@@ -6,10 +6,11 @@ use crate::library::provision;
 use crate::library::run_command;
 use anyhow::Context;
 use std::fs;
+use std::path;
 use std::process;
 
-pub fn go() -> anyhow::Result<()> {
-    let configuration = configuration::get()?;
+pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
+    let configuration = configuration::get(configuration)?;
 
     loop_until_sigint::go(loop_until_sigint::In {
         set_up: || set_up(&configuration),

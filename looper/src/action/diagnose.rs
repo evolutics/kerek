@@ -8,13 +8,19 @@ pub fn go() -> anyhow::Result<()> {
 
     print!("kubectl ");
     io::stdout().flush()?;
-    run_command::go(process::Command::new("kubectl").args(["version", "--client", "--short"]))?;
+    run_command::go(
+        process::Command::new("kubectl")
+            .arg("version")
+            .arg("--client")
+            .arg("--short"),
+    )?;
 
-    run_command::go(process::Command::new("skaffold").args([
-        "version",
-        "--output",
-        "Skaffold {{.Version}}\n",
-    ]))?;
+    run_command::go(
+        process::Command::new("skaffold")
+            .arg("version")
+            .arg("--output")
+            .arg("Skaffold {{.Version}}\n"),
+    )?;
 
     run_command::go(process::Command::new("ssh").arg("-V"))?;
 

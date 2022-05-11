@@ -30,8 +30,7 @@ pub struct EnvironmentConfiguration {
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct UserFacingConfiguration {
-    #[serde(default = "default_provision_extras")]
-    pub provision_extras: String,
+    pub provision_extras: Option<String>,
 
     #[serde(default = "default_base_test")]
     pub base_test: String,
@@ -46,10 +45,6 @@ struct UserFacingConfiguration {
     #[serde(default = "default_kubeconfig")]
     pub kubeconfig: String,
     pub public_ip: String,
-}
-
-fn default_provision_extras() -> String {
-    String::from("scripts/provision_extras.sh")
 }
 
 fn default_base_test() -> String {
@@ -77,10 +72,13 @@ impl From<UserFacingConfiguration> for Main {
         let work_folder = constants::WORK_FOLDER;
 
         Self {
-            provisioning_scripts: vec![
-                constants::provision_base_file(),
+            provisioning_scripts: [
+                Some(constants::provision_base_file()),
                 configuration.provision_extras,
-            ],
+            ]
+            .into_iter()
+            .flatten()
+            .collect(),
             base_test: configuration.base_test,
             acceptance_test: configuration.acceptance_test,
             smoke_test: configuration.smoke_test,

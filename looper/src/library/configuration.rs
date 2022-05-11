@@ -12,7 +12,7 @@ pub fn get() -> anyhow::Result<Main> {
 }
 
 pub struct Main {
-    pub provision_extras: String,
+    pub provisioning_scripts: Vec<String>,
     pub base_test: String,
     pub acceptance_test: String,
     pub smoke_test: String,
@@ -77,7 +77,10 @@ impl From<UserFacingConfiguration> for Main {
         let work_folder = constants::WORK_FOLDER;
 
         Self {
-            provision_extras: configuration.provision_extras,
+            provisioning_scripts: vec![
+                constants::provision_base_file(),
+                configuration.provision_extras,
+            ],
             base_test: configuration.base_test,
             acceptance_test: configuration.acceptance_test,
             smoke_test: configuration.smoke_test,

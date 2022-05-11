@@ -54,15 +54,13 @@ fn dump_staging_ssh_configuration(configuration: &configuration::Main) -> anyhow
 }
 
 fn provision_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
-    provision::go(
-        configuration,
-        provision::In {
-            ssh_configuration_file: &configuration.staging.ssh_configuration_file,
-            ssh_host: &configuration.staging.ssh_host,
-            kubeconfig_file: &configuration.staging.kubeconfig_file,
-            public_ip: &configuration.staging.public_ip,
-        },
-    )
+    provision::go(provision::In {
+        scripts: &configuration.provisioning_scripts,
+        ssh_configuration_file: &configuration.staging.ssh_configuration_file,
+        ssh_host: &configuration.staging.ssh_host,
+        kubeconfig_file: &configuration.staging.kubeconfig_file,
+        public_ip: &configuration.staging.public_ip,
+    })
 }
 
 fn iterate(configuration: &configuration::Main) -> anyhow::Result<()> {

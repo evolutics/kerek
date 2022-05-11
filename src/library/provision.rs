@@ -1,37 +1,30 @@
-use super::configuration;
-use super::constants;
 use super::run_bash_script_over_ssh;
 use super::run_command;
 use std::fs;
 use std::process;
 
-pub fn go(configuration: &configuration::Main, in_: In) -> anyhow::Result<()> {
-    provision_base(&in_)?;
-    provision_extras(configuration, &in_)?;
+pub fn go(in_: In) -> anyhow::Result<()> {
+    run_scripts(&in_)?;
     dump_kubeconfig(&in_)
 }
 
 pub struct In<'a> {
+    pub scripts: &'a [String],
     pub ssh_configuration_file: &'a str,
     pub ssh_host: &'a str,
     pub kubeconfig_file: &'a str,
     pub public_ip: &'a str,
 }
 
-fn provision_base(in_: &In) -> anyhow::Result<()> {
-    run_bash_script_over_ssh::go(run_bash_script_over_ssh::In {
-        configuration_file: in_.ssh_configuration_file,
-        host: in_.ssh_host,
-        script_file: &constants::provision_base_file(),
-    })
-}
-
-fn provision_extras(configuration: &configuration::Main, in_: &In) -> anyhow::Result<()> {
-    run_bash_script_over_ssh::go(run_bash_script_over_ssh::In {
-        configuration_file: in_.ssh_configuration_file,
-        host: in_.ssh_host,
-        script_file: &configuration.provision_extras,
-    })
+fn run_scripts(in_: &In) -> anyhow::Result<()> {
+    for script in in_.scripts {
+        run_bash_script_over_ssh::go(run_bash_script_over_ssh::In {
+            configuration_file: in_.ssh_configuration_file,
+            host: in_.ssh_host,
+            script_file: script,
+        })?;
+    }
+    Ok(())
 }
 
 fn dump_kubeconfig(in_: &In) -> anyhow::Result<()> {

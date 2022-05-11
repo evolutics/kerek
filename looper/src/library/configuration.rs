@@ -7,7 +7,10 @@ use std::path;
 pub fn get(path: path::PathBuf) -> anyhow::Result<Main> {
     let file = fs::File::open(&path).with_context(|| format!("Unable to open file: {path:?}"))?;
     let configuration = serde_json::from_reader(io::BufReader::new(file))?;
-    Ok(convert(configuration))
+    let root = path
+        .parent()
+        .ok_or_else(|| anyhow::anyhow!("No parent for path: {path:?}"))?;
+    Ok(convert(configuration, root))
 }
 
 pub struct Main {
@@ -41,7 +44,9 @@ struct UserFacingConfiguration {
     pub public_ip: String,
 }
 
-fn convert(configuration: UserFacingConfiguration) -> Main {
+fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
+    let work_folder = constants::WORK_FOLDER;
+
     Main {
         provisioning_scripts: [
             Some(constants::provision_base_file()),
@@ -49,32 +54,31 @@ fn convert(configuration: UserFacingConfiguration) -> Main {
         ]
         .into_iter()
         .flatten()
+        .map(|path| root.join(path))
         .collect(),
         base_test: configuration
             .base_test
-            .unwrap_or_else(|| ["scripts", "base_test.sh"].into_iter().collect()),
+            .unwrap_or_else(|| root.join("scripts/base_test.sh")),
         acceptance_test: configuration
             .acceptance_test
-            .unwrap_or_else(|| ["scripts", "acceptance_test.sh"].into_iter().collect()),
+            .unwrap_or_else(|| root.join("scripts/acceptance_test.sh")),
         smoke_test: configuration
             .smoke_test
-            .unwrap_or_else(|| ["scripts", "smoke_test.sh"].into_iter().collect()),
+            .unwrap_or_else(|| root.join("scripts/smoke_test.sh")),
         staging: EnvironmentConfiguration {
-            ssh_configuration_file: [constants::WORK_FOLDER, "ssh_configuration"]
-                .into_iter()
-                .collect(),
+            ssh_configuration_file: root.join(format!("{work_folder}/ssh_configuration")),
             ssh_host: String::from("default"),
-            kubeconfig_file: [constants::WORK_FOLDER, "kubeconfig"].into_iter().collect(),
+            kubeconfig_file: root.join(format!("{work_folder}/kubeconfig")),
             public_ip: String::from("192.168.63.63"),
         },
         production: EnvironmentConfiguration {
             ssh_configuration_file: configuration
                 .ssh_configuration
-                .unwrap_or_else(|| ["safe", "ssh_configuration"].into_iter().collect()),
+                .unwrap_or_else(|| root.join("safe/ssh_configuration")),
             ssh_host: configuration.ssh_host,
             kubeconfig_file: configuration
                 .kubeconfig
-                .unwrap_or_else(|| ["safe", "kubeconfig"].into_iter().collect()),
+                .unwrap_or_else(|| root.join("safe/kubeconfig")),
             public_ip: configuration.public_ip,
         },
     }

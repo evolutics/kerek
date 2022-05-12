@@ -1,7 +1,5 @@
 use crate::library::assets;
-use crate::library::clean;
 use crate::library::configuration;
-use crate::library::loop_until_sigint;
 use crate::library::provision;
 use crate::library::run_command;
 use anyhow::Context;
@@ -9,17 +7,7 @@ use std::fs;
 use std::path;
 use std::process;
 
-pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
-    let configuration = configuration::get(configuration)?;
-
-    loop_until_sigint::go(loop_until_sigint::In {
-        set_up: || set_up(&configuration),
-        iterate: || iterate(&configuration),
-        tear_down: || clean::go(&configuration.work_folder).expect("Unable to clean."),
-    })
-}
-
-fn set_up(configuration: &configuration::Main) -> anyhow::Result<()> {
+pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
     set_up_work_folder(&configuration.work_folder)?;
     start_staging(configuration)?;
     dump_staging_ssh_configuration(configuration)?;
@@ -65,8 +53,4 @@ fn provision_staging(configuration: &configuration::Main) -> anyhow::Result<()> 
         kubeconfig_file: &configuration.staging.kubeconfig_file,
         public_ip: &configuration.staging.public_ip,
     })
-}
-
-fn iterate(configuration: &configuration::Main) -> anyhow::Result<()> {
-    run_command::go(&mut process::Command::new(&configuration.base_test))
 }

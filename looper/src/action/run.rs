@@ -20,26 +20,21 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
 }
 
 fn set_up(configuration: &configuration::Main) -> anyhow::Result<()> {
-    set_up_work_folder(configuration)?;
+    set_up_work_folder(&configuration.work_folder)?;
     start_staging(configuration)?;
     dump_staging_ssh_configuration(configuration)?;
     provision_staging(configuration)
 }
 
-fn set_up_work_folder(configuration: &configuration::Main) -> anyhow::Result<()> {
-    let path = &configuration.work_folder;
-    fs::create_dir(path)
-        .with_context(|| format!("Unable to create folder, consider cleaning: {path:?}"))?;
+fn set_up_work_folder(work_folder: &path::Path) -> anyhow::Result<()> {
+    fs::create_dir(work_folder)
+        .with_context(|| format!("Unable to create folder, consider cleaning: {work_folder:?}"))?;
     fs::write(
-        configuration
-            .work_folder
-            .join(constants::PROVISION_BASE_FILENAME),
+        work_folder.join(constants::PROVISION_BASE_FILENAME),
         constants::PROVISION_BASE,
     )?;
     fs::write(
-        configuration
-            .work_folder
-            .join(constants::VAGRANTFILE_FILENAME),
+        work_folder.join(constants::VAGRANTFILE_FILENAME),
         constants::VAGRANTFILE,
     )?;
     Ok(())

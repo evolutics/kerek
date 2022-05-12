@@ -60,7 +60,7 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
     .into_iter()
     .flatten()
     .collect();
-    let staging = staging(&work_folder);
+    let staging = staging_configuration(&work_folder);
 
     Main {
         work_folder,
@@ -98,7 +98,7 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
     }
 }
 
-fn staging(work_folder: &path::Path) -> EnvironmentConfiguration {
+fn staging_configuration(work_folder: &path::Path) -> EnvironmentConfiguration {
     EnvironmentConfiguration {
         ssh_configuration_file: work_folder.join("ssh_configuration"),
         ssh_host: String::from("default"),

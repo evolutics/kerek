@@ -65,24 +65,34 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
     Main {
         work_folder,
         provisioning_scripts,
-        base_test: configuration
-            .base_test
-            .unwrap_or_else(|| root.join("scripts/base_test.sh")),
-        acceptance_test: configuration
-            .acceptance_test
-            .unwrap_or_else(|| root.join("scripts/acceptance_test.sh")),
-        smoke_test: configuration
-            .smoke_test
-            .unwrap_or_else(|| root.join("scripts/smoke_test.sh")),
+        base_test: root.join(
+            configuration
+                .base_test
+                .unwrap_or_else(|| ["scripts", "base_test.sh"].iter().collect()),
+        ),
+        acceptance_test: root.join(
+            configuration
+                .acceptance_test
+                .unwrap_or_else(|| ["scripts", "acceptance_test.sh"].iter().collect()),
+        ),
+        smoke_test: root.join(
+            configuration
+                .smoke_test
+                .unwrap_or_else(|| ["scripts", "smoke_test.sh"].iter().collect()),
+        ),
         staging,
         production: EnvironmentConfiguration {
-            ssh_configuration_file: configuration
-                .ssh_configuration
-                .unwrap_or_else(|| root.join("safe/ssh_configuration")),
+            ssh_configuration_file: root.join(
+                configuration
+                    .ssh_configuration
+                    .unwrap_or_else(|| ["safe", "ssh_configuration"].iter().collect()),
+            ),
             ssh_host: configuration.ssh_host,
-            kubeconfig_file: configuration
-                .kubeconfig
-                .unwrap_or_else(|| root.join("safe/kubeconfig")),
+            kubeconfig_file: root.join(
+                configuration
+                    .kubeconfig
+                    .unwrap_or_else(|| ["safe", "kubeconfig"].iter().collect()),
+            ),
             public_ip: configuration.public_ip,
         },
     }

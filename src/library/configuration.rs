@@ -48,11 +48,10 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
     Main {
         provisioning_scripts: [
             Some(constants::provision_base_file()),
-            configuration.provision_extras,
+            configuration.provision_extras.map(|path| root.join(path)),
         ]
         .into_iter()
         .flatten()
-        .map(|path| root.join(path))
         .collect(),
         base_test: configuration
             .base_test

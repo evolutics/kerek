@@ -33,6 +33,8 @@ pub struct EnvironmentConfiguration {
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct UserFacingConfiguration {
+    pub work_folder: Option<path::PathBuf>,
+
     pub provision_extras: Option<path::PathBuf>,
 
     pub base_test: Option<path::PathBuf>,
@@ -46,7 +48,11 @@ struct UserFacingConfiguration {
 }
 
 fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
-    let work_folder = root.join(constants::WORK_FOLDER);
+    let work_folder = root.join(
+        configuration
+            .work_folder
+            .unwrap_or_else(|| path::PathBuf::from(".kerek")),
+    );
     let provisioning_scripts = [
         Some(work_folder.join(constants::PROVISION_BASE_FILENAME)),
         configuration.provision_extras.map(|path| root.join(path)),

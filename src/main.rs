@@ -11,7 +11,7 @@ fn main() -> anyhow::Result<()> {
     let arguments = Arguments::parse();
 
     match arguments.action {
-        Action::Clean => clean::go(),
+        Action::Clean => clean::go(arguments.configuration),
         Action::Diagnose => diagnose::go(),
         Action::Run => run::go(arguments.configuration),
     }

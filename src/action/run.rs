@@ -15,7 +15,7 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
     loop_until_sigint::go(loop_until_sigint::In {
         set_up: || set_up(&configuration),
         iterate: || iterate(&configuration),
-        tear_down: || clean::go().expect("Unable to clean."),
+        tear_down: || clean::go(&configuration.work_folder).expect("Unable to clean."),
     })
 }
 

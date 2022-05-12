@@ -1,6 +1,6 @@
+use crate::library::assets;
 use crate::library::clean;
 use crate::library::configuration;
-use crate::library::constants;
 use crate::library::loop_until_sigint;
 use crate::library::provision;
 use crate::library::run_command;
@@ -30,12 +30,12 @@ fn set_up_work_folder(work_folder: &path::Path) -> anyhow::Result<()> {
     fs::create_dir(work_folder)
         .with_context(|| format!("Unable to create folder, consider cleaning: {work_folder:?}"))?;
     fs::write(
-        work_folder.join(constants::PROVISION_BASE_FILENAME),
-        constants::PROVISION_BASE,
+        work_folder.join(assets::PROVISION_BASE_FILENAME),
+        assets::PROVISION_BASE,
     )?;
     fs::write(
-        work_folder.join(constants::VAGRANTFILE_FILENAME),
-        constants::VAGRANTFILE,
+        work_folder.join(assets::VAGRANTFILE_FILENAME),
+        assets::VAGRANTFILE,
     )?;
     Ok(())
 }

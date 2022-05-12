@@ -1,4 +1,4 @@
-use super::constants;
+use super::assets;
 use anyhow::Context;
 use std::fs;
 use std::io;
@@ -54,7 +54,7 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
             .unwrap_or_else(|| path::PathBuf::from(".kerek")),
     );
     let provisioning_scripts = [
-        Some(work_folder.join(constants::PROVISION_BASE_FILENAME)),
+        Some(work_folder.join(assets::PROVISION_BASE_FILENAME)),
         configuration.provision_extras.map(|path| root.join(path)),
     ]
     .into_iter()

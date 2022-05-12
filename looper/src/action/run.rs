@@ -29,14 +29,12 @@ fn set_up(configuration: &configuration::Main) -> anyhow::Result<()> {
 fn set_up_work_folder(work_folder: &path::Path) -> anyhow::Result<()> {
     fs::create_dir(work_folder)
         .with_context(|| format!("Unable to create folder, consider cleaning: {work_folder:?}"))?;
-    fs::write(
-        work_folder.join(assets::PROVISION_BASE_FILENAME),
-        assets::PROVISION_BASE,
-    )?;
-    fs::write(
-        work_folder.join(assets::VAGRANTFILE_FILENAME),
-        assets::VAGRANTFILE,
-    )?;
+    for (filename, contents) in [
+        (assets::PROVISION_BASE_FILENAME, assets::PROVISION_BASE),
+        (assets::VAGRANTFILE_FILENAME, assets::VAGRANTFILE),
+    ] {
+        fs::write(work_folder.join(filename), contents)?;
+    }
     Ok(())
 }
 

@@ -20,18 +20,28 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
 }
 
 fn set_up(configuration: &configuration::Main) -> anyhow::Result<()> {
-    set_up_work_folder()?;
+    set_up_work_folder(configuration)?;
     start_staging(configuration)?;
     dump_staging_ssh_configuration(configuration)?;
     provision_staging(configuration)
 }
 
-fn set_up_work_folder() -> anyhow::Result<()> {
-    let path = constants::WORK_FOLDER;
+fn set_up_work_folder(configuration: &configuration::Main) -> anyhow::Result<()> {
+    let path = &configuration.work_folder;
     fs::create_dir(path)
-        .with_context(|| format!("Unable to create folder, consider cleaning: {path}"))?;
-    fs::write(constants::provision_base_file(), constants::PROVISION_BASE)?;
-    fs::write(constants::vagrantfile_file(), constants::VAGRANTFILE)?;
+        .with_context(|| format!("Unable to create folder, consider cleaning: {path:?}"))?;
+    fs::write(
+        configuration
+            .work_folder
+            .join(constants::PROVISION_BASE_FILENAME),
+        constants::PROVISION_BASE,
+    )?;
+    fs::write(
+        configuration
+            .work_folder
+            .join(constants::VAGRANTFILE_FILENAME),
+        constants::VAGRANTFILE,
+    )?;
     Ok(())
 }
 
@@ -39,7 +49,7 @@ fn start_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
     run_command::go(
         process::Command::new("vagrant")
             .arg("up")
-            .current_dir(constants::WORK_FOLDER)
+            .current_dir(&configuration.work_folder)
             .env("KEREK_IP", &configuration.staging.public_ip),
     )
 }
@@ -50,7 +60,7 @@ fn dump_staging_ssh_configuration(configuration: &configuration::Main) -> anyhow
         process::Command::new("vagrant")
             .arg("ssh-config")
             .stdout(file)
-            .current_dir(constants::WORK_FOLDER),
+            .current_dir(&configuration.work_folder),
     )
 }
 

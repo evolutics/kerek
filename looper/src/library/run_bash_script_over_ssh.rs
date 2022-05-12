@@ -1,11 +1,11 @@
-use super::run_command;
+use super::command;
 use std::fs;
 use std::path;
 use std::process;
 
 pub fn go(in_: In) -> anyhow::Result<()> {
     let script = fs::File::open(in_.script_file)?;
-    run_command::go(
+    command::status(
         process::Command::new("ssh")
             .arg("-F")
             .arg(in_.configuration_file)

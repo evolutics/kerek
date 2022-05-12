@@ -1,28 +1,41 @@
 use crate::library::command;
-use std::io;
-use std::io::Write;
 use std::process;
 
 pub fn go() -> anyhow::Result<()> {
-    command::status(process::Command::new("git").arg("version"))?;
+    let out = Out {
+        versions: get_versions()?,
+    };
 
-    print!("kubectl ");
-    io::stdout().flush()?;
-    command::status(
-        process::Command::new("kubectl")
-            .arg("version")
-            .arg("--client")
-            .arg("--short"),
-    )?;
+    eprintln!("{}", serde_json::to_string_pretty(&out)?);
 
-    command::status(
-        process::Command::new("skaffold")
-            .arg("version")
-            .arg("--output")
-            .arg("Skaffold {{.Version}}\n"),
-    )?;
+    Ok(())
+}
 
-    command::status(process::Command::new("ssh").arg("-V"))?;
+#[derive(serde::Serialize)]
+struct Out {
+    versions: Versions,
+}
 
-    command::status(process::Command::new("vagrant").arg("--version"))
+#[derive(serde::Serialize)]
+struct Versions {
+    git: String,
+    kubectl: String,
+    skaffold: String,
+    ssh: String,
+    vagrant: String,
+}
+
+fn get_versions() -> anyhow::Result<Versions> {
+    Ok(Versions {
+        git: command::stdout_utf8(process::Command::new("git").arg("version"))?,
+        kubectl: command::stdout_utf8(
+            process::Command::new("kubectl")
+                .arg("version")
+                .arg("--client")
+                .arg("--short"),
+        )?,
+        skaffold: command::stdout_utf8(process::Command::new("skaffold").arg("version"))?,
+        ssh: command::stderr_utf8(process::Command::new("ssh").arg("-V"))?,
+        vagrant: command::stdout_utf8(process::Command::new("vagrant").arg("--version"))?,
+    })
 }

@@ -1,4 +1,4 @@
-use super::constants;
+use super::assets;
 use super::run_command;
 use std::fs;
 use std::path;
@@ -10,7 +10,7 @@ pub fn go(work_folder: &path::Path) -> anyhow::Result<()> {
 }
 
 fn remove_vm_if_exists(work_folder: &path::Path) -> anyhow::Result<()> {
-    if work_folder.join(constants::VAGRANTFILE_FILENAME).exists() {
+    if work_folder.join(assets::VAGRANTFILE_FILENAME).exists() {
         run_command::go(
             process::Command::new("vagrant")
                 .arg("destroy")

@@ -1,7 +1,7 @@
 use anyhow::Context;
 use std::process;
 
-pub fn go(command: &mut process::Command) -> anyhow::Result<()> {
+pub fn status(command: &mut process::Command) -> anyhow::Result<()> {
     run_raw(command).with_context(|| format!("{command:?}"))
 }
 

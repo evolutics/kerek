@@ -1,7 +1,7 @@
 use crate::library::assets;
+use crate::library::command;
 use crate::library::configuration;
 use crate::library::provision;
-use crate::library::run_command;
 use anyhow::Context;
 use std::fs;
 use std::path;
@@ -27,7 +27,7 @@ fn set_up_work_folder(work_folder: &path::Path) -> anyhow::Result<()> {
 }
 
 fn start_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
-    run_command::go(
+    command::status(
         process::Command::new("vagrant")
             .arg("up")
             .current_dir(&configuration.work_folder)
@@ -37,7 +37,7 @@ fn start_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
 
 fn dump_staging_ssh_configuration(configuration: &configuration::Main) -> anyhow::Result<()> {
     let file = fs::File::create(&configuration.staging.ssh_configuration_file)?;
-    run_command::go(
+    command::status(
         process::Command::new("vagrant")
             .arg("ssh-config")
             .stdout(file)

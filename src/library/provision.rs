@@ -1,5 +1,5 @@
+use super::command;
 use super::run_bash_script_over_ssh;
-use super::run_command;
 use std::fs;
 use std::path;
 use std::process;
@@ -35,7 +35,7 @@ fn dump_kubeconfig(in_: &In) -> anyhow::Result<()> {
 
 fn copy_local_kubeconfig(in_: &In) -> anyhow::Result<()> {
     let file = fs::File::create(in_.kubeconfig_file)?;
-    run_command::go(
+    command::status(
         process::Command::new("ssh")
             .arg("-F")
             .arg(in_.ssh_configuration_file)
@@ -47,7 +47,7 @@ fn copy_local_kubeconfig(in_: &In) -> anyhow::Result<()> {
 
 fn adjust_kubeconfig_for_remote_access(in_: &In) -> anyhow::Result<()> {
     let public_ip = in_.public_ip;
-    run_command::go(
+    command::status(
         process::Command::new("kubectl")
             .arg("--kubeconfig")
             .arg(in_.kubeconfig_file)

@@ -14,6 +14,7 @@ pub fn get(path: path::PathBuf) -> anyhow::Result<Main> {
 }
 
 pub struct Main {
+    pub work_folder: path::PathBuf,
     pub provisioning_scripts: Vec<path::PathBuf>,
     pub base_test: path::PathBuf,
     pub acceptance_test: path::PathBuf,
@@ -45,14 +46,19 @@ struct UserFacingConfiguration {
 }
 
 fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
+    let work_folder = root.join(constants::WORK_FOLDER);
+    let provisioning_scripts = [
+        Some(work_folder.join(constants::PROVISION_BASE_FILENAME)),
+        configuration.provision_extras.map(|path| root.join(path)),
+    ]
+    .into_iter()
+    .flatten()
+    .collect();
+    let staging = staging(&work_folder);
+
     Main {
-        provisioning_scripts: [
-            Some(constants::provision_base_file()),
-            configuration.provision_extras.map(|path| root.join(path)),
-        ]
-        .into_iter()
-        .flatten()
-        .collect(),
+        work_folder,
+        provisioning_scripts,
         base_test: configuration
             .base_test
             .unwrap_or_else(|| root.join("scripts/base_test.sh")),
@@ -62,7 +68,7 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
         smoke_test: configuration
             .smoke_test
             .unwrap_or_else(|| root.join("scripts/smoke_test.sh")),
-        staging: staging(root),
+        staging,
         production: EnvironmentConfiguration {
             ssh_configuration_file: configuration
                 .ssh_configuration
@@ -76,12 +82,11 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
     }
 }
 
-fn staging(root: &path::Path) -> EnvironmentConfiguration {
-    let work_folder = constants::WORK_FOLDER;
+fn staging(work_folder: &path::Path) -> EnvironmentConfiguration {
     EnvironmentConfiguration {
-        ssh_configuration_file: root.join(format!("{work_folder}/ssh_configuration")),
+        ssh_configuration_file: work_folder.join("ssh_configuration"),
         ssh_host: String::from("default"),
-        kubeconfig_file: root.join(format!("{work_folder}/kubeconfig")),
+        kubeconfig_file: work_folder.join("kubeconfig"),
         public_ip: String::from("192.168.63.63"),
     }
 }

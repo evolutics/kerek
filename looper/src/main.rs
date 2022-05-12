@@ -13,13 +13,16 @@ fn main() -> anyhow::Result<()> {
     match arguments.action {
         Action::Clean => clean::go(),
         Action::Diagnose => diagnose::go(),
-        Action::Run { configuration } => run::go(configuration),
+        Action::Run => run::go(arguments.configuration),
     }
 }
 
 #[derive(Parser)]
 #[clap(version)]
 struct Arguments {
+    #[clap(default_value = "kerek.json", long, parse(from_os_str))]
+    configuration: path::PathBuf,
+
     #[clap(subcommand)]
     action: Action,
 }
@@ -28,8 +31,5 @@ struct Arguments {
 enum Action {
     Clean,
     Diagnose,
-    Run {
-        #[clap(default_value = "kerek.json", long, parse(from_os_str))]
-        configuration: path::PathBuf,
-    },
+    Run,
 }

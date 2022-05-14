@@ -1,4 +1,5 @@
 use crate::library::assets;
+use crate::library::clean;
 use crate::library::command;
 use crate::library::configuration;
 use crate::library::provision;
@@ -8,6 +9,7 @@ use std::path;
 use std::process;
 
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
+    clean::go(&configuration.work_folder)?;
     set_up_work_folder(&configuration.work_folder)?;
     start_staging(configuration)?;
     dump_staging_ssh_configuration(configuration)?;
@@ -16,7 +18,7 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
 
 fn set_up_work_folder(work_folder: &path::Path) -> anyhow::Result<()> {
     fs::create_dir(work_folder)
-        .with_context(|| format!("Unable to create folder, consider cleaning: {work_folder:?}"))?;
+        .with_context(|| format!("Unable to create folder: {work_folder:?}"))?;
     for (filename, contents) in [
         (assets::PROVISION_BASE_FILENAME, assets::PROVISION_BASE),
         (assets::VAGRANTFILE_FILENAME, assets::VAGRANTFILE),

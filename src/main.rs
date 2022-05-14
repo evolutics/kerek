@@ -3,6 +3,7 @@ mod library;
 
 use action::clean;
 use action::diagnose;
+use action::provision;
 use action::run;
 use clap::Parser;
 use std::path;
@@ -13,6 +14,7 @@ fn main() -> anyhow::Result<()> {
     match arguments.action {
         Action::Clean => clean::go(arguments.configuration),
         Action::Diagnose => diagnose::go(),
+        Action::Provision => provision::go(arguments.configuration),
         Action::Run => run::go(arguments.configuration),
     }
 }
@@ -31,5 +33,6 @@ struct Arguments {
 enum Action {
     Clean,
     Diagnose,
+    Provision,
     Run,
 }

@@ -40,8 +40,8 @@ fn dump_staging_ssh_configuration(configuration: &configuration::Main) -> anyhow
     command::status(
         process::Command::new("vagrant")
             .arg("ssh-config")
-            .stdout(file)
-            .current_dir(&configuration.work_folder),
+            .current_dir(&configuration.work_folder)
+            .stdout(file),
     )
 }
 

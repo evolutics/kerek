@@ -1,22 +1,22 @@
 use crate::library::assets;
-use crate::library::clean;
 use crate::library::command;
 use crate::library::configuration;
 use crate::library::provision;
+use crate::library::tear_down_workspace;
 use anyhow::Context;
 use std::fs;
 use std::path;
 use std::process;
 
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
-    clean::go(&configuration.work_folder)?;
-    set_up_work_folder(&configuration.work_folder)?;
+    tear_down_workspace::go(&configuration.work_folder)?;
+    set_up_workspace(&configuration.work_folder)?;
     start_staging(configuration)?;
     dump_staging_ssh_configuration(configuration)?;
     provision_staging(configuration)
 }
 
-fn set_up_work_folder(work_folder: &path::Path) -> anyhow::Result<()> {
+fn set_up_workspace(work_folder: &path::Path) -> anyhow::Result<()> {
     fs::create_dir(work_folder)
         .with_context(|| format!("Unable to create folder: {work_folder:?}"))?;
     for (filename, contents) in [

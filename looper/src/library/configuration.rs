@@ -43,12 +43,17 @@ pub struct EnvironmentConfiguration {
 #[serde(deny_unknown_fields)]
 struct UserFacingConfiguration {
     pub workspace_folder: Option<path::PathBuf>,
-
-    pub base_test: Option<path::PathBuf>,
-    pub acceptance_test: Option<path::PathBuf>,
-    pub smoke_test: Option<path::PathBuf>,
-
+    #[serde(default)]
+    pub test: UserFacingTestConfiguration,
     pub production: UserFacingProductionConfiguration,
+}
+
+#[derive(Default, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct UserFacingTestConfiguration {
+    pub base: Option<path::PathBuf>,
+    pub acceptance: Option<path::PathBuf>,
+    pub smoke: Option<path::PathBuf>,
 }
 
 #[derive(serde::Deserialize)]
@@ -74,17 +79,20 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
         test: TestConfiguration {
             base: root.join(
                 configuration
-                    .base_test
+                    .test
+                    .base
                     .unwrap_or_else(|| ["scripts", "base_test.sh"].iter().collect()),
             ),
             acceptance: root.join(
                 configuration
-                    .acceptance_test
+                    .test
+                    .acceptance
                     .unwrap_or_else(|| ["scripts", "acceptance_test.sh"].iter().collect()),
             ),
             smoke: root.join(
                 configuration
-                    .smoke_test
+                    .test
+                    .smoke
                     .unwrap_or_else(|| ["scripts", "smoke_test.sh"].iter().collect()),
             ),
         },

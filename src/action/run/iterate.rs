@@ -13,7 +13,7 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
 }
 
 fn run_base_test(configuration: &configuration::Main) -> anyhow::Result<()> {
-    command::status(&mut process::Command::new(&configuration.base_test))
+    command::status(&mut process::Command::new(&configuration.test.base))
 }
 
 fn build(configuration: &configuration::Main) -> anyhow::Result<()> {
@@ -42,10 +42,10 @@ fn deploy(configuration: &configuration::Main, kubeconfig_file: &path::Path) -> 
 
 fn test_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
-        process::Command::new(&configuration.smoke_test).arg(&configuration.staging.public_ip),
+        process::Command::new(&configuration.test.smoke).arg(&configuration.staging.public_ip),
     )?;
     command::status(
-        process::Command::new(&configuration.acceptance_test).arg(&configuration.staging.public_ip),
+        process::Command::new(&configuration.test.acceptance).arg(&configuration.staging.public_ip),
     )
 }
 
@@ -55,6 +55,6 @@ fn deploy_production(configuration: &configuration::Main) -> anyhow::Result<()> 
 
 fn test_production(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
-        process::Command::new(&configuration.smoke_test).arg(&configuration.production.public_ip),
+        process::Command::new(&configuration.test.smoke).arg(&configuration.production.public_ip),
     )
 }

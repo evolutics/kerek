@@ -9,7 +9,8 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
     deploy_staging(configuration)?;
     test_staging(configuration)?;
     deploy_production(configuration)?;
-    test_production(configuration)
+    test_production(configuration)?;
+    load_snapshot(configuration)
 }
 
 fn run_base_test(configuration: &configuration::Main) -> anyhow::Result<()> {
@@ -57,5 +58,15 @@ fn deploy_production(configuration: &configuration::Main) -> anyhow::Result<()> 
 fn test_production(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
         process::Command::new(&configuration.tests.smoke).arg(&configuration.production.public_ip),
+    )
+}
+
+fn load_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
+    command::status(
+        process::Command::new("vagrant")
+            .arg("snapshot")
+            .arg("restore")
+            .arg(&configuration.workspace.vm_snapshot)
+            .current_dir(&configuration.workspace.folder),
     )
 }

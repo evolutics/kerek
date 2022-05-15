@@ -24,6 +24,8 @@ pub struct WorkspaceConfiguration {
     pub provision: path::PathBuf,
     pub vagrantfile: path::PathBuf,
     pub build: path::PathBuf,
+    pub vm_name: String,
+    pub vm_snapshot: String,
 }
 
 pub struct TestsConfiguration {
@@ -135,5 +137,7 @@ fn workspace_configuration(folder: path::PathBuf) -> WorkspaceConfiguration {
         provision,
         vagrantfile,
         build,
+        vm_name: String::from("default"),
+        vm_snapshot: String::from("default"),
     }
 }

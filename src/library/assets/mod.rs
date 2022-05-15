@@ -1,8 +1,8 @@
 pub const BUILD_FILENAME: &str = "build.json";
 
-pub const PROVISION_BASE_FILENAME: &str = "provision_base.sh";
+pub const PROVISION_FILENAME: &str = "provision.sh";
 
-pub const PROVISION_BASE: &str = include_str!("provision_base.sh");
+pub const PROVISION: &str = include_str!("provision.sh");
 
 pub const VAGRANTFILE_FILENAME: &str = "Vagrantfile";
 

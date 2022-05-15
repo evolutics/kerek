@@ -9,7 +9,7 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
     set_up_workspace::go(&configuration.work_folder)?;
 
     provision::go(provision::In {
-        scripts: &configuration.provisioning_scripts,
+        script_file: &configuration.provisioning_script,
         ssh_configuration_file: &configuration.production.ssh_configuration_file,
         ssh_host: &configuration.production.ssh_host,
         kubeconfig_file: &configuration.production.kubeconfig_file,

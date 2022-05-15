@@ -5,27 +5,24 @@ use std::path;
 use std::process;
 
 pub fn go(in_: In) -> anyhow::Result<()> {
-    run_scripts(&in_)?;
+    run_script(&in_)?;
     dump_kubeconfig(&in_)
 }
 
 pub struct In<'a> {
-    pub scripts: &'a [path::PathBuf],
+    pub script_file: &'a path::Path,
     pub ssh_configuration_file: &'a path::Path,
     pub ssh_host: &'a str,
     pub kubeconfig_file: &'a path::Path,
     pub public_ip: &'a str,
 }
 
-fn run_scripts(in_: &In) -> anyhow::Result<()> {
-    for script in in_.scripts {
-        run_bash_script_over_ssh::go(run_bash_script_over_ssh::In {
-            configuration_file: in_.ssh_configuration_file,
-            host: in_.ssh_host,
-            script_file: script,
-        })?;
-    }
-    Ok(())
+fn run_script(in_: &In) -> anyhow::Result<()> {
+    run_bash_script_over_ssh::go(run_bash_script_over_ssh::In {
+        configuration_file: in_.ssh_configuration_file,
+        host: in_.ssh_host,
+        script_file: in_.script_file,
+    })
 }
 
 fn dump_kubeconfig(in_: &In) -> anyhow::Result<()> {

@@ -15,7 +15,7 @@ pub fn get(path: path::PathBuf) -> anyhow::Result<Main> {
 
 pub struct Main {
     pub work_folder: path::PathBuf,
-    pub provisioning_scripts: Vec<path::PathBuf>,
+    pub provisioning_script: path::PathBuf,
     pub base_test: path::PathBuf,
     pub acceptance_test: path::PathBuf,
     pub smoke_test: path::PathBuf,
@@ -35,8 +35,6 @@ pub struct EnvironmentConfiguration {
 struct UserFacingConfiguration {
     pub work_folder: Option<path::PathBuf>,
 
-    pub provision_extras: Option<path::PathBuf>,
-
     pub base_test: Option<path::PathBuf>,
     pub acceptance_test: Option<path::PathBuf>,
     pub smoke_test: Option<path::PathBuf>,
@@ -53,18 +51,12 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
             .work_folder
             .unwrap_or_else(|| path::PathBuf::from(".kerek")),
     );
-    let provisioning_scripts = [
-        Some(work_folder.join(assets::PROVISION_BASE_FILENAME)),
-        configuration.provision_extras.map(|path| root.join(path)),
-    ]
-    .into_iter()
-    .flatten()
-    .collect();
+    let provisioning_script = work_folder.join(assets::PROVISION_FILENAME);
     let staging = staging_configuration(&work_folder);
 
     Main {
         work_folder,
-        provisioning_scripts,
+        provisioning_script,
         base_test: root.join(
             configuration
                 .base_test

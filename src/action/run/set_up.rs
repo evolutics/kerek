@@ -11,7 +11,8 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
     set_up_workspace::go(&configuration.workspace)?;
     start_staging(configuration)?;
     dump_staging_ssh_configuration(configuration)?;
-    provision_staging(configuration)
+    provision_staging(configuration)?;
+    save_snapshot(configuration)
 }
 
 fn start_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
@@ -41,4 +42,15 @@ fn provision_staging(configuration: &configuration::Main) -> anyhow::Result<()> 
         kubeconfig_file: &configuration.staging.kubeconfig_file,
         public_ip: &configuration.staging.public_ip,
     })
+}
+
+fn save_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
+    command::status(
+        process::Command::new("vagrant")
+            .arg("snapshot")
+            .arg("save")
+            .arg("--force")
+            .arg(&configuration.workspace.vm_name)
+            .current_dir(&configuration.workspace.folder),
+    )
 }

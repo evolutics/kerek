@@ -4,5 +4,5 @@ use std::path;
 
 pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
     let configuration = configuration::get(configuration)?;
-    tear_down_workspace::go(&configuration.work_folder)
+    tear_down_workspace::go(&configuration.workspace)
 }

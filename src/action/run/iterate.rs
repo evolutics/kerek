@@ -1,4 +1,3 @@
-use crate::library::assets;
 use crate::library::command;
 use crate::library::configuration;
 use std::path;
@@ -22,7 +21,7 @@ fn build(configuration: &configuration::Main) -> anyhow::Result<()> {
         process::Command::new("skaffold")
             .arg("build")
             .arg("--file-output")
-            .arg(configuration.work_folder.join(assets::BUILD_FILENAME)),
+            .arg(&configuration.workspace.build),
     )
 }
 
@@ -35,7 +34,7 @@ fn deploy(configuration: &configuration::Main, kubeconfig_file: &path::Path) -> 
         process::Command::new("skaffold")
             .arg("deploy")
             .arg("--build-artifacts")
-            .arg(configuration.work_folder.join(assets::BUILD_FILENAME))
+            .arg(&configuration.workspace.build)
             .arg("--kubeconfig")
             .arg(kubeconfig_file),
     )

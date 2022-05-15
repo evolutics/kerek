@@ -1,4 +1,3 @@
-use super::assets;
 use anyhow::Context;
 use std::fs;
 use std::io;
@@ -14,13 +13,19 @@ pub fn get(path: path::PathBuf) -> anyhow::Result<Main> {
 }
 
 pub struct Main {
-    pub work_folder: path::PathBuf,
-    pub provisioning_script: path::PathBuf,
+    pub workspace: WorkspaceConfiguration,
     pub base_test: path::PathBuf,
     pub acceptance_test: path::PathBuf,
     pub smoke_test: path::PathBuf,
     pub staging: EnvironmentConfiguration,
     pub production: EnvironmentConfiguration,
+}
+
+pub struct WorkspaceConfiguration {
+    pub folder: path::PathBuf,
+    pub provision: path::PathBuf,
+    pub vagrantfile: path::PathBuf,
+    pub build: path::PathBuf,
 }
 
 pub struct EnvironmentConfiguration {
@@ -33,7 +38,7 @@ pub struct EnvironmentConfiguration {
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct UserFacingConfiguration {
-    pub work_folder: Option<path::PathBuf>,
+    pub workspace_folder: Option<path::PathBuf>,
 
     pub base_test: Option<path::PathBuf>,
     pub acceptance_test: Option<path::PathBuf>,
@@ -46,17 +51,16 @@ struct UserFacingConfiguration {
 }
 
 fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
-    let work_folder = root.join(
+    let workspace_folder = root.join(
         configuration
-            .work_folder
+            .workspace_folder
             .unwrap_or_else(|| path::PathBuf::from(".kerek")),
     );
-    let provisioning_script = work_folder.join(assets::PROVISION_FILENAME);
-    let staging = staging_configuration(&work_folder);
+    let staging = staging_configuration(&workspace_folder);
+    let workspace = workspace_configuration(workspace_folder);
 
     Main {
-        work_folder,
-        provisioning_script,
+        workspace,
         base_test: root.join(
             configuration
                 .base_test
@@ -90,11 +94,24 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
     }
 }
 
-fn staging_configuration(work_folder: &path::Path) -> EnvironmentConfiguration {
+fn staging_configuration(workspace_folder: &path::Path) -> EnvironmentConfiguration {
     EnvironmentConfiguration {
-        ssh_configuration_file: work_folder.join("ssh_configuration"),
+        ssh_configuration_file: workspace_folder.join("ssh_configuration"),
         ssh_host: String::from("default"),
-        kubeconfig_file: work_folder.join("kubeconfig"),
+        kubeconfig_file: workspace_folder.join("kubeconfig"),
         public_ip: String::from("192.168.63.63"),
+    }
+}
+
+fn workspace_configuration(folder: path::PathBuf) -> WorkspaceConfiguration {
+    let provision = folder.join("provision.sh");
+    let vagrantfile = folder.join("Vagrantfile");
+    let build = folder.join("build.json");
+
+    WorkspaceConfiguration {
+        folder,
+        provision,
+        vagrantfile,
+        build,
     }
 }

@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-echo "Acceptance testing" >>log.txt
+echo 'Acceptance testing' >>log.txt
 
 result="$(curl --data 'Boo Far' --fail --show-error http://"$1":8080)"
 readonly result

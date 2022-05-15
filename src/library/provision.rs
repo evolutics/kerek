@@ -5,7 +5,8 @@ use std::process;
 
 pub fn go(in_: In) -> anyhow::Result<()> {
     run_script(&in_)?;
-    dump_kubeconfig(&in_)
+    copy_local_kubeconfig(&in_)?;
+    adjust_kubeconfig_for_remote_access(&in_)
 }
 
 pub struct In<'a> {
@@ -26,11 +27,6 @@ fn run_script(in_: &In) -> anyhow::Result<()> {
             .arg("bash")
             .stdin(script),
     )
-}
-
-fn dump_kubeconfig(in_: &In) -> anyhow::Result<()> {
-    copy_local_kubeconfig(in_)?;
-    adjust_kubeconfig_for_remote_access(in_)
 }
 
 fn copy_local_kubeconfig(in_: &In) -> anyhow::Result<()> {

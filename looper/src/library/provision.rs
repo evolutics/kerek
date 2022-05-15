@@ -1,5 +1,4 @@
 use super::command;
-use super::run_bash_script_over_ssh;
 use std::fs;
 use std::path;
 use std::process;
@@ -18,11 +17,15 @@ pub struct In<'a> {
 }
 
 fn run_script(in_: &In) -> anyhow::Result<()> {
-    run_bash_script_over_ssh::go(run_bash_script_over_ssh::In {
-        configuration_file: in_.ssh_configuration_file,
-        host: in_.ssh_host,
-        script_file: in_.script_file,
-    })
+    let script = fs::File::open(in_.script_file)?;
+    command::status(
+        process::Command::new("ssh")
+            .arg("-F")
+            .arg(in_.ssh_configuration_file)
+            .arg(in_.ssh_host)
+            .arg("bash")
+            .stdin(script),
+    )
 }
 
 fn dump_kubeconfig(in_: &In) -> anyhow::Result<()> {

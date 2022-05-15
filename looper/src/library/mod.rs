@@ -1,4 +1,3 @@
-pub mod assets;
 pub mod command;
 pub mod configuration;
 pub mod provision;

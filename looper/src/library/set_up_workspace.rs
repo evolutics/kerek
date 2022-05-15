@@ -1,16 +1,15 @@
-use super::assets;
+use super::configuration;
 use anyhow::Context;
 use std::fs;
-use std::path;
 
-pub fn go(work_folder: &path::Path) -> anyhow::Result<()> {
-    fs::create_dir_all(work_folder)
-        .with_context(|| format!("Unable to create folder: {work_folder:?}"))?;
-    for (filename, contents) in [
-        (assets::PROVISION_FILENAME, assets::PROVISION),
-        (assets::VAGRANTFILE_FILENAME, assets::VAGRANTFILE),
+pub fn go(workspace: &configuration::WorkspaceConfiguration) -> anyhow::Result<()> {
+    let folder = &workspace.folder;
+    fs::create_dir_all(folder).with_context(|| format!("Unable to create folder: {folder:?}"))?;
+    for (file, contents) in [
+        (&workspace.provision, include_str!("assets/provision.sh")),
+        (&workspace.vagrantfile, include_str!("assets/Vagrantfile")),
     ] {
-        fs::write(work_folder.join(filename), contents)?;
+        fs::write(file, contents)?;
     }
     Ok(())
 }

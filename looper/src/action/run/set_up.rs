@@ -35,7 +35,7 @@ fn dump_staging_ssh_configuration(configuration: &configuration::Main) -> anyhow
 
 fn provision_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
     provision::go(provision::In {
-        scripts: &configuration.provisioning_scripts,
+        script_file: &configuration.provisioning_script,
         ssh_configuration_file: &configuration.staging.ssh_configuration_file,
         ssh_host: &configuration.staging.ssh_host,
         kubeconfig_file: &configuration.staging.kubeconfig_file,

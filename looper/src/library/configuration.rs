@@ -14,9 +14,7 @@ pub fn get(path: path::PathBuf) -> anyhow::Result<Main> {
 
 pub struct Main {
     pub workspace: WorkspaceConfiguration,
-    pub base_test: path::PathBuf,
-    pub acceptance_test: path::PathBuf,
-    pub smoke_test: path::PathBuf,
+    pub test: TestConfiguration,
     pub staging: EnvironmentConfiguration,
     pub production: EnvironmentConfiguration,
 }
@@ -26,6 +24,12 @@ pub struct WorkspaceConfiguration {
     pub provision: path::PathBuf,
     pub vagrantfile: path::PathBuf,
     pub build: path::PathBuf,
+}
+
+pub struct TestConfiguration {
+    pub base: path::PathBuf,
+    pub acceptance: path::PathBuf,
+    pub smoke: path::PathBuf,
 }
 
 pub struct EnvironmentConfiguration {
@@ -61,21 +65,23 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
 
     Main {
         workspace,
-        base_test: root.join(
-            configuration
-                .base_test
-                .unwrap_or_else(|| ["scripts", "base_test.sh"].iter().collect()),
-        ),
-        acceptance_test: root.join(
-            configuration
-                .acceptance_test
-                .unwrap_or_else(|| ["scripts", "acceptance_test.sh"].iter().collect()),
-        ),
-        smoke_test: root.join(
-            configuration
-                .smoke_test
-                .unwrap_or_else(|| ["scripts", "smoke_test.sh"].iter().collect()),
-        ),
+        test: TestConfiguration {
+            base: root.join(
+                configuration
+                    .base_test
+                    .unwrap_or_else(|| ["scripts", "base_test.sh"].iter().collect()),
+            ),
+            acceptance: root.join(
+                configuration
+                    .acceptance_test
+                    .unwrap_or_else(|| ["scripts", "acceptance_test.sh"].iter().collect()),
+            ),
+            smoke: root.join(
+                configuration
+                    .smoke_test
+                    .unwrap_or_else(|| ["scripts", "smoke_test.sh"].iter().collect()),
+            ),
+        },
         staging,
         production: EnvironmentConfiguration {
             ssh_configuration_file: root.join(

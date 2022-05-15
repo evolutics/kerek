@@ -14,7 +14,7 @@ pub fn get(path: path::PathBuf) -> anyhow::Result<Main> {
 
 pub struct Main {
     pub workspace: WorkspaceConfiguration,
-    pub test: TestConfiguration,
+    pub tests: TestsConfiguration,
     pub staging: EnvironmentConfiguration,
     pub production: EnvironmentConfiguration,
 }
@@ -26,7 +26,7 @@ pub struct WorkspaceConfiguration {
     pub build: path::PathBuf,
 }
 
-pub struct TestConfiguration {
+pub struct TestsConfiguration {
     pub base: path::PathBuf,
     pub acceptance: path::PathBuf,
     pub smoke: path::PathBuf,
@@ -44,13 +44,13 @@ pub struct EnvironmentConfiguration {
 struct UserFacingConfiguration {
     pub workspace_folder: Option<path::PathBuf>,
     #[serde(default)]
-    pub test: UserFacingTestConfiguration,
+    pub tests: UserFacingTestsConfiguration,
     pub production: UserFacingProductionConfiguration,
 }
 
 #[derive(Default, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
-struct UserFacingTestConfiguration {
+struct UserFacingTestsConfiguration {
     pub base: Option<path::PathBuf>,
     pub acceptance: Option<path::PathBuf>,
     pub smoke: Option<path::PathBuf>,
@@ -76,22 +76,22 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
 
     Main {
         workspace,
-        test: TestConfiguration {
+        tests: TestsConfiguration {
             base: root.join(
                 configuration
-                    .test
+                    .tests
                     .base
                     .unwrap_or_else(|| ["scripts", "base_test.sh"].iter().collect()),
             ),
             acceptance: root.join(
                 configuration
-                    .test
+                    .tests
                     .acceptance
                     .unwrap_or_else(|| ["scripts", "acceptance_test.sh"].iter().collect()),
             ),
             smoke: root.join(
                 configuration
-                    .test
+                    .tests
                     .smoke
                     .unwrap_or_else(|| ["scripts", "smoke_test.sh"].iter().collect()),
             ),

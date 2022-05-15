@@ -48,6 +48,12 @@ struct UserFacingConfiguration {
     pub acceptance_test: Option<path::PathBuf>,
     pub smoke_test: Option<path::PathBuf>,
 
+    pub production: UserFacingProductionConfiguration,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct UserFacingProductionConfiguration {
     pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: String,
     pub kubeconfig: Option<path::PathBuf>,
@@ -86,16 +92,18 @@ fn convert(configuration: UserFacingConfiguration, root: &path::Path) -> Main {
         production: EnvironmentConfiguration {
             ssh_configuration_file: root.join(
                 configuration
+                    .production
                     .ssh_configuration
                     .unwrap_or_else(|| ["safe", "ssh_configuration"].iter().collect()),
             ),
-            ssh_host: configuration.ssh_host,
+            ssh_host: configuration.production.ssh_host,
             kubeconfig_file: root.join(
                 configuration
+                    .production
                     .kubeconfig
                     .unwrap_or_else(|| ["safe", "kubeconfig"].iter().collect()),
             ),
-            public_ip: configuration.public_ip,
+            public_ip: configuration.production.public_ip,
         },
     }
 }

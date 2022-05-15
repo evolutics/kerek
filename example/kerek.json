@@ -1,4 +1,6 @@
 {
-  "public_ip": "192.168.62.62",
-  "ssh_host": "default"
+  "production": {
+    "public_ip": "192.168.62.62",
+    "ssh_host": "default"
+  }
 }

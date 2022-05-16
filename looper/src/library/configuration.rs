@@ -52,11 +52,11 @@ struct UserFacingConfiguration {
 #[serde(deny_unknown_fields)]
 struct UserFacingTestsConfiguration {
     #[serde(default)]
-    pub base: Vec<ffi::OsString>,
+    pub base: Vec<String>,
     #[serde(default)]
-    pub smoke: Vec<ffi::OsString>,
+    pub smoke: Vec<String>,
     #[serde(default)]
-    pub acceptance: Vec<ffi::OsString>,
+    pub acceptance: Vec<String>,
 }
 
 #[derive(serde::Deserialize)]
@@ -78,21 +78,15 @@ fn convert(configuration: UserFacingConfiguration) -> Main {
     Main {
         workspace,
         tests: TestsConfiguration {
-            base: if configuration.tests.base.is_empty() {
+            base: convert_nonempty_or_else(configuration.tests.base, || {
                 vec![ffi::OsString::from("scripts/base_test.sh")]
-            } else {
-                configuration.tests.base
-            },
-            smoke: if configuration.tests.smoke.is_empty() {
+            }),
+            smoke: convert_nonempty_or_else(configuration.tests.smoke, || {
                 vec![ffi::OsString::from("scripts/smoke_test.sh")]
-            } else {
-                configuration.tests.smoke
-            },
-            acceptance: if configuration.tests.acceptance.is_empty() {
+            }),
+            acceptance: convert_nonempty_or_else(configuration.tests.acceptance, || {
                 vec![ffi::OsString::from("scripts/acceptance_test.sh")]
-            } else {
-                configuration.tests.acceptance
-            },
+            }),
         },
         staging,
         production: EnvironmentConfiguration {
@@ -131,5 +125,16 @@ fn workspace_configuration(folder: path::PathBuf) -> WorkspaceConfiguration {
         build,
         vm_name: String::from("default"),
         vm_snapshot: String::from("default"),
+    }
+}
+
+fn convert_nonempty_or_else<F: Fn() -> Vec<U>, T, U: From<T>>(
+    sequence: Vec<T>,
+    if_empty: F,
+) -> Vec<U> {
+    if sequence.is_empty() {
+        if_empty()
+    } else {
+        sequence.into_iter().map(|element| element.into()).collect()
     }
 }

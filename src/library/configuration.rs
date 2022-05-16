@@ -26,9 +26,9 @@ pub struct WorkspaceConfiguration {
 }
 
 pub struct TestsConfiguration {
-    pub base: path::PathBuf,
-    pub acceptance: path::PathBuf,
-    pub smoke: path::PathBuf,
+    pub base: Vec<String>,
+    pub acceptance: Vec<String>,
+    pub smoke: Vec<String>,
 }
 
 pub struct EnvironmentConfiguration {
@@ -50,9 +50,9 @@ struct UserFacingConfiguration {
 #[derive(Default, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct UserFacingTestsConfiguration {
-    pub base: Option<path::PathBuf>,
-    pub acceptance: Option<path::PathBuf>,
-    pub smoke: Option<path::PathBuf>,
+    pub base: Vec<String>,
+    pub acceptance: Vec<String>,
+    pub smoke: Vec<String>,
 }
 
 #[derive(serde::Deserialize)]
@@ -74,18 +74,21 @@ fn convert(configuration: UserFacingConfiguration) -> Main {
     Main {
         workspace,
         tests: TestsConfiguration {
-            base: configuration
-                .tests
-                .base
-                .unwrap_or_else(|| ["scripts", "base_test.sh"].iter().collect()),
-            acceptance: configuration
-                .tests
-                .acceptance
-                .unwrap_or_else(|| ["scripts", "acceptance_test.sh"].iter().collect()),
-            smoke: configuration
-                .tests
-                .smoke
-                .unwrap_or_else(|| ["scripts", "smoke_test.sh"].iter().collect()),
+            base: if configuration.tests.base.is_empty() {
+                vec![String::from("scripts/base_test.sh")]
+            } else {
+                configuration.tests.base
+            },
+            acceptance: if configuration.tests.acceptance.is_empty() {
+                vec![String::from("scripts/acceptance_test.sh")]
+            } else {
+                configuration.tests.acceptance
+            },
+            smoke: if configuration.tests.smoke.is_empty() {
+                vec![String::from("scripts/smoke_test.sh")]
+            } else {
+                configuration.tests.smoke
+            },
         },
         staging,
         production: EnvironmentConfiguration {

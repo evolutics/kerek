@@ -14,7 +14,9 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
 }
 
 fn run_base_test(configuration: &configuration::Main) -> anyhow::Result<()> {
-    command::status(&mut process::Command::new(&configuration.tests.base))
+    command::status(
+        process::Command::new(&configuration.tests.base[0]).args(&configuration.tests.base[1..]),
+    )
 }
 
 fn build(configuration: &configuration::Main) -> anyhow::Result<()> {
@@ -43,11 +45,13 @@ fn deploy(configuration: &configuration::Main, kubeconfig_file: &path::Path) -> 
 
 fn test_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
-        process::Command::new(&configuration.tests.smoke)
+        process::Command::new(&configuration.tests.smoke[0])
+            .args(&configuration.tests.smoke[1..])
             .env("KEREK_IP", &configuration.staging.public_ip),
     )?;
     command::status(
-        process::Command::new(&configuration.tests.acceptance)
+        process::Command::new(&configuration.tests.acceptance[0])
+            .args(&configuration.tests.acceptance[1..])
             .env("KEREK_IP", &configuration.staging.public_ip),
     )
 }
@@ -58,7 +62,8 @@ fn deploy_production(configuration: &configuration::Main) -> anyhow::Result<()> 
 
 fn test_production(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
-        process::Command::new(&configuration.tests.smoke)
+        process::Command::new(&configuration.tests.smoke[0])
+            .args(&configuration.tests.smoke[1..])
             .env("KEREK_IP", &configuration.production.public_ip),
     )
 }

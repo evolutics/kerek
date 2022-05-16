@@ -18,7 +18,6 @@ struct Out {
 
 #[derive(serde::Serialize)]
 struct Versions {
-    git: String,
     kubectl: String,
     skaffold: String,
     ssh: String,
@@ -27,7 +26,6 @@ struct Versions {
 
 fn get_versions() -> anyhow::Result<Versions> {
     Ok(Versions {
-        git: command::stdout_utf8(process::Command::new("git").arg("version"))?,
         kubectl: command::stdout_utf8(
             process::Command::new("kubectl")
                 .arg("version")

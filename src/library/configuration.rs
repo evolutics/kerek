@@ -27,8 +27,8 @@ pub struct WorkspaceConfiguration {
 
 pub struct TestsConfiguration {
     pub base: Vec<String>,
-    pub acceptance: Vec<String>,
     pub smoke: Vec<String>,
+    pub acceptance: Vec<String>,
 }
 
 pub struct EnvironmentConfiguration {
@@ -51,8 +51,8 @@ struct UserFacingConfiguration {
 #[serde(deny_unknown_fields)]
 struct UserFacingTestsConfiguration {
     pub base: Vec<String>,
-    pub acceptance: Vec<String>,
     pub smoke: Vec<String>,
+    pub acceptance: Vec<String>,
 }
 
 #[derive(serde::Deserialize)]
@@ -79,15 +79,15 @@ fn convert(configuration: UserFacingConfiguration) -> Main {
             } else {
                 configuration.tests.base
             },
-            acceptance: if configuration.tests.acceptance.is_empty() {
-                vec![String::from("scripts/acceptance_test.sh")]
-            } else {
-                configuration.tests.acceptance
-            },
             smoke: if configuration.tests.smoke.is_empty() {
                 vec![String::from("scripts/smoke_test.sh")]
             } else {
                 configuration.tests.smoke
+            },
+            acceptance: if configuration.tests.acceptance.is_empty() {
+                vec![String::from("scripts/acceptance_test.sh")]
+            } else {
+                configuration.tests.acceptance
             },
         },
         staging,

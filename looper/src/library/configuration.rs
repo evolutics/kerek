@@ -51,8 +51,11 @@ struct UserFacingConfiguration {
 #[derive(Default, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct UserFacingTestsConfiguration {
+    #[serde(default)]
     pub base: Vec<ffi::OsString>,
+    #[serde(default)]
     pub smoke: Vec<ffi::OsString>,
+    #[serde(default)]
     pub acceptance: Vec<ffi::OsString>,
 }
 

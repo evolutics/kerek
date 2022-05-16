@@ -15,6 +15,7 @@ pub struct Main {
     pub tests: TestsConfiguration,
     pub staging: EnvironmentConfiguration,
     pub production: EnvironmentConfiguration,
+    pub iteration: IterationConfiguration,
 }
 
 pub struct WorkspaceConfiguration {
@@ -24,6 +25,7 @@ pub struct WorkspaceConfiguration {
     pub build: path::PathBuf,
     pub vm_name: String,
     pub vm_snapshot: String,
+    pub move_to_next_version: path::PathBuf,
 }
 
 pub struct TestsConfiguration {
@@ -39,6 +41,10 @@ pub struct EnvironmentConfiguration {
     pub public_ip: String,
 }
 
+pub struct IterationConfiguration {
+    pub move_to_next_version: Vec<ffi::OsString>,
+}
+
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct UserFacingConfiguration {
@@ -46,6 +52,8 @@ struct UserFacingConfiguration {
     #[serde(default)]
     pub tests: UserFacingTestsConfiguration,
     pub production: UserFacingProductionConfiguration,
+    #[serde(default)]
+    pub iteration: UserFacingIterationConfiguration,
 }
 
 #[derive(Default, serde::Deserialize)]
@@ -68,12 +76,26 @@ struct UserFacingProductionConfiguration {
     pub public_ip: String,
 }
 
+#[derive(Default, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct UserFacingIterationConfiguration {
+    #[serde(default)]
+    pub move_to_next_version: Vec<String>,
+}
+
 fn convert(configuration: UserFacingConfiguration) -> Main {
     let workspace_folder = configuration
         .workspace_folder
         .unwrap_or_else(|| path::PathBuf::from(".kerek"));
     let staging = staging_configuration(&workspace_folder);
     let workspace = workspace_configuration(workspace_folder);
+    let move_to_next_version =
+        convert_nonempty_or_else(configuration.iteration.move_to_next_version, || {
+            vec![
+                ffi::OsString::from("bash"),
+                ffi::OsString::from(&workspace.move_to_next_version),
+            ]
+        });
 
     Main {
         workspace,
@@ -101,6 +123,9 @@ fn convert(configuration: UserFacingConfiguration) -> Main {
                 .unwrap_or_else(|| ["safe", "kubeconfig"].iter().collect()),
             public_ip: configuration.production.public_ip,
         },
+        iteration: IterationConfiguration {
+            move_to_next_version,
+        },
     }
 }
 
@@ -117,6 +142,7 @@ fn workspace_configuration(folder: path::PathBuf) -> WorkspaceConfiguration {
     let provision = folder.join("provision.sh");
     let vagrantfile = folder.join("Vagrantfile");
     let build = folder.join("build.json");
+    let move_to_next_version = folder.join("move_to_next_version.sh");
 
     WorkspaceConfiguration {
         folder,
@@ -125,6 +151,7 @@ fn workspace_configuration(folder: path::PathBuf) -> WorkspaceConfiguration {
         build,
         vm_name: String::from("default"),
         vm_snapshot: String::from("default"),
+        move_to_next_version,
     }
 }
 

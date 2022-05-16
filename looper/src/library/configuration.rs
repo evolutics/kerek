@@ -87,54 +87,19 @@ fn convert(configuration: UserFacingConfiguration) -> Main {
     let workspace_folder = configuration
         .workspace_folder
         .unwrap_or_else(|| path::PathBuf::from(".kerek"));
-    let staging = staging_configuration(&workspace_folder);
+
     let workspace = workspace_configuration(workspace_folder);
-    let move_to_next_version =
-        convert_nonempty_or_else(configuration.iteration.move_to_next_version, || {
-            vec![
-                ffi::OsString::from("bash"),
-                ffi::OsString::from(&workspace.move_to_next_version),
-            ]
-        });
+    let tests = tests_configuration(configuration.tests);
+    let staging = staging_configuration(&workspace.folder);
+    let production = production_configuration(configuration.production);
+    let iteration = iteration_configuration(configuration.iteration, &workspace);
 
     Main {
         workspace,
-        tests: TestsConfiguration {
-            base: convert_nonempty_or_else(configuration.tests.base, || {
-                vec![ffi::OsString::from("scripts/base_test.sh")]
-            }),
-            smoke: convert_nonempty_or_else(configuration.tests.smoke, || {
-                vec![ffi::OsString::from("scripts/smoke_test.sh")]
-            }),
-            acceptance: convert_nonempty_or_else(configuration.tests.acceptance, || {
-                vec![ffi::OsString::from("scripts/acceptance_test.sh")]
-            }),
-        },
+        tests,
         staging,
-        production: EnvironmentConfiguration {
-            ssh_configuration_file: configuration
-                .production
-                .ssh_configuration
-                .unwrap_or_else(|| ["safe", "ssh_configuration"].iter().collect()),
-            ssh_host: configuration.production.ssh_host,
-            kubeconfig_file: configuration
-                .production
-                .kubeconfig
-                .unwrap_or_else(|| ["safe", "kubeconfig"].iter().collect()),
-            public_ip: configuration.production.public_ip,
-        },
-        iteration: IterationConfiguration {
-            move_to_next_version,
-        },
-    }
-}
-
-fn staging_configuration(workspace_folder: &path::Path) -> EnvironmentConfiguration {
-    EnvironmentConfiguration {
-        ssh_configuration_file: workspace_folder.join("ssh_configuration"),
-        ssh_host: String::from("default"),
-        kubeconfig_file: workspace_folder.join("kubeconfig"),
-        public_ip: String::from("192.168.63.63"),
+        production,
+        iteration,
     }
 }
 
@@ -155,6 +120,20 @@ fn workspace_configuration(folder: path::PathBuf) -> WorkspaceConfiguration {
     }
 }
 
+fn tests_configuration(tests: UserFacingTestsConfiguration) -> TestsConfiguration {
+    TestsConfiguration {
+        base: convert_nonempty_or_else(tests.base, || {
+            vec![ffi::OsString::from("scripts/base_test.sh")]
+        }),
+        smoke: convert_nonempty_or_else(tests.smoke, || {
+            vec![ffi::OsString::from("scripts/smoke_test.sh")]
+        }),
+        acceptance: convert_nonempty_or_else(tests.acceptance, || {
+            vec![ffi::OsString::from("scripts/acceptance_test.sh")]
+        }),
+    }
+}
+
 fn convert_nonempty_or_else<F: Fn() -> Vec<U>, T, U: From<T>>(
     sequence: Vec<T>,
     if_empty: F,
@@ -163,5 +142,43 @@ fn convert_nonempty_or_else<F: Fn() -> Vec<U>, T, U: From<T>>(
         if_empty()
     } else {
         sequence.into_iter().map(|element| element.into()).collect()
+    }
+}
+
+fn staging_configuration(workspace_folder: &path::Path) -> EnvironmentConfiguration {
+    EnvironmentConfiguration {
+        ssh_configuration_file: workspace_folder.join("ssh_configuration"),
+        ssh_host: String::from("default"),
+        kubeconfig_file: workspace_folder.join("kubeconfig"),
+        public_ip: String::from("192.168.63.63"),
+    }
+}
+
+fn production_configuration(
+    production: UserFacingProductionConfiguration,
+) -> EnvironmentConfiguration {
+    EnvironmentConfiguration {
+        ssh_configuration_file: production
+            .ssh_configuration
+            .unwrap_or_else(|| ["safe", "ssh_configuration"].iter().collect()),
+        ssh_host: production.ssh_host,
+        kubeconfig_file: production
+            .kubeconfig
+            .unwrap_or_else(|| ["safe", "kubeconfig"].iter().collect()),
+        public_ip: production.public_ip,
+    }
+}
+
+fn iteration_configuration(
+    iteration: UserFacingIterationConfiguration,
+    workspace: &WorkspaceConfiguration,
+) -> IterationConfiguration {
+    IterationConfiguration {
+        move_to_next_version: convert_nonempty_or_else(iteration.move_to_next_version, || {
+            vec![
+                ffi::OsString::from("bash"),
+                ffi::OsString::from(&workspace.move_to_next_version),
+            ]
+        }),
     }
 }

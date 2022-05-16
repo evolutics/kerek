@@ -21,6 +21,8 @@ fn go() -> anyhow::Result<()> {
 Smoke testing
 Acceptance testing
 Smoke testing
+Moving to next version
+Base testing
 ",
     );
 

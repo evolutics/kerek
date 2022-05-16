@@ -10,7 +10,8 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
     test_staging(configuration)?;
     deploy_production(configuration)?;
     test_production(configuration)?;
-    load_snapshot(configuration)
+    load_snapshot(configuration)?;
+    move_to_next_version(configuration)
 }
 
 fn run_base_test(configuration: &configuration::Main) -> anyhow::Result<()> {
@@ -75,5 +76,12 @@ fn load_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
             .arg("restore")
             .arg(&configuration.workspace.vm_snapshot)
             .current_dir(&configuration.workspace.folder),
+    )
+}
+
+fn move_to_next_version(configuration: &configuration::Main) -> anyhow::Result<()> {
+    command::status(
+        process::Command::new(&configuration.iteration.move_to_next_version[0])
+            .args(&configuration.iteration.move_to_next_version[1..]),
     )
 }

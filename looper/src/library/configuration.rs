@@ -1,4 +1,5 @@
 use anyhow::Context;
+use std::ffi;
 use std::fs;
 use std::io;
 use std::path;
@@ -26,9 +27,9 @@ pub struct WorkspaceConfiguration {
 }
 
 pub struct TestsConfiguration {
-    pub base: Vec<String>,
-    pub smoke: Vec<String>,
-    pub acceptance: Vec<String>,
+    pub base: Vec<ffi::OsString>,
+    pub smoke: Vec<ffi::OsString>,
+    pub acceptance: Vec<ffi::OsString>,
 }
 
 pub struct EnvironmentConfiguration {
@@ -50,9 +51,9 @@ struct UserFacingConfiguration {
 #[derive(Default, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct UserFacingTestsConfiguration {
-    pub base: Vec<String>,
-    pub smoke: Vec<String>,
-    pub acceptance: Vec<String>,
+    pub base: Vec<ffi::OsString>,
+    pub smoke: Vec<ffi::OsString>,
+    pub acceptance: Vec<ffi::OsString>,
 }
 
 #[derive(serde::Deserialize)]
@@ -75,17 +76,17 @@ fn convert(configuration: UserFacingConfiguration) -> Main {
         workspace,
         tests: TestsConfiguration {
             base: if configuration.tests.base.is_empty() {
-                vec![String::from("scripts/base_test.sh")]
+                vec![ffi::OsString::from("scripts/base_test.sh")]
             } else {
                 configuration.tests.base
             },
             smoke: if configuration.tests.smoke.is_empty() {
-                vec![String::from("scripts/smoke_test.sh")]
+                vec![ffi::OsString::from("scripts/smoke_test.sh")]
             } else {
                 configuration.tests.smoke
             },
             acceptance: if configuration.tests.acceptance.is_empty() {
-                vec![String::from("scripts/acceptance_test.sh")]
+                vec![ffi::OsString::from("scripts/acceptance_test.sh")]
             } else {
                 configuration.tests.acceptance
             },

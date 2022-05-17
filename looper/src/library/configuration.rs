@@ -25,7 +25,6 @@ pub struct WorkspaceConfiguration {
     pub build: path::PathBuf,
     pub vm_name: String,
     pub vm_snapshot: String,
-    pub move_to_next_version: path::PathBuf,
 }
 
 pub struct TestsConfiguration {
@@ -92,7 +91,7 @@ fn convert(configuration: UserFacingConfiguration) -> Main {
     let tests = tests_configuration(configuration.tests);
     let staging = staging_configuration(&workspace.folder);
     let production = production_configuration(configuration.production);
-    let iteration = iteration_configuration(configuration.iteration, &workspace);
+    let iteration = iteration_configuration(configuration.iteration);
 
     Main {
         workspace,
@@ -107,7 +106,6 @@ fn workspace_configuration(folder: path::PathBuf) -> WorkspaceConfiguration {
     let provision = folder.join("provision.sh");
     let vagrantfile = folder.join("Vagrantfile");
     let build = folder.join("build.json");
-    let move_to_next_version = folder.join("move_to_next_version.sh");
 
     WorkspaceConfiguration {
         folder,
@@ -116,7 +114,6 @@ fn workspace_configuration(folder: path::PathBuf) -> WorkspaceConfiguration {
         build,
         vm_name: String::from("default"),
         vm_snapshot: String::from("default"),
-        move_to_next_version,
     }
 }
 
@@ -169,16 +166,18 @@ fn production_configuration(
     }
 }
 
-fn iteration_configuration(
-    iteration: UserFacingIterationConfiguration,
-    workspace: &WorkspaceConfiguration,
-) -> IterationConfiguration {
+fn iteration_configuration(iteration: UserFacingIterationConfiguration) -> IterationConfiguration {
     IterationConfiguration {
         move_to_next_version: convert_nonempty_or_else(iteration.move_to_next_version, || {
-            vec![
-                ffi::OsString::from("bash"),
-                ffi::OsString::from(&workspace.move_to_next_version),
+            [
+                "bash",
+                "-c",
+                "--",
+                include_str!("assets/move_to_next_version.sh"),
             ]
+            .iter()
+            .map(ffi::OsString::from)
+            .collect()
         }),
     }
 }

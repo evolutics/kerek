@@ -69,6 +69,7 @@ fn load_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
         process::Command::new("vagrant")
             .arg("snapshot")
             .arg("restore")
+            .arg("--")
             .arg(&configuration.cache.vm_snapshot)
             .current_dir(&configuration.cache.folder),
     )

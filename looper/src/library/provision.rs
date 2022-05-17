@@ -24,6 +24,7 @@ fn run_script(in_: &In) -> anyhow::Result<()> {
             .arg("-F")
             .arg(in_.ssh_configuration_file)
             .arg(in_.ssh_host)
+            .arg("--")
             .arg("bash")
             .stdin(script),
     )
@@ -36,6 +37,7 @@ fn copy_local_kubeconfig(in_: &In) -> anyhow::Result<()> {
             .arg("-F")
             .arg(in_.ssh_configuration_file)
             .arg(in_.ssh_host)
+            .arg("--")
             .arg("sudo cat /etc/rancher/k3s/k3s.yaml")
             .stdout(file),
     )

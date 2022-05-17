@@ -50,6 +50,7 @@ fn save_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
             .arg("snapshot")
             .arg("save")
             .arg("--force")
+            .arg("--")
             .arg(&configuration.cache.vm_name)
             .current_dir(&configuration.cache.folder),
     )

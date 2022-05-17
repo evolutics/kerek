@@ -6,19 +6,19 @@ use std::path;
 
 pub fn get(path: path::PathBuf) -> anyhow::Result<Main> {
     let file = fs::File::open(&path).with_context(|| format!("Unable to open file: {path:?}"))?;
-    let configuration = serde_json::from_reader(io::BufReader::new(file))?;
-    Ok(convert(configuration))
+    let main = serde_json::from_reader(io::BufReader::new(file))?;
+    Ok(convert(main))
 }
 
 pub struct Main {
-    pub workspace: WorkspaceConfiguration,
-    pub tests: TestsConfiguration,
-    pub staging: EnvironmentConfiguration,
-    pub production: EnvironmentConfiguration,
-    pub life_cycle: LifeCycleConfiguration,
+    pub workspace: Workspace,
+    pub tests: Tests,
+    pub staging: Environment,
+    pub production: Environment,
+    pub life_cycle: LifeCycle,
 }
 
-pub struct WorkspaceConfiguration {
+pub struct Workspace {
     pub folder: path::PathBuf,
     pub provision: path::PathBuf,
     pub vagrantfile: path::PathBuf,
@@ -27,37 +27,37 @@ pub struct WorkspaceConfiguration {
     pub vm_snapshot: String,
 }
 
-pub struct TestsConfiguration {
+pub struct Tests {
     pub base: Vec<ffi::OsString>,
     pub smoke: Vec<ffi::OsString>,
     pub acceptance: Vec<ffi::OsString>,
 }
 
-pub struct EnvironmentConfiguration {
+pub struct Environment {
     pub ssh_configuration_file: path::PathBuf,
     pub ssh_host: String,
     pub kubeconfig_file: path::PathBuf,
     pub public_ip: String,
 }
 
-pub struct LifeCycleConfiguration {
+pub struct LifeCycle {
     pub move_to_next_version: Vec<ffi::OsString>,
 }
 
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
-struct UserFacingConfiguration {
+struct UserFacingMain {
     pub workspace_folder: Option<path::PathBuf>,
     #[serde(default)]
-    pub tests: UserFacingTestsConfiguration,
-    pub production: UserFacingProductionConfiguration,
+    pub tests: UserFacingTests,
+    pub production: UserFacingProduction,
     #[serde(default)]
-    pub life_cycle: UserFacingLifeCycleConfiguration,
+    pub life_cycle: UserFacingLifeCycle,
 }
 
 #[derive(Default, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
-struct UserFacingTestsConfiguration {
+struct UserFacingTests {
     #[serde(default)]
     pub base: Vec<String>,
     #[serde(default)]
@@ -68,7 +68,7 @@ struct UserFacingTestsConfiguration {
 
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
-struct UserFacingProductionConfiguration {
+struct UserFacingProduction {
     pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: String,
     pub kubeconfig: Option<path::PathBuf>,
@@ -77,21 +77,21 @@ struct UserFacingProductionConfiguration {
 
 #[derive(Default, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
-struct UserFacingLifeCycleConfiguration {
+struct UserFacingLifeCycle {
     #[serde(default)]
     pub move_to_next_version: Vec<String>,
 }
 
-fn convert(configuration: UserFacingConfiguration) -> Main {
-    let workspace_folder = configuration
+fn convert(main: UserFacingMain) -> Main {
+    let workspace_folder = main
         .workspace_folder
         .unwrap_or_else(|| path::PathBuf::from(".kerek"));
 
-    let workspace = workspace_configuration(workspace_folder);
-    let tests = tests_configuration(configuration.tests);
-    let staging = staging_configuration(&workspace.folder);
-    let production = production_configuration(configuration.production);
-    let life_cycle = life_cycle_configuration(configuration.life_cycle);
+    let workspace = get_workspace(workspace_folder);
+    let tests = get_tests(main.tests);
+    let staging = get_staging(&workspace.folder);
+    let production = get_production(main.production);
+    let life_cycle = get_life_cycle(main.life_cycle);
 
     Main {
         workspace,
@@ -102,12 +102,12 @@ fn convert(configuration: UserFacingConfiguration) -> Main {
     }
 }
 
-fn workspace_configuration(folder: path::PathBuf) -> WorkspaceConfiguration {
+fn get_workspace(folder: path::PathBuf) -> Workspace {
     let provision = folder.join("provision.sh");
     let vagrantfile = folder.join("Vagrantfile");
     let build = folder.join("build.json");
 
-    WorkspaceConfiguration {
+    Workspace {
         folder,
         provision,
         vagrantfile,
@@ -117,8 +117,8 @@ fn workspace_configuration(folder: path::PathBuf) -> WorkspaceConfiguration {
     }
 }
 
-fn tests_configuration(tests: UserFacingTestsConfiguration) -> TestsConfiguration {
-    TestsConfiguration {
+fn get_tests(tests: UserFacingTests) -> Tests {
+    Tests {
         base: convert_nonempty_or_else(tests.base, || {
             vec![ffi::OsString::from("scripts/base_test.sh")]
         }),
@@ -142,8 +142,8 @@ fn convert_nonempty_or_else<F: Fn() -> Vec<U>, T, U: From<T>>(
     }
 }
 
-fn staging_configuration(workspace_folder: &path::Path) -> EnvironmentConfiguration {
-    EnvironmentConfiguration {
+fn get_staging(workspace_folder: &path::Path) -> Environment {
+    Environment {
         ssh_configuration_file: workspace_folder.join("ssh_configuration"),
         ssh_host: String::from("default"),
         kubeconfig_file: workspace_folder.join("kubeconfig"),
@@ -151,10 +151,8 @@ fn staging_configuration(workspace_folder: &path::Path) -> EnvironmentConfigurat
     }
 }
 
-fn production_configuration(
-    production: UserFacingProductionConfiguration,
-) -> EnvironmentConfiguration {
-    EnvironmentConfiguration {
+fn get_production(production: UserFacingProduction) -> Environment {
+    Environment {
         ssh_configuration_file: production
             .ssh_configuration
             .unwrap_or_else(|| ["safe", "ssh_configuration"].iter().collect()),
@@ -166,10 +164,8 @@ fn production_configuration(
     }
 }
 
-fn life_cycle_configuration(
-    life_cycle: UserFacingLifeCycleConfiguration,
-) -> LifeCycleConfiguration {
-    LifeCycleConfiguration {
+fn get_life_cycle(life_cycle: UserFacingLifeCycle) -> LifeCycle {
+    LifeCycle {
         move_to_next_version: convert_nonempty_or_else(life_cycle.move_to_next_version, || {
             [
                 "bash",

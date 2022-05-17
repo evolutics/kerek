@@ -2,7 +2,7 @@ use super::configuration;
 use anyhow::Context;
 use std::fs;
 
-pub fn go(workspace: &configuration::WorkspaceConfiguration) -> anyhow::Result<()> {
+pub fn go(workspace: &configuration::Workspace) -> anyhow::Result<()> {
     let folder = &workspace.folder;
     fs::create_dir_all(folder).with_context(|| format!("Unable to create folder: {folder:?}"))?;
     for (file, contents) in [

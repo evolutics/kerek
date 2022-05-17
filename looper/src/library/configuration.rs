@@ -15,7 +15,7 @@ pub struct Main {
     pub tests: TestsConfiguration,
     pub staging: EnvironmentConfiguration,
     pub production: EnvironmentConfiguration,
-    pub iteration: IterationConfiguration,
+    pub life_cycle: LifeCycleConfiguration,
 }
 
 pub struct WorkspaceConfiguration {
@@ -40,7 +40,7 @@ pub struct EnvironmentConfiguration {
     pub public_ip: String,
 }
 
-pub struct IterationConfiguration {
+pub struct LifeCycleConfiguration {
     pub move_to_next_version: Vec<ffi::OsString>,
 }
 
@@ -52,7 +52,7 @@ struct UserFacingConfiguration {
     pub tests: UserFacingTestsConfiguration,
     pub production: UserFacingProductionConfiguration,
     #[serde(default)]
-    pub iteration: UserFacingIterationConfiguration,
+    pub life_cycle: UserFacingLifeCycleConfiguration,
 }
 
 #[derive(Default, serde::Deserialize)]
@@ -77,7 +77,7 @@ struct UserFacingProductionConfiguration {
 
 #[derive(Default, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
-struct UserFacingIterationConfiguration {
+struct UserFacingLifeCycleConfiguration {
     #[serde(default)]
     pub move_to_next_version: Vec<String>,
 }
@@ -91,14 +91,14 @@ fn convert(configuration: UserFacingConfiguration) -> Main {
     let tests = tests_configuration(configuration.tests);
     let staging = staging_configuration(&workspace.folder);
     let production = production_configuration(configuration.production);
-    let iteration = iteration_configuration(configuration.iteration);
+    let life_cycle = life_cycle_configuration(configuration.life_cycle);
 
     Main {
         workspace,
         tests,
         staging,
         production,
-        iteration,
+        life_cycle,
     }
 }
 
@@ -166,9 +166,11 @@ fn production_configuration(
     }
 }
 
-fn iteration_configuration(iteration: UserFacingIterationConfiguration) -> IterationConfiguration {
-    IterationConfiguration {
-        move_to_next_version: convert_nonempty_or_else(iteration.move_to_next_version, || {
+fn life_cycle_configuration(
+    life_cycle: UserFacingLifeCycleConfiguration,
+) -> LifeCycleConfiguration {
+    LifeCycleConfiguration {
+        move_to_next_version: convert_nonempty_or_else(life_cycle.move_to_next_version, || {
             [
                 "bash",
                 "-c",

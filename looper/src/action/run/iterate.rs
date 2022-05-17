@@ -81,7 +81,7 @@ fn load_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
 
 fn move_to_next_version(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
-        process::Command::new(&configuration.iteration.move_to_next_version[0])
-            .args(&configuration.iteration.move_to_next_version[1..]),
+        process::Command::new(&configuration.life_cycle.move_to_next_version[0])
+            .args(&configuration.life_cycle.move_to_next_version[1..]),
     )
 }

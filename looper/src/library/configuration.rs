@@ -11,14 +11,14 @@ pub fn get(path: path::PathBuf) -> anyhow::Result<Main> {
 }
 
 pub struct Main {
-    pub workspace: Workspace,
+    pub cache: Cache,
     pub tests: Tests,
     pub staging: Environment,
     pub production: Environment,
     pub life_cycle: LifeCycle,
 }
 
-pub struct Workspace {
+pub struct Cache {
     pub folder: path::PathBuf,
     pub provision: path::PathBuf,
     pub vagrantfile: path::PathBuf,
@@ -47,7 +47,7 @@ pub struct LifeCycle {
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct UserFacingMain {
-    pub workspace_folder: Option<path::PathBuf>,
+    pub cache_folder: Option<path::PathBuf>,
     #[serde(default)]
     pub tests: UserFacingTests,
     pub production: UserFacingProduction,
@@ -83,18 +83,18 @@ struct UserFacingLifeCycle {
 }
 
 fn convert(main: UserFacingMain) -> Main {
-    let workspace_folder = main
-        .workspace_folder
+    let cache_folder = main
+        .cache_folder
         .unwrap_or_else(|| path::PathBuf::from(".kerek"));
 
-    let workspace = get_workspace(workspace_folder);
+    let cache = get_cache(cache_folder);
     let tests = get_tests(main.tests);
-    let staging = get_staging(&workspace.folder);
+    let staging = get_staging(&cache.folder);
     let production = get_production(main.production);
     let life_cycle = get_life_cycle(main.life_cycle);
 
     Main {
-        workspace,
+        cache,
         tests,
         staging,
         production,
@@ -102,12 +102,12 @@ fn convert(main: UserFacingMain) -> Main {
     }
 }
 
-fn get_workspace(folder: path::PathBuf) -> Workspace {
+fn get_cache(folder: path::PathBuf) -> Cache {
     let provision = folder.join("provision.sh");
     let vagrantfile = folder.join("Vagrantfile");
     let build = folder.join("build.json");
 
-    Workspace {
+    Cache {
         folder,
         provision,
         vagrantfile,
@@ -142,11 +142,11 @@ fn convert_nonempty_or_else<F: Fn() -> Vec<U>, T, U: From<T>>(
     }
 }
 
-fn get_staging(workspace_folder: &path::Path) -> Environment {
+fn get_staging(cache_folder: &path::Path) -> Environment {
     Environment {
-        ssh_configuration_file: workspace_folder.join("ssh_configuration"),
+        ssh_configuration_file: cache_folder.join("ssh_configuration"),
         ssh_host: String::from("default"),
-        kubeconfig_file: workspace_folder.join("kubeconfig"),
+        kubeconfig_file: cache_folder.join("kubeconfig"),
         public_ip: String::from("192.168.63.63"),
     }
 }

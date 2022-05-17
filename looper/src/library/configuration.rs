@@ -22,7 +22,6 @@ pub struct Cache {
     pub folder: path::PathBuf,
     pub provision: path::PathBuf,
     pub vagrantfile: path::PathBuf,
-    pub build: path::PathBuf,
     pub vm_name: String,
     pub vm_snapshot: String,
 }
@@ -41,6 +40,8 @@ pub struct Environment {
 }
 
 pub struct LifeCycle {
+    pub build: Vec<ffi::OsString>,
+    pub deploy: Vec<ffi::OsString>,
     pub move_to_next_version: Vec<ffi::OsString>,
 }
 
@@ -79,6 +80,10 @@ struct UserFacingProduction {
 #[serde(deny_unknown_fields)]
 struct UserFacingLifeCycle {
     #[serde(default)]
+    pub build: Vec<String>,
+    #[serde(default)]
+    pub deploy: Vec<String>,
+    #[serde(default)]
     pub move_to_next_version: Vec<String>,
 }
 
@@ -105,13 +110,11 @@ fn convert(main: UserFacingMain) -> Main {
 fn get_cache(folder: path::PathBuf) -> Cache {
     let provision = folder.join("provision.sh");
     let vagrantfile = folder.join("Vagrantfile");
-    let build = folder.join("build.json");
 
     Cache {
         folder,
         provision,
         vagrantfile,
-        build,
         vm_name: String::from("default"),
         vm_snapshot: String::from("default"),
     }
@@ -166,6 +169,18 @@ fn get_production(production: UserFacingProduction) -> Environment {
 
 fn get_life_cycle(life_cycle: UserFacingLifeCycle) -> LifeCycle {
     LifeCycle {
+        build: convert_nonempty_or_else(life_cycle.build, || {
+            ["bash", "-c", "--", include_str!("assets/build.sh")]
+                .iter()
+                .map(ffi::OsString::from)
+                .collect()
+        }),
+        deploy: convert_nonempty_or_else(life_cycle.deploy, || {
+            ["bash", "-c", "--", include_str!("assets/deploy.sh")]
+                .iter()
+                .map(ffi::OsString::from)
+                .collect()
+        }),
         move_to_next_version: convert_nonempty_or_else(life_cycle.move_to_next_version, || {
             [
                 "bash",

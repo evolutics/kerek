@@ -19,7 +19,6 @@ struct Out {
 #[derive(serde::Serialize)]
 struct Versions {
     kubectl: String,
-    skaffold: String,
     ssh: String,
     vagrant: String,
 }
@@ -32,7 +31,6 @@ fn get_versions() -> anyhow::Result<Versions> {
                 .arg("--client")
                 .arg("--short"),
         )?,
-        skaffold: command::stdout_utf8(process::Command::new("skaffold").arg("version"))?,
         ssh: command::stderr_utf8(process::Command::new("ssh").arg("-V"))?,
         vagrant: command::stdout_utf8(process::Command::new("vagrant").arg("--version"))?,
     })

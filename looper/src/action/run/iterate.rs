@@ -22,10 +22,8 @@ fn run_base_test(configuration: &configuration::Main) -> anyhow::Result<()> {
 
 fn build(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
-        process::Command::new("skaffold")
-            .arg("build")
-            .arg("--file-output")
-            .arg(&configuration.cache.build),
+        process::Command::new(&configuration.life_cycle.build[0])
+            .args(&configuration.life_cycle.build[1..]),
     )
 }
 
@@ -35,12 +33,9 @@ fn deploy_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
 
 fn deploy(configuration: &configuration::Main, kubeconfig_file: &path::Path) -> anyhow::Result<()> {
     command::status(
-        process::Command::new("skaffold")
-            .arg("deploy")
-            .arg("--build-artifacts")
-            .arg(&configuration.cache.build)
-            .arg("--kubeconfig")
-            .arg(kubeconfig_file),
+        process::Command::new(&configuration.life_cycle.deploy[0])
+            .args(&configuration.life_cycle.deploy[1..])
+            .env("KEREK_KUBECONFIG", kubeconfig_file),
     )
 }
 

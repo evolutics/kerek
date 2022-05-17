@@ -25,7 +25,7 @@ fn build(configuration: &configuration::Main) -> anyhow::Result<()> {
         process::Command::new("skaffold")
             .arg("build")
             .arg("--file-output")
-            .arg(&configuration.workspace.build),
+            .arg(&configuration.cache.build),
     )
 }
 
@@ -38,7 +38,7 @@ fn deploy(configuration: &configuration::Main, kubeconfig_file: &path::Path) -> 
         process::Command::new("skaffold")
             .arg("deploy")
             .arg("--build-artifacts")
-            .arg(&configuration.workspace.build)
+            .arg(&configuration.cache.build)
             .arg("--kubeconfig")
             .arg(kubeconfig_file),
     )
@@ -74,8 +74,8 @@ fn load_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
         process::Command::new("vagrant")
             .arg("snapshot")
             .arg("restore")
-            .arg(&configuration.workspace.vm_snapshot)
-            .current_dir(&configuration.workspace.folder),
+            .arg(&configuration.cache.vm_snapshot)
+            .current_dir(&configuration.cache.folder),
     )
 }
 

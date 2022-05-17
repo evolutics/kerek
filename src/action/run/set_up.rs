@@ -1,14 +1,14 @@
 use crate::library::command;
 use crate::library::configuration;
 use crate::library::provision;
-use crate::library::set_up_workspace;
-use crate::library::tear_down_workspace;
+use crate::library::set_up_cache;
+use crate::library::tear_down_cache;
 use std::fs;
 use std::process;
 
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
-    tear_down_workspace::go(&configuration.workspace)?;
-    set_up_workspace::go(&configuration.workspace)?;
+    tear_down_cache::go(&configuration.cache)?;
+    set_up_cache::go(&configuration.cache)?;
     start_staging(configuration)?;
     dump_staging_ssh_configuration(configuration)?;
     provision_staging(configuration)?;
@@ -19,7 +19,7 @@ fn start_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
         process::Command::new("vagrant")
             .arg("up")
-            .current_dir(&configuration.workspace.folder)
+            .current_dir(&configuration.cache.folder)
             .env("KEREK_IP", &configuration.staging.public_ip),
     )
 }
@@ -29,14 +29,14 @@ fn dump_staging_ssh_configuration(configuration: &configuration::Main) -> anyhow
     command::status(
         process::Command::new("vagrant")
             .arg("ssh-config")
-            .current_dir(&configuration.workspace.folder)
+            .current_dir(&configuration.cache.folder)
             .stdout(file),
     )
 }
 
 fn provision_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
     provision::go(provision::In {
-        script_file: &configuration.workspace.provision,
+        script_file: &configuration.cache.provision,
         ssh_configuration_file: &configuration.staging.ssh_configuration_file,
         ssh_host: &configuration.staging.ssh_host,
         kubeconfig_file: &configuration.staging.kubeconfig_file,
@@ -50,7 +50,7 @@ fn save_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
             .arg("snapshot")
             .arg("save")
             .arg("--force")
-            .arg(&configuration.workspace.vm_name)
-            .current_dir(&configuration.workspace.folder),
+            .arg(&configuration.cache.vm_name)
+            .current_dir(&configuration.cache.folder),
     )
 }

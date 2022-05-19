@@ -88,11 +88,10 @@ struct UserFacingLifeCycle {
 }
 
 fn convert(main: UserFacingMain) -> Main {
-    let cache_folder = main
-        .cache_folder
-        .unwrap_or_else(|| path::PathBuf::from(".kerek"));
-
-    let cache = get_cache(cache_folder);
+    let cache = get_cache(
+        main.cache_folder
+            .unwrap_or_else(|| path::PathBuf::from(".kerek")),
+    );
     let tests = get_tests(main.tests);
     let staging = get_staging(&cache.folder);
     let production = get_production(main.production);

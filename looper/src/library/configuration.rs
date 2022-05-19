@@ -1,7 +1,9 @@
 use anyhow::Context;
+use rand::Rng;
 use std::ffi;
 use std::fs;
 use std::io;
+use std::net;
 use std::path;
 
 pub fn get(path: path::PathBuf) -> anyhow::Result<Main> {
@@ -177,8 +179,13 @@ fn get_staging(cache_folder: &path::Path) -> Environment {
         ssh_configuration_file: cache_folder.join("ssh_configuration"),
         ssh_host: String::from("default"),
         kubeconfig_file: cache_folder.join("kubeconfig"),
-        public_ip: String::from("192.168.63.63"),
+        public_ip: random_virtualbox_host_only_ip(),
     }
+}
+
+fn random_virtualbox_host_only_ip() -> String {
+    let mut random = rand::thread_rng();
+    net::Ipv4Addr::new(192, 168, random.gen_range(56..=63), random.gen()).to_string()
 }
 
 fn get_production(production: UserFacingProduction) -> Environment {

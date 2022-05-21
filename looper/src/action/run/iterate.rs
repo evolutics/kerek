@@ -1,6 +1,5 @@
 use crate::library::command;
 use crate::library::configuration;
-use std::path;
 use std::process;
 
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
@@ -28,14 +27,22 @@ fn build(configuration: &configuration::Main) -> anyhow::Result<()> {
 }
 
 fn deploy_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
-    deploy(configuration, &configuration.staging.kubeconfig_file)
+    deploy(configuration, &configuration.staging)
 }
 
-fn deploy(configuration: &configuration::Main, kubeconfig_file: &path::Path) -> anyhow::Result<()> {
+fn deploy(
+    configuration: &configuration::Main,
+    environment: &configuration::Environment,
+) -> anyhow::Result<()> {
     command::status(
         process::Command::new(&configuration.life_cycle.deploy[0])
             .args(&configuration.life_cycle.deploy[1..])
-            .env("KEREK_KUBECONFIG", kubeconfig_file),
+            .env("KEREK_KUBECONFIG", &environment.kubeconfig_file)
+            .env(
+                "KEREK_SSH_CONFIGURATION",
+                &environment.ssh_configuration_file,
+            )
+            .env("KEREK_SSH_HOST", &environment.ssh_host),
     )
 }
 
@@ -53,7 +60,7 @@ fn test_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
 }
 
 fn deploy_production(configuration: &configuration::Main) -> anyhow::Result<()> {
-    deploy(configuration, &configuration.production.kubeconfig_file)
+    deploy(configuration, &configuration.production)
 }
 
 fn test_production(configuration: &configuration::Main) -> anyhow::Result<()> {

@@ -130,7 +130,7 @@ fn get_life_cycle(life_cycle: UserFacingLifeCycle) -> LifeCycle {
                 .collect()
         }),
         deploy: convert_nonempty_or_else(life_cycle.deploy, || {
-            ["bash", "-c", "--", include_str!("assets/deploy.sh")]
+            ["python3", "-c", include_str!("assets/deploy.py")]
                 .iter()
                 .map(ffi::OsString::from)
                 .collect()

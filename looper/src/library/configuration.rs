@@ -41,6 +41,7 @@ pub struct Tests {
 }
 
 pub struct Environment {
+    pub display_name: String,
     pub ssh_configuration_file: path::PathBuf,
     pub ssh_host: String,
     pub kubeconfig_file: path::PathBuf,
@@ -176,6 +177,7 @@ fn get_tests(tests: UserFacingTests) -> Tests {
 
 fn get_staging(cache_folder: &path::Path) -> Environment {
     Environment {
+        display_name: String::from("staging"),
         ssh_configuration_file: cache_folder.join("ssh_configuration"),
         ssh_host: String::from("default"),
         kubeconfig_file: cache_folder.join("kubeconfig"),
@@ -190,6 +192,7 @@ fn random_virtualbox_host_only_ip() -> String {
 
 fn get_production(production: UserFacingProduction) -> Environment {
     Environment {
+        display_name: String::from("production"),
         ssh_configuration_file: production
             .ssh_configuration
             .unwrap_or_else(|| ["safe", "ssh_configuration"].iter().collect()),

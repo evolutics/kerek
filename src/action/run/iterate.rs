@@ -3,17 +3,18 @@ use crate::library::configuration;
 use std::process;
 
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
-    run_base_test(configuration)?;
+    run_base_tests(configuration)?;
     build(configuration)?;
-    deploy_staging(configuration)?;
-    test_staging(configuration)?;
-    deploy_production(configuration)?;
-    test_production(configuration)?;
+    deploy(configuration, &configuration.staging)?;
+    run_smoke_tests(configuration, &configuration.staging)?;
+    run_acceptance_tests(configuration, &configuration.staging)?;
+    deploy(configuration, &configuration.production)?;
+    run_smoke_tests(configuration, &configuration.production)?;
     load_snapshot(configuration)?;
     move_to_next_version(configuration)
 }
 
-fn run_base_test(configuration: &configuration::Main) -> anyhow::Result<()> {
+fn run_base_tests(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
         process::Command::new(&configuration.tests.base[0]).args(&configuration.tests.base[1..]),
     )
@@ -24,10 +25,6 @@ fn build(configuration: &configuration::Main) -> anyhow::Result<()> {
         process::Command::new(&configuration.life_cycle.build[0])
             .args(&configuration.life_cycle.build[1..]),
     )
-}
-
-fn deploy_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
-    deploy(configuration, &configuration.staging)
 }
 
 fn deploy(
@@ -46,28 +43,25 @@ fn deploy(
     )
 }
 
-fn test_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
+fn run_smoke_tests(
+    configuration: &configuration::Main,
+    environment: &configuration::Environment,
+) -> anyhow::Result<()> {
     command::status(
         process::Command::new(&configuration.tests.smoke[0])
             .args(&configuration.tests.smoke[1..])
-            .env("KEREK_IP", &configuration.staging.public_ip),
-    )?;
-    command::status(
-        process::Command::new(&configuration.tests.acceptance[0])
-            .args(&configuration.tests.acceptance[1..])
-            .env("KEREK_IP", &configuration.staging.public_ip),
+            .env("KEREK_IP", &environment.public_ip),
     )
 }
 
-fn deploy_production(configuration: &configuration::Main) -> anyhow::Result<()> {
-    deploy(configuration, &configuration.production)
-}
-
-fn test_production(configuration: &configuration::Main) -> anyhow::Result<()> {
+fn run_acceptance_tests(
+    configuration: &configuration::Main,
+    environment: &configuration::Environment,
+) -> anyhow::Result<()> {
     command::status(
-        process::Command::new(&configuration.tests.smoke[0])
-            .args(&configuration.tests.smoke[1..])
-            .env("KEREK_IP", &configuration.production.public_ip),
+        process::Command::new(&configuration.tests.acceptance[0])
+            .args(&configuration.tests.acceptance[1..])
+            .env("KEREK_IP", &environment.public_ip),
     )
 }
 

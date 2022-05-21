@@ -6,4 +6,5 @@ set -o pipefail
 
 echo 'Smoke testing' >>log.txt
 
-curl --connect-timeout 3 --fail --retry 2 --show-error http://"${KEREK_IP}":8080
+curl --fail --max-time 3 --retry 99 --retry-connrefused --retry-max-time 150 \
+  --show-error http://"${KEREK_IP}":8080

@@ -8,6 +8,11 @@ update_package_index() {
   sudo apt-get update
 }
 
+set_up_automatic_upgrades() {
+  sudo apt-get install unattended-upgrades
+  systemctl is-active unattended-upgrades.service
+}
+
 set_up_kubernetes() {
   curl --fail --location --silent https://get.k3s.io | sh -
 }
@@ -44,6 +49,7 @@ set_up_firewall() {
 
 main() {
   update_package_index
+  set_up_automatic_upgrades
   set_up_kubernetes
   set_up_data_folder
   set_up_deploy_user

@@ -4,4 +4,4 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-echo 'Moving to next version' >>log.txt
+echo 'Move to next version' >>log.txt

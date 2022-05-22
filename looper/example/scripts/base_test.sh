@@ -4,8 +4,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-echo 'Base testing' >>log.txt
+echo 'Base tests' >>log.txt
 
-if grep 'Moving to next version' log.txt; then
+if grep 'Move to next version' log.txt; then
   exit 1
 fi

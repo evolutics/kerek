@@ -17,12 +17,12 @@ fn go() -> anyhow::Result<()> {
 
     assert_eq!(
         fs::read_to_string(log_file)?,
-        "Base testing
-Smoke testing
-Acceptance testing
-Smoke testing
-Moving to next version
-Base testing
+        "Base tests
+Smoke tests
+Acceptance tests
+Smoke tests
+Move to next version
+Base tests
 ",
     );
 

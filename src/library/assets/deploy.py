@@ -28,7 +28,7 @@ def _save_images(build_file):
 
 
 def _import_images(local_images_file):
-    remote_images_file = pathlib.Path("/tmp") / "images.tar"
+    remote_images_file = pathlib.Path("/home") / "deploy" / "images.tar"
 
     subprocess.run(
         [
@@ -37,7 +37,7 @@ def _import_images(local_images_file):
             os.getenv("KEREK_SSH_CONFIGURATION"),
             "--",
             local_images_file,
-            f"{os.getenv('KEREK_SSH_HOST')}:{remote_images_file}",
+            f"deploy@{os.getenv('KEREK_SSH_HOST')}:{remote_images_file}",
         ],
         check=True,
     )
@@ -47,6 +47,8 @@ def _import_images(local_images_file):
             "ssh",
             "-F",
             os.getenv("KEREK_SSH_CONFIGURATION"),
+            "-l",
+            "deploy",
             os.getenv("KEREK_SSH_HOST"),
             "--",
             "bash",

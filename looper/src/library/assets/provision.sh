@@ -18,7 +18,7 @@ do_kubernetes_setup() {
 }
 
 test_kubernetes_setup() {
-  true
+  k3s check-config
 }
 
 do_data_folder_setup() {

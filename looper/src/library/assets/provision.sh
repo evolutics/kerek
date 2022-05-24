@@ -4,24 +4,39 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-update_package_index() {
+do_package_index_update() {
   sudo apt-get update
 }
 
-set_up_automatic_upgrades() {
+test_package_index_update() {
+  true
+}
+
+do_automatic_upgrades_setup() {
   sudo apt-get install unattended-upgrades
+}
+
+test_automatic_upgrades_setup() {
   systemctl is-active unattended-upgrades.service
 }
 
-set_up_kubernetes() {
+do_kubernetes_setup() {
   curl --fail --location --silent https://get.k3s.io | sh -
 }
 
-set_up_data_folder() {
+test_kubernetes_setup() {
+  true
+}
+
+do_data_folder_setup() {
   sudo mkdir /data
 }
 
-set_up_deploy_user() {
+test_data_folder_setup() {
+  true
+}
+
+do_deploy_user_setup() {
   sudo useradd --create-home --user-group deploy
   sudo rsync --archive --chown deploy:deploy "${HOME}/.ssh" /home/deploy
 
@@ -30,7 +45,11 @@ set_up_deploy_user() {
     | sudo EDITOR='tee' visudo --file /etc/sudoers.d/deploy --strict
 }
 
-set_up_firewall() {
+test_deploy_user_setup() {
+  true
+}
+
+do_firewall_setup() {
   sudo apt-get install ufw
   sudo ufw --force reset
 
@@ -47,13 +66,20 @@ set_up_firewall() {
   sudo ufw status verbose
 }
 
+test_firewall_setup() {
+  true
+}
+
 main() {
-  update_package_index
-  set_up_automatic_upgrades
-  set_up_kubernetes
-  set_up_data_folder
-  set_up_deploy_user
-  set_up_firewall
+  for task in \
+    package_index_update \
+    automatic_upgrades_setup \
+    kubernetes_setup \
+    data_folder_setup \
+    deploy_user_setup \
+    firewall_setup; do
+    "$1_${task}"
+  done
 }
 
 main "$@"

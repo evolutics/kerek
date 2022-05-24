@@ -31,15 +31,19 @@ test_data_folder_setup() {
 }
 
 do_user_setup() {
+  sudo sed --in-place 's/^#PermitRootLogin .*$/PermitRootLogin no/' \
+    /etc/ssh/sshd_config
+
   sudo useradd --create-home --user-group deploy
   sudo rsync --archive --chown deploy:deploy "${HOME}/.ssh" /home/deploy
-
   echo "%deploy ALL=NOPASSWD: \
 /usr/local/bin/k3s ctr images import /home/deploy/images.tar" \
     | sudo EDITOR='tee' visudo --file /etc/sudoers.d/deploy --strict
 }
 
 test_user_setup() {
+  sudo sshd -T | grep '^permitrootlogin no$'
+
   diff <(groups deploy) <(echo 'deploy : deploy')
 }
 

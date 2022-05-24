@@ -4,19 +4,12 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-do_package_index_update() {
+do_package_management_setup() {
   sudo apt-get update
-}
-
-test_package_index_update() {
-  true
-}
-
-do_automatic_upgrades_setup() {
   sudo apt-get install unattended-upgrades
 }
 
-test_automatic_upgrades_setup() {
+test_package_management_setup() {
   systemctl is-active unattended-upgrades.service
 }
 
@@ -36,7 +29,7 @@ test_data_folder_setup() {
   true
 }
 
-do_deploy_user_setup() {
+do_user_setup() {
   sudo useradd --create-home --user-group deploy
   sudo rsync --archive --chown deploy:deploy "${HOME}/.ssh" /home/deploy
 
@@ -45,7 +38,7 @@ do_deploy_user_setup() {
     | sudo EDITOR='tee' visudo --file /etc/sudoers.d/deploy --strict
 }
 
-test_deploy_user_setup() {
+test_user_setup() {
   true
 }
 
@@ -72,11 +65,10 @@ test_firewall_setup() {
 
 main() {
   for task in \
-    package_index_update \
-    automatic_upgrades_setup \
+    package_management_setup \
     kubernetes_setup \
     data_folder_setup \
-    deploy_user_setup \
+    user_setup \
     firewall_setup; do
     "$1_${task}"
   done

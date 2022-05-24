@@ -4,7 +4,8 @@ use std::path;
 use std::process;
 
 pub fn go(in_: In) -> anyhow::Result<()> {
-    run_script(&in_)?;
+    run_script(&in_, "do")?;
+    run_script(&in_, "test")?;
     copy_local_kubeconfig(&in_)?;
     adjust_kubeconfig_for_remote_access(&in_)
 }
@@ -17,7 +18,7 @@ pub struct In<'a> {
     pub public_ip: &'a str,
 }
 
-fn run_script(in_: &In) -> anyhow::Result<()> {
+fn run_script(in_: &In, subcommand: &str) -> anyhow::Result<()> {
     let script = fs::File::open(in_.script_file)?;
     command::status(
         process::Command::new("ssh")
@@ -26,6 +27,9 @@ fn run_script(in_: &In) -> anyhow::Result<()> {
             .arg(in_.ssh_host)
             .arg("--")
             .arg("bash")
+            .arg("-s")
+            .arg("--")
+            .arg(subcommand)
             .stdin(script),
     )
 }

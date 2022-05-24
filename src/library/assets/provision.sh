@@ -60,7 +60,22 @@ do_firewall_setup() {
 }
 
 test_firewall_setup() {
-  true
+  diff --ignore-trailing-space <(sudo ufw status verbose) <(echo 'Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), deny (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+80/tcp                     ALLOW IN    Anywhere
+443                        ALLOW IN    Anywhere
+22/tcp                     ALLOW IN    Anywhere
+6443                       ALLOW IN    Anywhere
+80/tcp (v6)                ALLOW IN    Anywhere (v6)
+443 (v6)                   ALLOW IN    Anywhere (v6)
+22/tcp (v6)                ALLOW IN    Anywhere (v6)
+6443 (v6)                  ALLOW IN    Anywhere (v6)
+')
 }
 
 main() {

@@ -26,7 +26,7 @@ do_data_folder_setup() {
 }
 
 test_data_folder_setup() {
-  true
+  [[ -d /data ]]
 }
 
 do_user_setup() {

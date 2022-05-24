@@ -39,7 +39,7 @@ do_user_setup() {
 }
 
 test_user_setup() {
-  true
+  diff <(groups deploy) <(echo 'deploy : deploy')
 }
 
 do_firewall_setup() {

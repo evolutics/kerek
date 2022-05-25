@@ -60,7 +60,6 @@ do_firewall_setup() {
   sudo ufw allow "${KUBERNETES_API_SERVER_PORT}"
 
   sudo ufw --force enable
-  sudo ufw status verbose
 }
 
 test_firewall_setup() {

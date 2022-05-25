@@ -31,8 +31,7 @@ test_data_folder_setup() {
 }
 
 do_user_setup() {
-  sudo sed --in-place 's/^#PermitRootLogin .*$/PermitRootLogin no/' \
-    /etc/ssh/sshd_config
+  sudo sed --in-place 's/^#\(PermitRootLogin\) .*$/\1 no/' /etc/ssh/sshd_config
 
   sudo useradd --create-home --user-group deploy
   sudo rsync --archive --chown deploy:deploy "${HOME}/.ssh" /home/deploy

@@ -33,25 +33,17 @@ test_data_folder_setup() {
 do_user_setup() {
   sudo sed --in-place 's/^#\(PermitRootLogin\) .*$/\1 no/' /etc/ssh/sshd_config
 
-  for user in provision deploy; do
-    sudo useradd --create-home --user-group "${user}"
-    sudo rsync --archive --chown "${user}:${user}" "${HOME}/.ssh" \
-      "/home/${user}"
-  done
+  sudo useradd --create-home --user-group kerek
+  sudo rsync --archive --chown kerek:kerek "${HOME}/.ssh" /home/kerek
 
-  echo '%provision ALL=(ALL:ALL) NOPASSWD:ALL' \
-    | sudo EDITOR='tee' visudo --file /etc/sudoers.d/provision --strict
-
-  echo "%deploy ALL=NOPASSWD: \
-/usr/local/bin/k3s ctr images import /home/deploy/images.tar" \
-    | sudo EDITOR='tee' visudo --file /etc/sudoers.d/deploy --strict
+  echo '%kerek ALL=(ALL:ALL) NOPASSWD:ALL' \
+    | sudo EDITOR='tee' visudo --file /etc/sudoers.d/kerek --strict
 }
 
 test_user_setup() {
   sudo sshd -T | grep '^permitrootlogin no$'
 
-  diff <(groups provision deploy) <(echo 'provision : provision
-deploy : deploy')
+  diff <(groups kerek) <(echo 'kerek : kerek')
 }
 
 do_firewall_setup() {

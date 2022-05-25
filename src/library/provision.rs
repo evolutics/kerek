@@ -4,8 +4,8 @@ use std::path;
 use std::process;
 
 pub fn go(in_: In) -> anyhow::Result<()> {
-    run_script(&in_, "do")?;
-    run_script(&in_, "test")?;
+    do_scripted_provisioning(&in_)?;
+    test_scripted_provisioning(&in_)?;
     copy_local_kubeconfig(&in_)?;
     adjust_kubeconfig_for_remote_access(&in_)
 }
@@ -18,7 +18,7 @@ pub struct In<'a> {
     pub public_ip: &'a str,
 }
 
-fn run_script(in_: &In, subcommand: &str) -> anyhow::Result<()> {
+fn do_scripted_provisioning(in_: &In) -> anyhow::Result<()> {
     let script = fs::File::open(in_.script_file)?;
     command::status(
         process::Command::new("ssh")
@@ -29,7 +29,25 @@ fn run_script(in_: &In, subcommand: &str) -> anyhow::Result<()> {
             .arg("bash")
             .arg("-s")
             .arg("--")
-            .arg(subcommand)
+            .arg("do")
+            .stdin(script),
+    )
+}
+
+fn test_scripted_provisioning(in_: &In) -> anyhow::Result<()> {
+    let script = fs::File::open(in_.script_file)?;
+    command::status(
+        process::Command::new("ssh")
+            .arg("-F")
+            .arg(in_.ssh_configuration_file)
+            .arg("-l")
+            .arg("provision")
+            .arg(in_.ssh_host)
+            .arg("--")
+            .arg("bash")
+            .arg("-s")
+            .arg("--")
+            .arg("test")
             .stdin(script),
     )
 }
@@ -40,6 +58,8 @@ fn copy_local_kubeconfig(in_: &In) -> anyhow::Result<()> {
         process::Command::new("ssh")
             .arg("-F")
             .arg(in_.ssh_configuration_file)
+            .arg("-l")
+            .arg("provision")
             .arg(in_.ssh_host)
             .arg("--")
             .arg("sudo cat /etc/rancher/k3s/k3s.yaml")

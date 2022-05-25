@@ -33,8 +33,15 @@ test_data_folder_setup() {
 do_user_setup() {
   sudo sed --in-place 's/^#\(PermitRootLogin\) .*$/\1 no/' /etc/ssh/sshd_config
 
-  sudo useradd --create-home --user-group deploy
-  sudo rsync --archive --chown deploy:deploy "${HOME}/.ssh" /home/deploy
+  for user in provision deploy; do
+    sudo useradd --create-home --user-group "${user}"
+    sudo rsync --archive --chown "${user}:${user}" "${HOME}/.ssh" \
+      "/home/${user}"
+  done
+
+  echo '%provision ALL=(ALL:ALL) NOPASSWD:ALL' \
+    | sudo EDITOR='tee' visudo --file /etc/sudoers.d/provision --strict
+
   echo "%deploy ALL=NOPASSWD: \
 /usr/local/bin/k3s ctr images import /home/deploy/images.tar" \
     | sudo EDITOR='tee' visudo --file /etc/sudoers.d/deploy --strict
@@ -43,7 +50,8 @@ do_user_setup() {
 test_user_setup() {
   sudo sshd -T | grep '^permitrootlogin no$'
 
-  diff <(groups deploy) <(echo 'deploy : deploy')
+  diff <(groups provision deploy) <(echo 'provision : provision
+deploy : deploy')
 }
 
 do_firewall_setup() {

@@ -7,12 +7,27 @@ use std::fs;
 use std::process;
 
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
-    tear_down_cache::go(&configuration.cache)?;
-    set_up_cache::go(&configuration.cache)?;
-    start_staging(configuration)?;
-    dump_staging_ssh_configuration(configuration)?;
-    provision_staging(configuration)?;
-    save_snapshot(configuration)
+    load_snapshot(configuration).or_else(|_| {
+        tear_down_cache::go(&configuration.cache)?;
+        set_up_cache::go(&configuration.cache)?;
+        start_staging(configuration)?;
+        dump_staging_ssh_configuration(configuration)?;
+        provision_staging(configuration)?;
+        save_snapshot(configuration)
+    })
+}
+
+const VERSIONED_SNAPSHOT_NAME: &str = env!("VERGEN_GIT_SHA");
+
+fn load_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
+    command::status(
+        process::Command::new("vagrant")
+            .arg("snapshot")
+            .arg("restore")
+            .arg("--")
+            .arg(VERSIONED_SNAPSHOT_NAME)
+            .current_dir(&configuration.cache.folder),
+    )
 }
 
 fn start_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
@@ -48,7 +63,10 @@ fn save_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
         process::Command::new("vagrant")
             .arg("snapshot")
-            .arg("push")
+            .arg("save")
+            .arg("--force")
+            .arg("--")
+            .arg(VERSIONED_SNAPSHOT_NAME)
             .current_dir(&configuration.cache.folder),
     )
 }

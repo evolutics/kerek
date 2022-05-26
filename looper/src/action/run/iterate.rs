@@ -11,7 +11,6 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
     run_acceptance_tests(configuration, &configuration.staging)?;
     deploy(configuration, &configuration.production)?;
     run_smoke_tests(configuration, &configuration.production)?;
-    load_snapshot(configuration)?;
     move_to_next_version(configuration)
 }
 
@@ -78,16 +77,6 @@ fn run_acceptance_tests(
         let environment = &environment.display_name;
         format!("Acceptance tests for {environment} failed.")
     })
-}
-
-fn load_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
-    command::status(
-        process::Command::new("vagrant")
-            .arg("snapshot")
-            .arg("pop")
-            .arg("--no-delete")
-            .current_dir(&configuration.cache.folder),
-    )
 }
 
 fn move_to_next_version(configuration: &configuration::Main) -> anyhow::Result<()> {

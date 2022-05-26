@@ -11,6 +11,8 @@ do_package_management_setup() {
 }
 
 test_package_management_setup() {
+  [[ ! -f /var/run/reboot-required ]]
+
   systemctl is-active unattended-upgrades.service
 }
 

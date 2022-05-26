@@ -90,6 +90,7 @@ main() {
     data_folder_setup \
     user_setup \
     firewall_setup; do
+    echo >&2 "● ${task}"
     "$1_${task}"
   done
 }

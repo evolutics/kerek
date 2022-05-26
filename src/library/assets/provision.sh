@@ -43,7 +43,9 @@ do_user_setup() {
 }
 
 test_user_setup() {
-  sudo sshd -T | grep '^permitrootlogin no$'
+  local -r sshd_configuration="$(sudo sshd -T)"
+  echo "${sshd_configuration}" | grep '^passwordauthentication no$'
+  echo "${sshd_configuration}" | grep '^permitrootlogin no$'
 
   diff <(groups kerek) <(echo 'kerek : kerek')
 }

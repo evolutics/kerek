@@ -24,8 +24,6 @@ pub struct Cache {
     pub folder: path::PathBuf,
     pub provision: path::PathBuf,
     pub vagrantfile: path::PathBuf,
-    pub vm_name: String,
-    pub vm_snapshot: String,
 }
 
 pub struct LifeCycle {
@@ -117,8 +115,6 @@ fn get_cache(folder: path::PathBuf) -> Cache {
         folder,
         provision,
         vagrantfile,
-        vm_name: String::from("default"),
-        vm_snapshot: String::from("default"),
     }
 }
 

@@ -48,10 +48,7 @@ fn save_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
         process::Command::new("vagrant")
             .arg("snapshot")
-            .arg("save")
-            .arg("--force")
-            .arg("--")
-            .arg(&configuration.cache.vm_name)
+            .arg("push")
             .current_dir(&configuration.cache.folder),
     )
 }

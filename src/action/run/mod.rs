@@ -1,14 +1,14 @@
 mod iterate;
-mod set_up;
+mod reset;
 
 use crate::library::configuration;
 use std::path;
 
 pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
     let configuration = configuration::get(configuration)?;
-    set_up::go(&configuration)?;
 
     loop {
+        reset::go(&configuration)?;
         iterate::go(&configuration)?;
     }
 }

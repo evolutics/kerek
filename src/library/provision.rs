@@ -55,7 +55,7 @@ fn reboot(in_: &In) -> anyhow::Result<()> {
 fn test_scripted_provisioning(in_: &In) -> anyhow::Result<()> {
     retry::go(retry::In {
         total_duration_limit: time::Duration::from_secs(150),
-        expected_retry_pause: time::Duration::from_secs(3),
+        retry_pause: time::Duration::from_secs(3),
         run: || {
             let script = fs::File::open(in_.script_file)?;
             command::status(

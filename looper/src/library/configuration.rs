@@ -41,7 +41,7 @@ pub struct Environment {
     pub ssh_configuration_file: path::PathBuf,
     pub ssh_host: String,
     pub kubeconfig_file: path::PathBuf,
-    pub public_ip: String,
+    pub ip_address: String,
 }
 
 #[derive(serde::Deserialize)]
@@ -83,7 +83,7 @@ struct UserFacingProduction {
     pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: String,
     pub kubeconfig: Option<path::PathBuf>,
-    pub public_ip: String,
+    pub ip_address: String,
 }
 
 fn convert(main: UserFacingMain) -> Main {
@@ -175,7 +175,7 @@ fn get_staging(cache_folder: &path::Path) -> Environment {
         ssh_configuration_file: cache_folder.join("ssh_configuration"),
         ssh_host: String::from("default"),
         kubeconfig_file: cache_folder.join("kubeconfig"),
-        public_ip: String::from("192.168.60.60"),
+        ip_address: String::from("192.168.60.60"),
     }
 }
 
@@ -189,6 +189,6 @@ fn get_production(production: UserFacingProduction) -> Environment {
         kubeconfig_file: production
             .kubeconfig
             .unwrap_or_else(|| ["safe", "kubeconfig"].iter().collect()),
-        public_ip: production.public_ip,
+        ip_address: production.ip_address,
     }
 }

@@ -19,7 +19,7 @@ fn start_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
         process::Command::new("vagrant")
             .arg("up")
             .current_dir(&configuration.cache.folder)
-            .env("KEREK_IP", &configuration.staging.public_ip),
+            .env("KEREK_IP_ADDRESS", &configuration.staging.ip_address),
     )
 }
 
@@ -39,6 +39,6 @@ fn provision_staging(configuration: &configuration::Main) -> anyhow::Result<()> 
         ssh_configuration_file: &configuration.staging.ssh_configuration_file,
         ssh_host: &configuration.staging.ssh_host,
         kubeconfig_file: &configuration.staging.kubeconfig_file,
-        public_ip: &configuration.staging.public_ip,
+        ip_address: &configuration.staging.ip_address,
     })
 }

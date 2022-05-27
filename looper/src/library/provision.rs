@@ -18,7 +18,7 @@ pub struct In<'a> {
     pub ssh_configuration_file: &'a path::Path,
     pub ssh_host: &'a str,
     pub kubeconfig_file: &'a path::Path,
-    pub public_ip: &'a str,
+    pub ip_address: &'a str,
 }
 
 fn do_scripted_provisioning(in_: &In) -> anyhow::Result<()> {
@@ -92,7 +92,7 @@ fn copy_local_kubeconfig(in_: &In) -> anyhow::Result<()> {
 }
 
 fn adjust_kubeconfig_for_remote_access(in_: &In) -> anyhow::Result<()> {
-    let public_ip = in_.public_ip;
+    let ip_address = in_.ip_address;
     command::status(
         process::Command::new("kubectl")
             .arg("--kubeconfig")
@@ -101,6 +101,6 @@ fn adjust_kubeconfig_for_remote_access(in_: &In) -> anyhow::Result<()> {
             .arg("set-cluster")
             .arg("default")
             .arg("--server")
-            .arg(format!("https://{public_ip}:6443")),
+            .arg(format!("https://{ip_address}:6443")),
     )
 }

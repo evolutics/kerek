@@ -6,7 +6,8 @@ set -o pipefail
 
 echo 'Acceptance tests' >>log.txt
 
-result="$(curl --data 'Boo Far' --fail --show-error http://"${KEREK_IP}":8080)"
+result="$(curl --data 'Boo Far' --fail --show-error \
+  http://"${KEREK_IP_ADDRESS}":8080)"
 readonly result
 if [[ "${result}" != *'Boo Far'* ]]; then
   exit 1

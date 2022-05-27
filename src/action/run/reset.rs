@@ -7,8 +7,8 @@ use std::fs;
 use std::process;
 
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
-    tear_down_cache::go(&configuration.cache)?;
-    set_up_cache::go(&configuration.cache)?;
+    tear_down_cache::go(configuration)?;
+    set_up_cache::go(configuration)?;
     start_staging(configuration)?;
     dump_staging_ssh_configuration(configuration)?;
     provision_staging(configuration)

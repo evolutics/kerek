@@ -6,7 +6,7 @@ use std::path;
 pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
     let configuration = configuration::get(configuration)?;
 
-    set_up_cache::go(&configuration.cache)?;
+    set_up_cache::go(&configuration)?;
 
     provision::go(provision::In {
         script_file: &configuration.cache.provision,

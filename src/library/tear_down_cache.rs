@@ -3,27 +3,27 @@ use super::configuration;
 use std::fs;
 use std::process;
 
-pub fn go(cache: &configuration::Cache) -> anyhow::Result<()> {
-    remove_vm_if_exists(cache)?;
-    remove_cache_folder_if_exists(cache)
+pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
+    remove_vm_if_exists(configuration)?;
+    remove_cache_folder_if_exists(configuration)
 }
 
-fn remove_vm_if_exists(cache: &configuration::Cache) -> anyhow::Result<()> {
-    if cache.vagrantfile.exists() {
+fn remove_vm_if_exists(configuration: &configuration::Main) -> anyhow::Result<()> {
+    if configuration.cache.vagrantfile.exists() {
         command::status(
             process::Command::new("vagrant")
                 .arg("destroy")
                 .arg("--force")
-                .current_dir(&cache.folder),
+                .current_dir(&configuration.cache.folder),
         )
     } else {
         Ok(())
     }
 }
 
-fn remove_cache_folder_if_exists(cache: &configuration::Cache) -> anyhow::Result<()> {
-    if cache.folder.exists() {
-        fs::remove_dir_all(&cache.folder)?;
+fn remove_cache_folder_if_exists(configuration: &configuration::Main) -> anyhow::Result<()> {
+    if configuration.cache.folder.exists() {
+        fs::remove_dir_all(&configuration.cache.folder)?;
     }
     Ok(())
 }

@@ -1,8 +1,12 @@
 use anyhow::Context;
+use std::collections::hash_map;
 use std::ffi;
 use std::fs;
+use std::hash::Hash;
+use std::hash::Hasher;
 use std::io;
 use std::path;
+use std::time;
 
 pub fn get(path: path::PathBuf) -> anyhow::Result<Main> {
     let file = fs::File::open(&path).with_context(|| format!("Unable to open file: {path:?}"))?;
@@ -93,7 +97,7 @@ fn convert(main: UserFacingMain) -> Main {
     );
     let life_cycle = get_life_cycle(main.life_cycle);
     let tests = get_tests(main.tests);
-    let staging = get_staging(&cache.folder);
+    let staging = get_staging(&cache);
     let production = get_production(main.production);
 
     Main {
@@ -169,14 +173,35 @@ fn get_tests(tests: UserFacingTests) -> Tests {
     }
 }
 
-fn get_staging(cache_folder: &path::Path) -> Environment {
+fn get_staging(cache: &Cache) -> Environment {
     Environment {
         display_name: String::from("staging"),
-        ssh_configuration_file: cache_folder.join("ssh_configuration"),
+        ssh_configuration_file: cache.folder.join("ssh_configuration"),
         ssh_host: String::from("default"),
-        kubeconfig_file: cache_folder.join("kubeconfig"),
-        ip_address: String::from("192.168.60.60"),
+        kubeconfig_file: cache.folder.join("kubeconfig"),
+        ip_address: get_staging_ip_address(cache),
     }
+}
+
+fn get_staging_ip_address(cache: &Cache) -> String {
+    let existing_ip_address = match fs::read_to_string(&cache.vagrantfile) {
+        Err(_) => None,
+        Ok(full_contents) => full_contents
+            .split_once(" ip: \"")
+            .and_then(|(_, contents_from_ip_address)| contents_from_ip_address.split_once('"'))
+            .map(|(ip_address, _)| String::from(ip_address)),
+    };
+
+    existing_ip_address.unwrap_or_else(|| {
+        let random = draw_random();
+        format!("192.168.60.{random}")
+    })
+}
+
+fn draw_random() -> u8 {
+    let mut hasher = hash_map::DefaultHasher::new();
+    time::Instant::now().hash(&mut hasher);
+    hasher.finish().to_le_bytes()[0]
 }
 
 fn get_production(production: UserFacingProduction) -> Environment {

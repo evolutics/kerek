@@ -13,7 +13,10 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
         ),
         (
             &configuration.cache.vagrantfile,
-            include_str!("assets/Vagrantfile"),
+            &format!(
+                include_str!("assets/Vagrantfile"),
+                ip_address = &configuration.staging.ip_address,
+            ),
         ),
     ] {
         fs::write(file, contents)?;

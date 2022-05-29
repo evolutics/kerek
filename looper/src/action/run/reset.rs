@@ -18,8 +18,7 @@ fn start_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
         process::Command::new("vagrant")
             .arg("up")
-            .current_dir(&configuration.cache.folder)
-            .env("KEREK_IP_ADDRESS", &configuration.staging.ip_address),
+            .current_dir(&configuration.cache.folder),
     )
 }
 

@@ -31,8 +31,12 @@ struct Arguments {
 
 #[derive(clap::Subcommand)]
 enum Action {
+    /// Tears down internal resources such as the cache folder.
     Clean,
+    /// Shows debugging information.
     Diagnose,
+    /// Sets up the production environment for the first time.
     Provision,
+    /// Builds, tests, deploys in a loop.
     Run,
 }

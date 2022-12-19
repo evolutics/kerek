@@ -7,7 +7,7 @@ set -o pipefail
 do_package_management_setup() {
   sudo apt-get update
   sudo apt-get --yes upgrade
-  sudo apt-get install unattended-upgrades
+  sudo apt-get install --yes unattended-upgrades
 }
 
 test_package_management_setup() {

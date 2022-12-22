@@ -12,7 +12,7 @@ import sys
 
 
 def main():
-    network = "default"
+    network = "main"
 
     target_image_ids = _load_target_images()
     images = _get_images()

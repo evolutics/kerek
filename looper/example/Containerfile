@@ -1,0 +1,4 @@
+FROM k8s.gcr.io/echoserver:1.4
+
+LABEL info.evolutics.kerek.container-names='web'
+LABEL info.evolutics.kerek.port-mappings='8080:8080'

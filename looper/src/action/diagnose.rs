@@ -18,19 +18,12 @@ struct Out {
 
 #[derive(serde::Serialize)]
 struct Versions {
-    kubectl: String,
     ssh: String,
     vagrant: String,
 }
 
 fn get_versions() -> anyhow::Result<Versions> {
     Ok(Versions {
-        kubectl: command::stdout_utf8(
-            process::Command::new("kubectl")
-                .arg("version")
-                .arg("--client")
-                .arg("--short"),
-        )?,
         ssh: command::stderr_utf8(process::Command::new("ssh").arg("-V"))?,
         vagrant: command::stdout_utf8(process::Command::new("vagrant").arg("--version"))?,
     })

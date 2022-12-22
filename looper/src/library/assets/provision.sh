@@ -16,22 +16,6 @@ test_package_management_setup() {
   systemctl is-active unattended-upgrades.service
 }
 
-do_kubernetes_setup() {
-  curl --fail --location --silent https://get.k3s.io | sh -
-}
-
-test_kubernetes_setup() {
-  k3s check-config
-}
-
-do_data_folder_setup() {
-  sudo mkdir /data
-}
-
-test_data_folder_setup() {
-  [[ -d /data ]]
-}
-
 do_user_setup() {
   sudo sed --in-place 's/^#\(PermitRootLogin\) .*$/\1 no/' /etc/ssh/sshd_config
 
@@ -50,6 +34,16 @@ test_user_setup() {
   diff <(groups kerek) <(echo 'kerek : kerek')
 }
 
+do_podman_setup() {
+  sudo apt-get install --yes podman
+  sudo loginctl enable-linger kerek
+}
+
+test_podman_setup() {
+  podman --version
+  loginctl show-user kerek | grep '^Linger=yes$'
+}
+
 do_firewall_setup() {
   sudo apt-get install ufw
   sudo ufw --force reset
@@ -60,8 +54,8 @@ do_firewall_setup() {
   sudo ufw allow https
   sudo ufw allow ssh
 
-  local -r KUBERNETES_API_SERVER_PORT=6443
-  sudo ufw allow "${KUBERNETES_API_SERVER_PORT}"
+  # TODO: Remove once example uses port 80 instead.
+  sudo ufw allow 8080
 
   sudo ufw --force enable
 }
@@ -69,7 +63,7 @@ do_firewall_setup() {
 test_firewall_setup() {
   diff --ignore-trailing-space <(sudo ufw status verbose) <(echo 'Status: active
 Logging: on (low)
-Default: deny (incoming), allow (outgoing), deny (routed)
+Default: deny (incoming), allow (outgoing), disabled (routed)
 New profiles: skip
 
 To                         Action      From
@@ -77,20 +71,19 @@ To                         Action      From
 80/tcp                     ALLOW IN    Anywhere
 443                        ALLOW IN    Anywhere
 22/tcp                     ALLOW IN    Anywhere
-6443                       ALLOW IN    Anywhere
+8080                       ALLOW IN    Anywhere
 80/tcp (v6)                ALLOW IN    Anywhere (v6)
 443 (v6)                   ALLOW IN    Anywhere (v6)
 22/tcp (v6)                ALLOW IN    Anywhere (v6)
-6443 (v6)                  ALLOW IN    Anywhere (v6)
+8080 (v6)                  ALLOW IN    Anywhere (v6)
 ')
 }
 
 main() {
   for task in \
     package_management_setup \
-    kubernetes_setup \
-    data_folder_setup \
     user_setup \
+    podman_setup \
     firewall_setup; do
     echo >&2 "● ${task}"
     "$1_${task}"

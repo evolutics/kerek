@@ -36,7 +36,6 @@ fn deploy(
     command::status(
         process::Command::new(&configuration.life_cycle.deploy[0])
             .args(&configuration.life_cycle.deploy[1..])
-            .env("KEREK_KUBECONFIG", &environment.kubeconfig_file)
             .env(
                 "KEREK_SSH_CONFIGURATION",
                 &environment.ssh_configuration_file,

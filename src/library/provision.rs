@@ -8,17 +8,13 @@ use std::time;
 pub fn go(in_: In) -> anyhow::Result<()> {
     do_scripted_provisioning(&in_)?;
     reboot(&in_)?;
-    test_scripted_provisioning(&in_)?;
-    copy_local_kubeconfig(&in_)?;
-    adjust_kubeconfig_for_remote_access(&in_)
+    test_scripted_provisioning(&in_)
 }
 
 pub struct In<'a> {
     pub script_file: &'a path::Path,
     pub ssh_configuration_file: &'a path::Path,
     pub ssh_host: &'a str,
-    pub kubeconfig_file: &'a path::Path,
-    pub ip_address: &'a str,
 }
 
 fn do_scripted_provisioning(in_: &In) -> anyhow::Result<()> {
@@ -74,33 +70,4 @@ fn test_scripted_provisioning(in_: &In) -> anyhow::Result<()> {
             )
         },
     })
-}
-
-fn copy_local_kubeconfig(in_: &In) -> anyhow::Result<()> {
-    let file = fs::File::create(in_.kubeconfig_file)?;
-    command::status(
-        process::Command::new("ssh")
-            .arg("-F")
-            .arg(in_.ssh_configuration_file)
-            .arg("-l")
-            .arg("kerek")
-            .arg(in_.ssh_host)
-            .arg("--")
-            .arg("sudo cat /etc/rancher/k3s/k3s.yaml")
-            .stdout(file),
-    )
-}
-
-fn adjust_kubeconfig_for_remote_access(in_: &In) -> anyhow::Result<()> {
-    let ip_address = in_.ip_address;
-    command::status(
-        process::Command::new("kubectl")
-            .arg("--kubeconfig")
-            .arg(in_.kubeconfig_file)
-            .arg("config")
-            .arg("set-cluster")
-            .arg("default")
-            .arg("--server")
-            .arg(format!("https://{ip_address}:6443")),
-    )
 }

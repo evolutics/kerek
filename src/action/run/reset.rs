@@ -37,7 +37,5 @@ fn provision_staging(configuration: &configuration::Main) -> anyhow::Result<()> 
         script_file: &configuration.cache.provision,
         ssh_configuration_file: &configuration.staging.ssh_configuration_file,
         ssh_host: &configuration.staging.ssh_host,
-        kubeconfig_file: &configuration.staging.kubeconfig_file,
-        ip_address: &configuration.staging.ip_address,
     })
 }

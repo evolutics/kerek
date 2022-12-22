@@ -44,7 +44,6 @@ pub struct Environment {
     pub display_name: String,
     pub ssh_configuration_file: path::PathBuf,
     pub ssh_host: String,
-    pub kubeconfig_file: path::PathBuf,
     pub ip_address: String,
 }
 
@@ -86,7 +85,6 @@ struct UserFacingTests {
 struct UserFacingProduction {
     pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: String,
-    pub kubeconfig: Option<path::PathBuf>,
     pub ip_address: String,
 }
 
@@ -123,16 +121,21 @@ fn get_cache(folder: path::PathBuf) -> Cache {
 fn get_life_cycle(life_cycle: UserFacingLifeCycle) -> LifeCycle {
     LifeCycle {
         build: convert_nonempty_or_else(life_cycle.build, || {
-            ["bash", "-c", "--", include_str!("assets/build.sh")]
+            ["python3", "-c", include_str!("assets/build.py")]
                 .iter()
                 .map(ffi::OsString::from)
                 .collect()
         }),
         deploy: convert_nonempty_or_else(life_cycle.deploy, || {
-            ["python3", "-c", include_str!("assets/deploy.py")]
-                .iter()
-                .map(ffi::OsString::from)
-                .collect()
+            [
+                "python3",
+                "-c",
+                include_str!("assets/deploy.py"),
+                include_str!("assets/deploy_on_remote.py"),
+            ]
+            .iter()
+            .map(ffi::OsString::from)
+            .collect()
         }),
         move_to_next_version: convert_nonempty_or_else(life_cycle.move_to_next_version, || {
             [
@@ -178,7 +181,6 @@ fn get_staging(cache: &Cache) -> Environment {
         display_name: String::from("staging"),
         ssh_configuration_file: cache.folder.join("ssh_configuration"),
         ssh_host: String::from("default"),
-        kubeconfig_file: cache.folder.join("kubeconfig"),
         ip_address: get_staging_ip_address(cache),
     }
 }
@@ -211,9 +213,6 @@ fn get_production(production: UserFacingProduction) -> Environment {
             .ssh_configuration
             .unwrap_or_else(|| ["safe", "ssh_configuration"].iter().collect()),
         ssh_host: production.ssh_host,
-        kubeconfig_file: production
-            .kubeconfig
-            .unwrap_or_else(|| ["safe", "kubeconfig"].iter().collect()),
         ip_address: production.ip_address,
     }
 }

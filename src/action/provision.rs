@@ -5,12 +5,6 @@ use std::path;
 
 pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
     let configuration = configuration::get(configuration)?;
-
     set_up_cache::go(&configuration)?;
-
-    provision::go(provision::In {
-        script_file: &configuration.cache.provision,
-        ssh_configuration_file: &configuration.production.ssh_configuration_file,
-        ssh_host: &configuration.production.ssh_host,
-    })
+    provision::go(&configuration, &configuration.production)
 }

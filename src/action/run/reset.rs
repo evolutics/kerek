@@ -11,7 +11,7 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
     set_up_cache::go(configuration)?;
     start_staging(configuration)?;
     dump_staging_ssh_configuration(configuration)?;
-    provision_staging(configuration)
+    provision::go(configuration, &configuration.staging)
 }
 
 fn start_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
@@ -30,12 +30,4 @@ fn dump_staging_ssh_configuration(configuration: &configuration::Main) -> anyhow
             .current_dir(&configuration.cache.folder)
             .stdout(file),
     )
-}
-
-fn provision_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
-    provision::go(provision::In {
-        script_file: &configuration.cache.provision,
-        ssh_configuration_file: &configuration.staging.ssh_configuration_file,
-        ssh_host: &configuration.staging.ssh_host,
-    })
 }

@@ -9,6 +9,19 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
     }
 
     for (file, contents) in [
+        (&configuration.cache.build, include_str!("assets/build.py")),
+        (
+            &configuration.cache.deploy,
+            include_str!("assets/deploy.py"),
+        ),
+        (
+            &configuration.cache.deploy_on_remote,
+            include_str!("assets/deploy_on_remote.py"),
+        ),
+        (
+            &configuration.cache.move_to_next_version,
+            include_str!("assets/move_to_next_version.sh"),
+        ),
         (
             &configuration.cache.provision,
             include_str!("assets/provision.sh"),

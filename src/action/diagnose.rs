@@ -18,13 +18,11 @@ struct Out {
 
 #[derive(serde::Serialize)]
 struct Versions {
-    ssh: String,
     vagrant: String,
 }
 
 fn get_versions() -> anyhow::Result<Versions> {
     Ok(Versions {
-        ssh: command::stderr_utf8(process::Command::new("ssh").arg("-V"))?,
         vagrant: command::stdout_utf8(process::Command::new("vagrant").arg("--version"))?,
     })
 }

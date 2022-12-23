@@ -7,6 +7,7 @@ pub fn status(command: &mut process::Command) -> anyhow::Result<()> {
     Ok(())
 }
 
+#[allow(dead_code)]
 pub fn stderr_utf8(command: &mut process::Command) -> anyhow::Result<String> {
     output_utf8(command.stdout(process::Stdio::inherit()), |output| {
         output.stderr

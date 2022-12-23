@@ -29,11 +29,13 @@ pub struct Cache {
     pub deploy_on_remote: path::PathBuf,
     pub move_to_next_version: path::PathBuf,
     pub provision: path::PathBuf,
+    pub provision_on_remote: path::PathBuf,
     pub vagrantfile: path::PathBuf,
     pub workbench: path::PathBuf,
 }
 
 pub struct LifeCycle {
+    pub provision: Vec<ffi::OsString>,
     pub build: Vec<ffi::OsString>,
     pub deploy: Vec<ffi::OsString>,
     pub move_to_next_version: Vec<ffi::OsString>,
@@ -117,7 +119,8 @@ fn get_cache(folder: path::PathBuf) -> Cache {
     let deploy = folder.join("deploy.py");
     let deploy_on_remote = folder.join("deploy_on_remote.py");
     let move_to_next_version = folder.join("move_to_next_version.sh");
-    let provision = folder.join("provision.sh");
+    let provision = folder.join("provision.py");
+    let provision_on_remote = folder.join("provision_on_remote.sh");
     let vagrantfile = folder.join("Vagrantfile");
     let workbench = folder.join("workbench");
 
@@ -128,6 +131,7 @@ fn get_cache(folder: path::PathBuf) -> Cache {
         deploy_on_remote,
         move_to_next_version,
         provision,
+        provision_on_remote,
         vagrantfile,
         workbench,
     }
@@ -135,6 +139,11 @@ fn get_cache(folder: path::PathBuf) -> Cache {
 
 fn get_life_cycle(cache: &Cache, life_cycle: UserFacingLifeCycle) -> LifeCycle {
     LifeCycle {
+        provision: vec![
+            ffi::OsString::from("python3"),
+            ffi::OsString::from("--"),
+            ffi::OsString::from(&cache.provision),
+        ],
         build: convert_nonempty_or_else(life_cycle.build, || {
             vec![
                 ffi::OsString::from("python3"),

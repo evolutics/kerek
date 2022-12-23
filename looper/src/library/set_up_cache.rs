@@ -24,7 +24,11 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
         ),
         (
             &configuration.cache.provision,
-            include_str!("assets/provision.sh"),
+            include_str!("assets/provision.py"),
+        ),
+        (
+            &configuration.cache.provision_on_remote,
+            include_str!("assets/provision_on_remote.sh"),
         ),
         (
             &configuration.cache.vagrantfile,

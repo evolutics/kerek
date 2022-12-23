@@ -31,7 +31,7 @@ test_user_setup() {
   echo "${sshd_configuration}" | grep '^passwordauthentication no$'
   echo "${sshd_configuration}" | grep '^permitrootlogin no$'
 
-  diff <(groups kerek) <(echo 'kerek : kerek')
+  [[ "$(groups kerek)" == 'kerek : kerek' ]]
 }
 
 do_podman_setup() {

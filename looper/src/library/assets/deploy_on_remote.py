@@ -22,14 +22,8 @@ def main():
 
     changes = _plan_changes(actual_images, target_images)
 
-    print("Summary of planned changes:")
-    for change in changes:
-        print(_summarize_change(change))
-
-    print("Now applying changes …")
     _create_network_if_not_exists(network)
     for change in changes:
-        print(_summarize_change(change))
         _apply_change(network, change)
     _collect_garbage()
 
@@ -59,6 +53,7 @@ def _load_target_images():
     images_folder = pathlib.Path(sys.argv[1])
     image_files = sorted(images_folder.iterdir())
     for image_file in image_files:
+        print(f"Loading image file {str(image_file)!r}.")
         subprocess.run(["podman", "load", "--input", image_file], check=True)
     return {image_file.stem for image_file in image_files}
 
@@ -132,19 +127,12 @@ def _plan_changes(actual_images, target_images):
     return changes
 
 
-def _summarize_change(change):
-    signs = {_Sign.ADD: "+ Add", _Sign.KEEP: "= Keep", _Sign.REMOVE: "- Remove"}
-    sign = signs[change.sign]
-    container = json.dumps(change.container_name)
-    image = json.dumps(change.image_digest)
-    return f"{sign} container {container} using image {image}"
-
-
 def _create_network_if_not_exists(network):
     try:
         subprocess.run(["podman", "network", "exists", "--", network], check=True)
     except subprocess.CalledProcessError as error:
         if error.returncode == 1:
+            print(f"Creating network {network!r}.")
             subprocess.run(["podman", "network", "create", "--", network], check=True)
         else:
             raise
@@ -153,28 +141,44 @@ def _create_network_if_not_exists(network):
 def _apply_change(network, change):
     # TODO: Restart containers on reboot with systemd.
     # TODO: Support volumes.
-    if change.sign == _Sign.ADD:
-        subprocess.run(
-            [
-                "podman",
-                "run",
-                "--detach",
-                "--name",
-                change.container_name,
-                "--network",
-                network,
-            ]
-            + [f"--publish={port_mapping}" for port_mapping in change.port_mappings]
-            + ["--restart", "always", "--", change.image_id],
-            check=True,
-        )
-        # TODO: Wait until healthy if there is a health check.
-    elif change.sign == _Sign.REMOVE:
-        subprocess.run(["podman", "stop", "--", change.container_name], check=True)
-        subprocess.run(["podman", "rm", "--", change.container_name], check=True)
+
+    operand = f"container {change.container_name!r} of image {change.image_digest!r}"
+
+    summary, operation = {
+        _Sign.ADD: (f"Adding {operand}.", _add_container),
+        _Sign.KEEP: (f"Keeping {operand}.", lambda _: None),
+        _Sign.REMOVE: (f"Removing {operand}.", _remove_container),
+    }[change.sign]
+
+    print(summary)
+    operation(network, change)
+
+
+def _add_container(network, change):
+    subprocess.run(
+        [
+            "podman",
+            "run",
+            "--detach",
+            "--name",
+            change.container_name,
+            "--network",
+            network,
+        ]
+        + [f"--publish={port_mapping}" for port_mapping in change.port_mappings]
+        + ["--restart", "always", "--", change.image_id],
+        check=True,
+    )
+    # TODO: Wait until healthy if there is a health check.
+
+
+def _remove_container(_network, change):
+    subprocess.run(["podman", "stop", "--", change.container_name], check=True)
+    subprocess.run(["podman", "rm", "--", change.container_name], check=True)
 
 
 def _collect_garbage():
+    print("Collecting garbage.")
     subprocess.run(["podman", "system", "prune", "--all", "--force"], check=True)
 
 

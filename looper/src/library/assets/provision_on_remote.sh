@@ -4,6 +4,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+set -o xtrace
+
 do_package_management_setup() {
   sudo apt-get update
   sudo apt-get --yes upgrade
@@ -83,7 +85,6 @@ main() {
     user_setup \
     podman_setup \
     firewall_setup; do
-    echo >&2 "● ${task}"
     "$1_${task}"
   done
 }

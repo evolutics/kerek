@@ -3,8 +3,10 @@ use anyhow::Context;
 use std::fs;
 
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
-    let folder = &configuration.cache.folder;
-    fs::create_dir_all(folder).with_context(|| format!("Unable to create folder: {folder:?}"))?;
+    for folder in [&configuration.cache.folder, &configuration.cache.workbench] {
+        fs::create_dir_all(folder)
+            .with_context(|| format!("Unable to create folder: {folder:?}"))?;
+    }
 
     for (file, contents) in [
         (

@@ -69,6 +69,8 @@ struct UserFacingMain {
 #[serde(deny_unknown_fields)]
 struct UserFacingLifeCycle {
     #[serde(default)]
+    pub provision: Vec<String>,
+    #[serde(default)]
     pub build: Vec<String>,
     #[serde(default)]
     pub deploy: Vec<String>,
@@ -139,11 +141,13 @@ fn get_cache(folder: path::PathBuf) -> Cache {
 
 fn get_life_cycle(cache: &Cache, life_cycle: UserFacingLifeCycle) -> LifeCycle {
     LifeCycle {
-        provision: vec![
-            ffi::OsString::from("python3"),
-            ffi::OsString::from("--"),
-            ffi::OsString::from(&cache.provision),
-        ],
+        provision: convert_nonempty_or_else(life_cycle.provision, || {
+            vec![
+                ffi::OsString::from("python3"),
+                ffi::OsString::from("--"),
+                ffi::OsString::from(&cache.provision),
+            ]
+        }),
         build: convert_nonempty_or_else(life_cycle.build, || {
             vec![
                 ffi::OsString::from("python3"),

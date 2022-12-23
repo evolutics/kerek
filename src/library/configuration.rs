@@ -147,7 +147,6 @@ fn get_life_cycle(cache: &Cache, life_cycle: UserFacingLifeCycle) -> LifeCycle {
                 ffi::OsString::from("python3"),
                 ffi::OsString::from("--"),
                 ffi::OsString::from(&cache.deploy),
-                ffi::OsString::from(&cache.deploy_on_remote),
             ]
         }),
         move_to_next_version: convert_nonempty_or_else(life_cycle.move_to_next_version, || {

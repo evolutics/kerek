@@ -3,7 +3,6 @@
 import os
 import pathlib
 import subprocess
-import sys
 
 
 def main():
@@ -33,6 +32,7 @@ def _synchronize_artifacts(local_images_folder, remote_images_folder):
 
 
 def _deploy_on_remote(remote_images_folder):
+    cache_folder = pathlib.Path(os.environ["KEREK_CACHE_FOLDER"])
     subprocess.run(
         [
             "ssh",
@@ -47,7 +47,7 @@ def _deploy_on_remote(remote_images_folder):
             remote_images_folder,
         ],
         check=True,
-        input=pathlib.Path(sys.argv[1]).read_bytes(),
+        input=(cache_folder / "deploy_on_remote.py").read_bytes(),
     )
 
 

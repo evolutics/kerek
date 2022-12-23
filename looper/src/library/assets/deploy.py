@@ -7,7 +7,7 @@ import sys
 
 
 def main():
-    local_images_folder = pathlib.Path(".kerek") / "images"
+    local_images_folder = pathlib.Path(os.getenv("KEREK_CACHE_WORKBENCH"))
     remote_images_folder = pathlib.Path("/home") / "kerek" / "images"
     _synchronize_artifacts(local_images_folder, remote_images_folder)
     _deploy_on_remote(remote_images_folder)

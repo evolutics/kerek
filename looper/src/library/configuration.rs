@@ -26,6 +26,7 @@ pub struct Cache {
     pub folder: path::PathBuf,
     pub provision: path::PathBuf,
     pub vagrantfile: path::PathBuf,
+    pub workbench: path::PathBuf,
 }
 
 pub struct LifeCycle {
@@ -110,11 +111,13 @@ fn convert(main: UserFacingMain) -> Main {
 fn get_cache(folder: path::PathBuf) -> Cache {
     let provision = folder.join("provision.sh");
     let vagrantfile = folder.join("Vagrantfile");
+    let workbench = folder.join("workbench");
 
     Cache {
         folder,
         provision,
         vagrantfile,
+        workbench,
     }
 }
 

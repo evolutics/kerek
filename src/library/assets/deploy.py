@@ -7,7 +7,7 @@ import sys
 
 
 def main():
-    local_images_folder = pathlib.Path(os.getenv("KEREK_CACHE_WORKBENCH"))
+    local_images_folder = pathlib.Path(os.environ["KEREK_CACHE_WORKBENCH"])
     remote_images_folder = pathlib.Path("/home") / "kerek" / "images"
     _synchronize_artifacts(local_images_folder, remote_images_folder)
     _deploy_on_remote(remote_images_folder)
@@ -15,7 +15,7 @@ def main():
 
 def _synchronize_artifacts(local_images_folder, remote_images_folder):
     # TODO: Escape quotes.
-    quoted_ssh_configuration = f"'{os.getenv('KEREK_SSH_CONFIGURATION')}'"
+    quoted_ssh_configuration = f"'{os.environ['KEREK_SSH_CONFIGURATION']}'"
 
     subprocess.run(
         [
@@ -26,7 +26,7 @@ def _synchronize_artifacts(local_images_folder, remote_images_folder):
             f"ssh -F {quoted_ssh_configuration}",
             "--",
             f"{local_images_folder}/",
-            f"kerek@{os.getenv('KEREK_SSH_HOST')}:{remote_images_folder}",
+            f"kerek@{os.environ['KEREK_SSH_HOST']}:{remote_images_folder}",
         ],
         check=True,
     )
@@ -37,10 +37,10 @@ def _deploy_on_remote(remote_images_folder):
         [
             "ssh",
             "-F",
-            os.getenv("KEREK_SSH_CONFIGURATION"),
+            os.environ["KEREK_SSH_CONFIGURATION"],
             "-l",
             "kerek",
-            os.getenv("KEREK_SSH_HOST"),
+            os.environ["KEREK_SSH_HOST"],
             "--",
             "python3",
             "-",

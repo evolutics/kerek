@@ -64,7 +64,7 @@ def _retry_subprocess(*, total_duration_limit, retry_pause, run):
     while True:
         try:
             return run()
-        except subprocess.CalledProcessError:
+        except subprocess.SubprocessError:
             total_duration = datetime.timedelta(seconds=time.monotonic() - start)
             if total_duration >= total_duration_limit:
                 raise
@@ -90,6 +90,7 @@ def _try_to_test_provisioning():
         ],
         check=True,
         input=(cache_folder / "provision_on_remote.sh").read_bytes(),
+        timeout=datetime.timedelta(seconds=15).total_seconds(),
     )
 
 

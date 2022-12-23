@@ -11,6 +11,7 @@ while true; do
     HEAD..origin/main | tail -1)"
 
   if [[ -n "${child_commit}" ]]; then
+    echo "Checking out Git commit ${child_commit}."
     git checkout "${child_commit}"
     break
   fi

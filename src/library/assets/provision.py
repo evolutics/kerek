@@ -8,8 +8,11 @@ import time
 
 
 def main():
+    print("Doing provisioning.")
     _do_provisioning()
+    print("Rebooting.")
     _reboot()
+    print("Testing provisioning.")
     _test_provisioning()
 
 

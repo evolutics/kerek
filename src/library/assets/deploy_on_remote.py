@@ -37,7 +37,7 @@ class _Image:
     port_mappings: tuple[str, ...]
 
 
-_Sign = enum.Enum("_Sign", ["ADD", "KEEP", "REMOVE"])
+_Operator = enum.Enum("_Operator", ["ADD", "KEEP", "REMOVE"])
 
 
 @dataclasses.dataclass
@@ -45,8 +45,8 @@ class _ContainerChange:
     container_name: str
     image_digest: str
     image_id: str
+    operator: _Operator
     port_mappings: tuple[str, ...]
-    sign: _Sign
 
 
 def _load_target_images():
@@ -90,12 +90,12 @@ def _plan_changes(actual_images, target_images):
             container_name=container_name,
             image_digest=image.digest,
             image_id=image.image_id,
+            operator=operator,
             port_mappings=image.port_mappings,
-            sign=sign,
         )
-        for sign, images in (
-            (_Sign.REMOVE, actual_images),
-            (_Sign.ADD, target_images),
+        for operator, images in (
+            (_Operator.REMOVE, actual_images),
+            (_Operator.ADD, target_images),
         )
         for image in images
         for container_name in image.container_names
@@ -112,14 +112,14 @@ def _plan_changes(actual_images, target_images):
     def cancel_removal_followed_by_addition(previous_changes, next_change):
         if (
             previous_changes
-            and previous_changes[-1].sign == _Sign.REMOVE
-            and next_change.sign == _Sign.ADD
+            and previous_changes[-1].operator == _Operator.REMOVE
+            and next_change.operator == _Operator.ADD
             and previous_changes[-1].container_name == next_change.container_name
             and previous_changes[-1].image_digest == next_change.image_digest
             # Other relevant fields are captured by comparing the image digest.
         ):
-            base = previous_changes[-1]
-            return previous_changes[:-1] + [dataclasses.replace(base, sign=_Sign.KEEP)]
+            result = dataclasses.replace(previous_changes[-1], operator=_Operator.KEEP)
+            return previous_changes[:-1] + [result]
         return previous_changes + [next_change]
 
     changes = functools.reduce(cancel_removal_followed_by_addition, changes, [])
@@ -145,10 +145,10 @@ def _apply_change(network, change):
     operand = f"container {change.container_name!r} of image {change.image_digest!r}"
 
     summary, operation = {
-        _Sign.ADD: (f"Adding {operand}.", _add_container),
-        _Sign.KEEP: (f"Keeping {operand}.", lambda _: None),
-        _Sign.REMOVE: (f"Removing {operand}.", _remove_container),
-    }[change.sign]
+        _Operator.ADD: (f"Adding {operand}.", _add_container),
+        _Operator.KEEP: (f"Keeping {operand}.", lambda _: None),
+        _Operator.REMOVE: (f"Removing {operand}.", _remove_container),
+    }[change.operator]
 
     print(summary)
     operation(network, change)

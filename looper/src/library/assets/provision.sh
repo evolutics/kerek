@@ -37,11 +37,14 @@ test_user_setup() {
 do_podman_setup() {
   sudo apt-get install --yes podman
   sudo loginctl enable-linger kerek
+  echo 'net.ipv4.ip_unprivileged_port_start=80' \
+    | sudo tee --append /etc/sysctl.conf
 }
 
 test_podman_setup() {
   podman --version
   loginctl show-user kerek | grep '^Linger=yes$'
+  [[ "$(sysctl --values net.ipv4.ip_unprivileged_port_start)" == 80 ]]
 }
 
 do_firewall_setup() {
@@ -53,9 +56,6 @@ do_firewall_setup() {
   sudo ufw allow http
   sudo ufw allow https
   sudo ufw allow ssh
-
-  # TODO: Remove once example uses port 80 instead.
-  sudo ufw allow 8080
 
   sudo ufw --force enable
 }
@@ -71,11 +71,9 @@ To                         Action      From
 80/tcp                     ALLOW IN    Anywhere
 443                        ALLOW IN    Anywhere
 22/tcp                     ALLOW IN    Anywhere
-8080                       ALLOW IN    Anywhere
 80/tcp (v6)                ALLOW IN    Anywhere (v6)
 443 (v6)                   ALLOW IN    Anywhere (v6)
 22/tcp (v6)                ALLOW IN    Anywhere (v6)
-8080 (v6)                  ALLOW IN    Anywhere (v6)
 ')
 }
 

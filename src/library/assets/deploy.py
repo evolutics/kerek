@@ -47,8 +47,7 @@ def _deploy_on_remote(remote_images_folder):
             remote_images_folder,
         ],
         check=True,
-        input=sys.argv[1],
-        text=True,
+        input=pathlib.Path(sys.argv[1]).read_bytes(),
     )
 
 

@@ -24,6 +24,10 @@ pub struct Main {
 
 pub struct Cache {
     pub folder: path::PathBuf,
+    pub build: path::PathBuf,
+    pub deploy: path::PathBuf,
+    pub deploy_on_remote: path::PathBuf,
+    pub move_to_next_version: path::PathBuf,
     pub provision: path::PathBuf,
     pub vagrantfile: path::PathBuf,
     pub workbench: path::PathBuf,
@@ -94,7 +98,7 @@ fn convert(main: UserFacingMain) -> Main {
         main.cache_folder
             .unwrap_or_else(|| path::PathBuf::from(".kerek")),
     );
-    let life_cycle = get_life_cycle(main.life_cycle);
+    let life_cycle = get_life_cycle(&cache, main.life_cycle);
     let tests = get_tests(main.tests);
     let staging = get_staging(&cache);
     let production = get_production(main.production);
@@ -109,47 +113,49 @@ fn convert(main: UserFacingMain) -> Main {
 }
 
 fn get_cache(folder: path::PathBuf) -> Cache {
+    let build = folder.join("build.py");
+    let deploy = folder.join("deploy.py");
+    let deploy_on_remote = folder.join("deploy_on_remote.py");
+    let move_to_next_version = folder.join("move_to_next_version.sh");
     let provision = folder.join("provision.sh");
     let vagrantfile = folder.join("Vagrantfile");
     let workbench = folder.join("workbench");
 
     Cache {
         folder,
+        build,
+        deploy,
+        deploy_on_remote,
+        move_to_next_version,
         provision,
         vagrantfile,
         workbench,
     }
 }
 
-fn get_life_cycle(life_cycle: UserFacingLifeCycle) -> LifeCycle {
+fn get_life_cycle(cache: &Cache, life_cycle: UserFacingLifeCycle) -> LifeCycle {
     LifeCycle {
         build: convert_nonempty_or_else(life_cycle.build, || {
-            ["python3", "-c", include_str!("assets/build.py")]
-                .iter()
-                .map(ffi::OsString::from)
-                .collect()
+            vec![
+                ffi::OsString::from("python3"),
+                ffi::OsString::from("--"),
+                ffi::OsString::from(&cache.build),
+            ]
         }),
         deploy: convert_nonempty_or_else(life_cycle.deploy, || {
-            [
-                "python3",
-                "-c",
-                include_str!("assets/deploy.py"),
-                include_str!("assets/deploy_on_remote.py"),
+            vec![
+                ffi::OsString::from("python3"),
+                ffi::OsString::from("--"),
+                ffi::OsString::from(&cache.deploy),
+                ffi::OsString::from(&cache.deploy_on_remote),
             ]
-            .iter()
-            .map(ffi::OsString::from)
-            .collect()
         }),
         move_to_next_version: convert_nonempty_or_else(life_cycle.move_to_next_version, || {
-            [
-                "bash",
-                "-c",
-                "--",
-                include_str!("assets/move_to_next_version.sh"),
+            vec![
+                ffi::OsString::from("bash"),
+                ffi::OsString::from("--"),
+                ffi::OsString::from(&cache.move_to_next_version),
             ]
-            .iter()
-            .map(ffi::OsString::from)
-            .collect()
         }),
     }
 }

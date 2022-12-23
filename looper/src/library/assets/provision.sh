@@ -19,7 +19,7 @@ test_package_management_setup() {
 do_user_setup() {
   sudo sed --in-place 's/^#\(PermitRootLogin\) .*$/\1 no/' /etc/ssh/sshd_config
 
-  sudo useradd --create-home --user-group kerek
+  sudo useradd --create-home --shell /bin/bash --user-group kerek
   sudo rsync --archive --chown kerek:kerek "${HOME}/.ssh" /home/kerek
 
   echo '%kerek ALL=(ALL:ALL) NOPASSWD:ALL' \

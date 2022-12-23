@@ -10,7 +10,7 @@ def main():
     with pathlib.Path("images.json").open("br") as images_file:
         build_contexts = json.load(images_file)
 
-    images_folder = pathlib.Path(os.getenv("KEREK_CACHE_WORKBENCH"))
+    images_folder = pathlib.Path(os.environ["KEREK_CACHE_WORKBENCH"])
 
     image_files = {
         _build_image_file(build_context, images_folder)

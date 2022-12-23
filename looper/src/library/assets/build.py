@@ -31,19 +31,22 @@ def _build_image_file(build_context, images_folder):
     ).stdout.rstrip()
 
     image_file = images_folder / f"{image_id}.tar"
-    subprocess.run(
-        [
-            "podman",
-            "save",
-            "--format",
-            "oci-archive",
-            "--output",
-            image_file,
-            "--",
-            image_id,
-        ],
-        check=True,
-    )
+
+    if not image_file.exists():
+        subprocess.run(
+            [
+                "podman",
+                "save",
+                "--format",
+                "oci-archive",
+                "--output",
+                image_file,
+                "--",
+                image_id,
+            ],
+            check=True,
+        )
+
     return image_file
 
 

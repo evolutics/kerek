@@ -14,6 +14,7 @@ pub fn stderr_utf8(command: &mut process::Command) -> anyhow::Result<String> {
     })
 }
 
+#[allow(dead_code)]
 pub fn stdout_utf8(command: &mut process::Command) -> anyhow::Result<String> {
     output_utf8(command.stderr(process::Stdio::inherit()), |output| {
         output.stdout

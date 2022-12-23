@@ -2,7 +2,6 @@ mod action;
 mod library;
 
 use action::clean;
-use action::diagnose;
 use action::provision;
 use action::run;
 use clap::Parser;
@@ -13,7 +12,6 @@ fn main() -> anyhow::Result<()> {
 
     match arguments.action {
         Action::Clean => clean::go(arguments.configuration),
-        Action::Diagnose => diagnose::go(),
         Action::Provision => provision::go(arguments.configuration),
         Action::Run => run::go(arguments.configuration),
     }
@@ -33,8 +31,6 @@ struct Arguments {
 enum Action {
     /// Tears down internal resources such as the cache folder.
     Clean,
-    /// Shows debugging information.
-    Diagnose,
     /// Sets up the production environment for the first time.
     Provision,
     /// Builds, tests, deploys in a loop.

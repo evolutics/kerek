@@ -1,13 +1,9 @@
 use anyhow::Context;
 use std::collections;
-use std::collections::hash_map;
 use std::ffi;
 use std::fs;
-use std::hash::Hash;
-use std::hash::Hasher;
 use std::io;
 use std::path;
-use std::time;
 
 pub fn get(path: path::PathBuf) -> anyhow::Result<Main> {
     let file = fs::File::open(&path).with_context(|| format!("Unable to open file: {path:?}"))?;
@@ -53,7 +49,6 @@ pub struct Environment {
     pub display_name: String,
     pub ssh_configuration_file: path::PathBuf,
     pub ssh_host: String,
-    pub ip_address: String,
     pub variables: collections::HashMap<String, String>,
 }
 
@@ -108,7 +103,6 @@ struct UserFacingStaging {
 struct UserFacingProduction {
     pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: String,
-    pub ip_address: String,
     #[serde(default)]
     pub variables: collections::HashMap<String, String>,
 }
@@ -216,34 +210,18 @@ fn get_tests(tests: UserFacingTests) -> Tests {
 }
 
 fn get_staging(cache: &Cache, staging: UserFacingStaging) -> Environment {
+    let mut variables = collections::HashMap::from([(
+        String::from("KEREK_IP_ADDRESS"),
+        String::from("192.168.60.158"),
+    )]);
+    variables.extend(staging.variables);
+
     Environment {
         display_name: String::from("staging"),
         ssh_configuration_file: cache.folder.join("ssh_configuration"),
         ssh_host: String::from("default"),
-        ip_address: get_staging_ip_address(cache),
-        variables: staging.variables,
+        variables,
     }
-}
-
-fn get_staging_ip_address(cache: &Cache) -> String {
-    let existing_ip_address = match fs::read_to_string(&cache.vagrantfile) {
-        Err(_) => None,
-        Ok(full_contents) => full_contents
-            .split_once(" ip: \"")
-            .and_then(|(_, contents_from_ip_address)| contents_from_ip_address.split_once('"'))
-            .map(|(ip_address, _)| String::from(ip_address)),
-    };
-
-    existing_ip_address.unwrap_or_else(|| {
-        let random = draw_random();
-        format!("192.168.60.{random}")
-    })
-}
-
-fn draw_random() -> u8 {
-    let mut hasher = hash_map::DefaultHasher::new();
-    time::Instant::now().hash(&mut hasher);
-    hasher.finish().to_le_bytes()[0]
 }
 
 fn get_production(production: UserFacingProduction) -> Environment {
@@ -253,7 +231,6 @@ fn get_production(production: UserFacingProduction) -> Environment {
             .ssh_configuration
             .unwrap_or_else(|| ["safe", "ssh_configuration"].iter().collect()),
         ssh_host: production.ssh_host,
-        ip_address: production.ip_address,
         variables: production.variables,
     }
 }

@@ -11,7 +11,6 @@ pub fn go(
             .args(&configuration.life_cycle.provision[1..])
             .env("KEREK_CACHE_FOLDER", &configuration.cache.folder)
             .env("KEREK_CACHE_WORKBENCH", &configuration.cache.workbench)
-            .env("KEREK_IP_ADDRESS", &environment.ip_address)
             .env(
                 "KEREK_SSH_CONFIGURATION",
                 &environment.ssh_configuration_file,

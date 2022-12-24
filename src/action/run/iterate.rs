@@ -27,8 +27,6 @@ fn build(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
         process::Command::new(&configuration.life_cycle.build[0])
             .args(&configuration.life_cycle.build[1..])
-            .env("KEREK_CACHE_FOLDER", &configuration.cache.folder)
-            .env("KEREK_CACHE_WORKBENCH", &configuration.cache.workbench)
             .envs(&configuration.variables),
     )
     .context("Unable to build.")
@@ -41,13 +39,6 @@ fn deploy(
     command::status(
         process::Command::new(&configuration.life_cycle.deploy[0])
             .args(&configuration.life_cycle.deploy[1..])
-            .env("KEREK_CACHE_FOLDER", &configuration.cache.folder)
-            .env("KEREK_CACHE_WORKBENCH", &configuration.cache.workbench)
-            .env(
-                "KEREK_SSH_CONFIGURATION",
-                &environment.ssh_configuration_file,
-            )
-            .env("KEREK_SSH_HOST", &environment.ssh_host)
             .envs(&configuration.variables)
             .envs(&environment.variables),
     )

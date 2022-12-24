@@ -17,6 +17,7 @@ pub fn go(
                 &environment.ssh_configuration_file,
             )
             .env("KEREK_SSH_HOST", &environment.ssh_host)
+            .envs(&configuration.variables)
             .envs(&environment.variables),
     )
 }

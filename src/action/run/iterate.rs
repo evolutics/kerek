@@ -16,7 +16,9 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
 
 fn run_base_tests(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
-        process::Command::new(&configuration.tests.base[0]).args(&configuration.tests.base[1..]),
+        process::Command::new(&configuration.tests.base[0])
+            .args(&configuration.tests.base[1..])
+            .envs(&configuration.variables),
     )
     .context("Base tests failed.")
 }
@@ -26,7 +28,8 @@ fn build(configuration: &configuration::Main) -> anyhow::Result<()> {
         process::Command::new(&configuration.life_cycle.build[0])
             .args(&configuration.life_cycle.build[1..])
             .env("KEREK_CACHE_FOLDER", &configuration.cache.folder)
-            .env("KEREK_CACHE_WORKBENCH", &configuration.cache.workbench),
+            .env("KEREK_CACHE_WORKBENCH", &configuration.cache.workbench)
+            .envs(&configuration.variables),
     )
     .context("Unable to build.")
 }
@@ -45,6 +48,7 @@ fn deploy(
                 &environment.ssh_configuration_file,
             )
             .env("KEREK_SSH_HOST", &environment.ssh_host)
+            .envs(&configuration.variables)
             .envs(&environment.variables),
     )
     .with_context(|| {
@@ -61,6 +65,7 @@ fn run_smoke_tests(
         process::Command::new(&configuration.tests.smoke[0])
             .args(&configuration.tests.smoke[1..])
             .env("KEREK_IP_ADDRESS", &environment.ip_address)
+            .envs(&configuration.variables)
             .envs(&environment.variables),
     )
     .with_context(|| {
@@ -77,6 +82,7 @@ fn run_acceptance_tests(
         process::Command::new(&configuration.tests.acceptance[0])
             .args(&configuration.tests.acceptance[1..])
             .env("KEREK_IP_ADDRESS", &environment.ip_address)
+            .envs(&configuration.variables)
             .envs(&environment.variables),
     )
     .with_context(|| {
@@ -88,7 +94,8 @@ fn run_acceptance_tests(
 fn move_to_next_version(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
         process::Command::new(&configuration.life_cycle.move_to_next_version[0])
-            .args(&configuration.life_cycle.move_to_next_version[1..]),
+            .args(&configuration.life_cycle.move_to_next_version[1..])
+            .envs(&configuration.variables),
     )
     .context("Unable to move to next version.")
 }

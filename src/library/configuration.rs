@@ -19,6 +19,7 @@ pub struct Main {
     pub cache: Cache,
     pub life_cycle: LifeCycle,
     pub tests: Tests,
+    pub variables: collections::HashMap<String, String>,
     pub staging: Environment,
     pub production: Environment,
 }
@@ -64,6 +65,8 @@ struct UserFacingMain {
     pub life_cycle: UserFacingLifeCycle,
     #[serde(default)]
     pub tests: UserFacingTests,
+    #[serde(default)]
+    pub variables: collections::HashMap<String, String>,
     #[serde(default)]
     pub staging: UserFacingStaging,
     pub production: UserFacingProduction,
@@ -117,6 +120,7 @@ fn convert(main: UserFacingMain) -> Main {
     );
     let life_cycle = get_life_cycle(&cache, main.life_cycle);
     let tests = get_tests(main.tests);
+    let variables = main.variables;
     let staging = get_staging(&cache, main.staging);
     let production = get_production(main.production);
 
@@ -124,6 +128,7 @@ fn convert(main: UserFacingMain) -> Main {
         cache,
         life_cycle,
         tests,
+        variables,
         staging,
         production,
     }

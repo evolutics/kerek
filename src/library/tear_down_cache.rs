@@ -15,6 +15,7 @@ fn remove_vm_if_exists(configuration: &configuration::Main) -> anyhow::Result<()
                 .arg("destroy")
                 .arg("--force")
                 .current_dir(&configuration.cache.folder)
+                .envs(&configuration.variables)
                 .envs(&configuration.staging.variables),
         )
     } else {

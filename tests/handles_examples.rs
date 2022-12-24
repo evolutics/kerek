@@ -8,6 +8,11 @@ fn default() -> anyhow::Result<()> {
     test("default")
 }
 
+#[test]
+fn kubernetes() -> anyhow::Result<()> {
+    test("kubernetes")
+}
+
 fn test(example: &str) -> anyhow::Result<()> {
     let folder = ["examples", example].iter().collect::<path::PathBuf>();
     reset_fake_production(&folder)?;

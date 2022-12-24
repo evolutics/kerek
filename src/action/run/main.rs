@@ -28,7 +28,8 @@ fn load_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
             .arg("restore")
             .arg("--")
             .arg(VERSIONED_SNAPSHOT_NAME)
-            .current_dir(&configuration.cache.folder),
+            .current_dir(&configuration.cache.folder)
+            .envs(&configuration.staging.variables),
     )
 }
 
@@ -40,6 +41,7 @@ fn save_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
             .arg("--force")
             .arg("--")
             .arg(VERSIONED_SNAPSHOT_NAME)
-            .current_dir(&configuration.cache.folder),
+            .current_dir(&configuration.cache.folder)
+            .envs(&configuration.staging.variables),
     )
 }

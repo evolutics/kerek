@@ -18,7 +18,8 @@ fn start_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
         process::Command::new("vagrant")
             .arg("up")
-            .current_dir(&configuration.cache.folder),
+            .current_dir(&configuration.cache.folder)
+            .envs(&configuration.staging.variables),
     )
 }
 
@@ -28,6 +29,7 @@ fn dump_staging_ssh_configuration(configuration: &configuration::Main) -> anyhow
         process::Command::new("vagrant")
             .arg("ssh-config")
             .current_dir(&configuration.cache.folder)
+            .envs(&configuration.staging.variables)
             .stdout(file),
     )
 }

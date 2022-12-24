@@ -14,7 +14,8 @@ fn remove_vm_if_exists(configuration: &configuration::Main) -> anyhow::Result<()
             process::Command::new("vagrant")
                 .arg("destroy")
                 .arg("--force")
-                .current_dir(&configuration.cache.folder),
+                .current_dir(&configuration.cache.folder)
+                .envs(&configuration.staging.variables),
         )
     } else {
         Ok(())

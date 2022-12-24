@@ -1,4 +1,5 @@
 use anyhow::Context;
+use std::collections;
 use std::collections::hash_map;
 use std::ffi;
 use std::fs;
@@ -52,6 +53,7 @@ pub struct Environment {
     pub ssh_configuration_file: path::PathBuf,
     pub ssh_host: String,
     pub ip_address: String,
+    pub variables: collections::HashMap<String, String>,
 }
 
 #[derive(serde::Deserialize)]
@@ -62,6 +64,8 @@ struct UserFacingMain {
     pub life_cycle: UserFacingLifeCycle,
     #[serde(default)]
     pub tests: UserFacingTests,
+    #[serde(default)]
+    pub staging: UserFacingStaging,
     pub production: UserFacingProduction,
 }
 
@@ -89,12 +93,21 @@ struct UserFacingTests {
     pub acceptance: Vec<String>,
 }
 
+#[derive(Default, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct UserFacingStaging {
+    #[serde(default)]
+    pub variables: collections::HashMap<String, String>,
+}
+
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct UserFacingProduction {
     pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: String,
     pub ip_address: String,
+    #[serde(default)]
+    pub variables: collections::HashMap<String, String>,
 }
 
 fn convert(main: UserFacingMain) -> Main {
@@ -104,7 +117,7 @@ fn convert(main: UserFacingMain) -> Main {
     );
     let life_cycle = get_life_cycle(&cache, main.life_cycle);
     let tests = get_tests(main.tests);
-    let staging = get_staging(&cache);
+    let staging = get_staging(&cache, main.staging);
     let production = get_production(main.production);
 
     Main {
@@ -197,12 +210,13 @@ fn get_tests(tests: UserFacingTests) -> Tests {
     }
 }
 
-fn get_staging(cache: &Cache) -> Environment {
+fn get_staging(cache: &Cache, staging: UserFacingStaging) -> Environment {
     Environment {
         display_name: String::from("staging"),
         ssh_configuration_file: cache.folder.join("ssh_configuration"),
         ssh_host: String::from("default"),
         ip_address: get_staging_ip_address(cache),
+        variables: staging.variables,
     }
 }
 
@@ -235,5 +249,6 @@ fn get_production(production: UserFacingProduction) -> Environment {
             .unwrap_or_else(|| ["safe", "ssh_configuration"].iter().collect()),
         ssh_host: production.ssh_host,
         ip_address: production.ip_address,
+        variables: production.variables,
     }
 }

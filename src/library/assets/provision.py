@@ -54,28 +54,17 @@ def _reboot():
 
 
 def _test_provisioning():
-    _retry_subprocess(
-        total_duration_limit=datetime.timedelta(seconds=150),
-        retry_pause=datetime.timedelta(seconds=3),
-        run=_try_to_test_provisioning,
-    )
-
-
-def _retry_subprocess(*, total_duration_limit, retry_pause, run):
-    start = time.monotonic()
+    timeout = datetime.timedelta(seconds=5)
 
     while True:
         try:
-            return run()
+            return _try_to_test_provisioning(timeout)
         except subprocess.SubprocessError:
-            total_duration = datetime.timedelta(seconds=time.monotonic() - start)
-            if total_duration >= total_duration_limit:
-                raise
-
-            time.sleep(retry_pause.total_seconds())
+            timeout *= 2
+            time.sleep(datetime.timedelta(seconds=1).total_seconds())
 
 
-def _try_to_test_provisioning():
+def _try_to_test_provisioning(timeout):
     cache_folder = pathlib.Path(os.environ["KEREK_CACHE_FOLDER"])
     subprocess.run(
         [
@@ -93,7 +82,7 @@ def _try_to_test_provisioning():
         ],
         check=True,
         input=(cache_folder / "provision_on_remote.sh").read_bytes(),
-        timeout=datetime.timedelta(seconds=15).total_seconds(),
+        timeout=timeout.total_seconds(),
     )
 
 

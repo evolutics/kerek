@@ -3,17 +3,20 @@ use std::io;
 use std::path;
 use std::process;
 
-const FOLDER: &str = "example";
-
 #[test]
-fn go() -> anyhow::Result<()> {
-    reset_fake_production()?;
-    let log_file = path::PathBuf::from(format!("{FOLDER}/log.txt"));
+fn default() -> anyhow::Result<()> {
+    test("default")
+}
+
+fn test(example: &str) -> anyhow::Result<()> {
+    let folder = ["examples", example].iter().collect::<path::PathBuf>();
+    reset_fake_production(&folder)?;
+    let log_file = folder.join("log.txt");
     fs::write(&log_file, "")?;
 
-    assert!(clean()?.success());
-    assert!(provision()?.success());
-    assert!(!run()?.success());
+    assert!(clean(&folder)?.success());
+    assert!(provision(&folder)?.success());
+    assert!(!run(&folder)?.success());
 
     assert_eq!(
         fs::read_to_string(log_file)?,
@@ -29,46 +32,45 @@ Base tests
     Ok(())
 }
 
-fn reset_fake_production() -> anyhow::Result<()> {
+fn reset_fake_production(folder: &path::Path) -> anyhow::Result<()> {
     assert!(process::Command::new("vagrant")
         .arg("destroy")
         .arg("--force")
-        .current_dir(FOLDER)
+        .current_dir(folder)
         .status()?
         .success());
     assert!(process::Command::new("vagrant")
         .arg("up")
-        .current_dir(FOLDER)
+        .current_dir(folder)
         .status()?
         .success());
-    let ssh_configuration =
-        fs::File::create(path::Path::new(&format!("{FOLDER}/safe/ssh_configuration")))?;
+    let ssh_configuration = fs::File::create(folder.join("safe/ssh_configuration"))?;
     assert!(process::Command::new("vagrant")
         .arg("ssh-config")
-        .current_dir(FOLDER)
+        .current_dir(folder)
         .stdout(ssh_configuration)
         .status()?
         .success());
     Ok(())
 }
 
-fn clean() -> io::Result<process::ExitStatus> {
+fn clean(folder: &path::Path) -> io::Result<process::ExitStatus> {
     process::Command::new(env!("CARGO_BIN_EXE_kerek"))
         .arg("clean")
-        .current_dir(FOLDER)
+        .current_dir(folder)
         .status()
 }
 
-fn provision() -> io::Result<process::ExitStatus> {
+fn provision(folder: &path::Path) -> io::Result<process::ExitStatus> {
     process::Command::new(env!("CARGO_BIN_EXE_kerek"))
         .arg("provision")
-        .current_dir(FOLDER)
+        .current_dir(folder)
         .status()
 }
 
-fn run() -> io::Result<process::ExitStatus> {
+fn run(folder: &path::Path) -> io::Result<process::ExitStatus> {
     process::Command::new(env!("CARGO_BIN_EXE_kerek"))
         .arg("run")
-        .current_dir(FOLDER)
+        .current_dir(folder)
         .status()
 }

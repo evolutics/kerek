@@ -1,0 +1,14 @@
+{
+  "life_cycle": {
+    "move_to_next_version": ["../scripts/move_to_next_version.sh"]
+  },
+  "tests": {
+    "base": ["../scripts/base_test.sh"],
+    "smoke": ["../scripts/smoke_test.sh"],
+    "acceptance": ["../scripts/acceptance_test.sh"]
+  },
+  "production": {
+    "ip_address": "192.168.62.62",
+    "ssh_host": "default"
+  }
+}

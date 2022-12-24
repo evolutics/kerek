@@ -13,13 +13,13 @@
   "staging": {
     "variables": {
       "KUBECONFIG": ".kerek/workbench/kubeconfig",
-      "KEREK_IP_ADDRESS": "192.168.62.64"
+      "KEREK_IP_ADDRESS": "192.168.60.160"
     }
   },
   "production": {
     "ssh_host": "default",
     "variables": {
-      "KEREK_IP_ADDRESS": "192.168.62.63",
+      "KEREK_IP_ADDRESS": "192.168.60.161",
       "KUBECONFIG": "safe/kubeconfig"
     }
   }

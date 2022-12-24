@@ -10,7 +10,7 @@
   "production": {
     "ssh_host": "default",
     "variables": {
-      "KEREK_IP_ADDRESS": "192.168.62.62"
+      "KEREK_IP_ADDRESS": "192.168.60.159"
     }
   }
 }

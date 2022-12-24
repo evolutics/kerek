@@ -64,7 +64,6 @@ fn run_smoke_tests(
     command::status(
         process::Command::new(&configuration.tests.smoke[0])
             .args(&configuration.tests.smoke[1..])
-            .env("KEREK_IP_ADDRESS", &environment.ip_address)
             .envs(&configuration.variables)
             .envs(&environment.variables),
     )
@@ -81,7 +80,6 @@ fn run_acceptance_tests(
     command::status(
         process::Command::new(&configuration.tests.acceptance[0])
             .args(&configuration.tests.acceptance[1..])
-            .env("KEREK_IP_ADDRESS", &environment.ip_address)
             .envs(&configuration.variables)
             .envs(&environment.variables),
     )

@@ -15,7 +15,7 @@ pub struct Main {
     pub cache: Cache,
     pub life_cycle: LifeCycle,
     pub tests: Tests,
-    pub variables: collections::HashMap<String, String>,
+    pub variables: collections::HashMap<ffi::OsString, ffi::OsString>,
     pub staging: Environment,
     pub production: Environment,
 }
@@ -49,7 +49,7 @@ pub struct Environment {
     pub display_name: String,
     pub ssh_configuration_file: path::PathBuf,
     pub ssh_host: String,
-    pub variables: collections::HashMap<String, String>,
+    pub variables: collections::HashMap<ffi::OsString, ffi::OsString>,
 }
 
 #[derive(serde::Deserialize)]
@@ -114,7 +114,7 @@ fn convert(main: UserFacingMain) -> Main {
     );
     let life_cycle = get_life_cycle(&cache, main.life_cycle);
     let tests = get_tests(main.tests);
-    let variables = main.variables;
+    let variables = get_variables(main.variables);
     let staging = get_staging(&cache, main.staging);
     let production = get_production(main.production);
 
@@ -209,12 +209,21 @@ fn get_tests(tests: UserFacingTests) -> Tests {
     }
 }
 
+fn get_variables(
+    variables: collections::HashMap<String, String>,
+) -> collections::HashMap<ffi::OsString, ffi::OsString> {
+    variables
+        .into_iter()
+        .map(|(key, value)| (key.into(), value.into()))
+        .collect()
+}
+
 fn get_staging(cache: &Cache, staging: UserFacingStaging) -> Environment {
     let mut variables = collections::HashMap::from([(
-        String::from("KEREK_IP_ADDRESS"),
-        String::from("192.168.60.158"),
+        ffi::OsString::from("KEREK_IP_ADDRESS"),
+        ffi::OsString::from("192.168.60.158"),
     )]);
-    variables.extend(staging.variables);
+    variables.extend(get_variables(staging.variables));
 
     Environment {
         display_name: String::from("staging"),
@@ -225,12 +234,14 @@ fn get_staging(cache: &Cache, staging: UserFacingStaging) -> Environment {
 }
 
 fn get_production(production: UserFacingProduction) -> Environment {
+    let variables = get_variables(production.variables);
+
     Environment {
         display_name: String::from("production"),
         ssh_configuration_file: production
             .ssh_configuration
             .unwrap_or_else(|| ["safe", "ssh_configuration"].iter().collect()),
         ssh_host: production.ssh_host,
-        variables: production.variables,
+        variables,
     }
 }

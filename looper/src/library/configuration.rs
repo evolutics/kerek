@@ -50,7 +50,7 @@ pub struct Environment {
     pub variables: collections::HashMap<ffi::OsString, ffi::OsString>,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(Default, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct UserFacingMain {
     pub cache_folder: Option<path::PathBuf>,
@@ -62,6 +62,7 @@ struct UserFacingMain {
     pub variables: collections::HashMap<String, String>,
     #[serde(default)]
     pub staging: UserFacingStaging,
+    #[serde(default)]
     pub production: UserFacingProduction,
 }
 
@@ -96,7 +97,7 @@ struct UserFacingStaging {
     pub variables: collections::HashMap<String, String>,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(Default, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct UserFacingProduction {
     #[serde(default)]

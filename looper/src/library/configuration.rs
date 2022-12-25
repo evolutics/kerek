@@ -6,8 +6,10 @@ use std::io;
 use std::path;
 
 pub fn get(path: path::PathBuf) -> anyhow::Result<Main> {
-    let file = fs::File::open(&path).with_context(|| format!("Unable to open file: {path:?}"))?;
-    let main = serde_json::from_reader(io::BufReader::new(file))?;
+    let file = fs::File::open(&path)
+        .with_context(|| format!("Unable to open configuration file: {path:?}"))?;
+    let main = serde_json::from_reader(io::BufReader::new(file))
+        .with_context(|| format!("Unable to deserialize configuration file: {path:?}"))?;
     Ok(convert(main))
 }
 

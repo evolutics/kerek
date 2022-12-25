@@ -59,8 +59,6 @@ struct UserFacingMain {
     #[serde(default)]
     pub tests: UserFacingTests,
     #[serde(default)]
-    pub variables: collections::HashMap<String, String>,
-    #[serde(default)]
     pub environment_variables: UserFacingEnvironmentVariables,
 }
 
@@ -104,7 +102,7 @@ fn convert(main: UserFacingMain) -> Main {
     );
     let life_cycle = get_life_cycle(&cache, main.life_cycle);
     let tests = get_tests(main.tests);
-    let variables = get_variables(&cache, main.variables);
+    let variables = get_variables(&cache);
     let staging = get_staging(&cache, main.environment_variables.staging);
     let production = get_production(main.environment_variables.production);
 
@@ -199,11 +197,8 @@ fn get_tests(tests: UserFacingTests) -> Tests {
     }
 }
 
-fn get_variables(
-    cache: &Cache,
-    custom_variables: collections::HashMap<String, String>,
-) -> collections::HashMap<ffi::OsString, ffi::OsString> {
-    let mut variables = collections::HashMap::from([
+fn get_variables(cache: &Cache) -> collections::HashMap<ffi::OsString, ffi::OsString> {
+    collections::HashMap::from([
         (
             ffi::OsString::from("KEREK_CACHE_FOLDER"),
             cache.folder.clone().into_os_string(),
@@ -212,61 +207,64 @@ fn get_variables(
             ffi::OsString::from("KEREK_CACHE_WORKBENCH"),
             cache.workbench.clone().into_os_string(),
         ),
-    ]);
-
-    variables.extend(convert_variables(custom_variables));
-    variables
-}
-
-fn convert_variables(
-    variables: collections::HashMap<String, String>,
-) -> collections::HashMap<ffi::OsString, ffi::OsString> {
-    variables
-        .into_iter()
-        .map(|(key, value)| (key.into(), value.into()))
-        .collect()
+    ])
 }
 
 fn get_staging(
     cache: &Cache,
     custom_variables: collections::HashMap<String, String>,
 ) -> Environment {
-    let mut variables = collections::HashMap::from([
-        (
-            ffi::OsString::from("KEREK_IP_ADDRESS"),
-            ffi::OsString::from("192.168.60.158"),
-        ),
-        (
-            ffi::OsString::from("KEREK_SSH_CONFIGURATION"),
-            cache.folder.join("ssh_configuration").into(),
-        ),
-        (
-            ffi::OsString::from("KEREK_SSH_HOST"),
-            ffi::OsString::from("default"),
-        ),
-    ]);
+    with_custom_variables(
+        Environment {
+            display_name: String::from("staging"),
+            variables: collections::HashMap::from([
+                (
+                    ffi::OsString::from("KEREK_IP_ADDRESS"),
+                    ffi::OsString::from("192.168.60.158"),
+                ),
+                (
+                    ffi::OsString::from("KEREK_SSH_CONFIGURATION"),
+                    cache.folder.join("ssh_configuration").into(),
+                ),
+                (
+                    ffi::OsString::from("KEREK_SSH_HOST"),
+                    ffi::OsString::from("default"),
+                ),
+            ]),
+        },
+        custom_variables,
+    )
+}
 
-    variables.extend(convert_variables(custom_variables));
+fn with_custom_variables(
+    environment: Environment,
+    custom_variables: collections::HashMap<String, String>,
+) -> Environment {
+    let mut variables = environment.variables;
+    variables.extend(
+        custom_variables
+            .into_iter()
+            .map(|(key, value)| (key.into(), value.into())),
+    );
 
     Environment {
-        display_name: String::from("staging"),
         variables,
+        ..environment
     }
 }
 
 fn get_production(custom_variables: collections::HashMap<String, String>) -> Environment {
-    let mut variables = collections::HashMap::from([(
-        ffi::OsString::from("KEREK_SSH_CONFIGURATION"),
-        ["safe", "ssh_configuration"]
-            .iter()
-            .collect::<path::PathBuf>()
-            .into(),
-    )]);
-
-    variables.extend(convert_variables(custom_variables));
-
-    Environment {
-        display_name: String::from("production"),
-        variables,
-    }
+    with_custom_variables(
+        Environment {
+            display_name: String::from("production"),
+            variables: collections::HashMap::from([(
+                ffi::OsString::from("KEREK_SSH_CONFIGURATION"),
+                ["safe", "ssh_configuration"]
+                    .iter()
+                    .collect::<path::PathBuf>()
+                    .into(),
+            )]),
+        },
+        custom_variables,
+    )
 }

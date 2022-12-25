@@ -61,9 +61,7 @@ struct UserFacingMain {
     #[serde(default)]
     pub variables: collections::HashMap<String, String>,
     #[serde(default)]
-    pub staging: UserFacingStaging,
-    #[serde(default)]
-    pub production: UserFacingProduction,
+    pub environment_variables: UserFacingEnvironmentVariables,
 }
 
 #[derive(Default, serde::Deserialize)]
@@ -92,16 +90,11 @@ struct UserFacingTests {
 
 #[derive(Default, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
-struct UserFacingStaging {
+struct UserFacingEnvironmentVariables {
     #[serde(default)]
-    pub variables: collections::HashMap<String, String>,
-}
-
-#[derive(Default, serde::Deserialize)]
-#[serde(deny_unknown_fields)]
-struct UserFacingProduction {
+    pub staging: collections::HashMap<String, String>,
     #[serde(default)]
-    pub variables: collections::HashMap<String, String>,
+    pub production: collections::HashMap<String, String>,
 }
 
 fn convert(main: UserFacingMain) -> Main {
@@ -112,8 +105,8 @@ fn convert(main: UserFacingMain) -> Main {
     let life_cycle = get_life_cycle(&cache, main.life_cycle);
     let tests = get_tests(main.tests);
     let variables = get_variables(&cache, main.variables);
-    let staging = get_staging(&cache, main.staging);
-    let production = get_production(main.production);
+    let staging = get_staging(&cache, main.environment_variables.staging);
+    let production = get_production(main.environment_variables.production);
 
     Main {
         cache,
@@ -234,7 +227,10 @@ fn convert_variables(
         .collect()
 }
 
-fn get_staging(cache: &Cache, staging: UserFacingStaging) -> Environment {
+fn get_staging(
+    cache: &Cache,
+    custom_variables: collections::HashMap<String, String>,
+) -> Environment {
     let mut variables = collections::HashMap::from([
         (
             ffi::OsString::from("KEREK_IP_ADDRESS"),
@@ -250,7 +246,7 @@ fn get_staging(cache: &Cache, staging: UserFacingStaging) -> Environment {
         ),
     ]);
 
-    variables.extend(convert_variables(staging.variables));
+    variables.extend(convert_variables(custom_variables));
 
     Environment {
         display_name: String::from("staging"),
@@ -258,7 +254,7 @@ fn get_staging(cache: &Cache, staging: UserFacingStaging) -> Environment {
     }
 }
 
-fn get_production(production: UserFacingProduction) -> Environment {
+fn get_production(custom_variables: collections::HashMap<String, String>) -> Environment {
     let mut variables = collections::HashMap::from([(
         ffi::OsString::from("KEREK_SSH_CONFIGURATION"),
         ["safe", "ssh_configuration"]
@@ -267,7 +263,7 @@ fn get_production(production: UserFacingProduction) -> Environment {
             .into(),
     )]);
 
-    variables.extend(convert_variables(production.variables));
+    variables.extend(convert_variables(custom_variables));
 
     Environment {
         display_name: String::from("production"),

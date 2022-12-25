@@ -10,14 +10,12 @@
     "smoke": ["../scripts/smoke_test.sh"],
     "acceptance": ["../scripts/acceptance_test.sh"]
   },
-  "staging": {
-    "variables": {
+  "environment_variables": {
+    "staging": {
       "KUBECONFIG": ".kerek/workbench/kubeconfig",
       "KEREK_IP_ADDRESS": "192.168.60.160"
-    }
-  },
-  "production": {
-    "variables": {
+    },
+    "production": {
       "KEREK_IP_ADDRESS": "192.168.60.161",
       "KEREK_SSH_HOST": "default",
       "KUBECONFIG": "safe/kubeconfig"

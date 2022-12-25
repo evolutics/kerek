@@ -1,5 +1,7 @@
 use super::configuration;
 use anyhow::Context;
+use std::borrow;
+use std::ffi;
 use std::fs;
 
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
@@ -32,11 +34,29 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
         ),
         (
             &configuration.cache.vagrantfile,
-            include_str!("assets/Vagrantfile"),
+            &get_vagrantfile_contents(&configuration.staging)?,
         ),
     ] {
         fs::write(file, contents)?;
     }
 
     Ok(())
+}
+
+fn get_vagrantfile_contents(
+    environment: &configuration::Environment,
+) -> anyhow::Result<borrow::Cow<str>> {
+    Ok(
+        match environment
+            .variables
+            .get(ffi::OsStr::new("KEREK_VAGRANTFILE"))
+        {
+            None => borrow::Cow::from(include_str!("assets/Vagrantfile")),
+            Some(path) => {
+                let contents = fs::read_to_string(path)
+                    .with_context(|| format!("Unable to read file: {path:?}"))?;
+                borrow::Cow::from(contents)
+            }
+        },
+    )
 }

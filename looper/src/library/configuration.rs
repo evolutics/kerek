@@ -46,7 +46,7 @@ pub struct Tests {
 }
 
 pub struct Environment {
-    pub display_name: String,
+    pub id: String,
     pub variables: collections::HashMap<ffi::OsString, ffi::OsString>,
 }
 
@@ -216,7 +216,7 @@ fn get_staging(
 ) -> Environment {
     with_custom_variables(
         Environment {
-            display_name: String::from("staging"),
+            id: String::from("staging"),
             variables: collections::HashMap::from([
                 (
                     ffi::OsString::from("KEREK_IP_ADDRESS"),
@@ -256,7 +256,7 @@ fn with_custom_variables(
 fn get_production(custom_variables: collections::HashMap<String, String>) -> Environment {
     with_custom_variables(
         Environment {
-            display_name: String::from("production"),
+            id: String::from("production"),
             variables: collections::HashMap::from([(
                 ffi::OsString::from("KEREK_SSH_CONFIGURATION"),
                 ["safe", "ssh_configuration"]

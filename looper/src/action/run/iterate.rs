@@ -43,8 +43,8 @@ fn deploy(
             .envs(&environment.variables),
     )
     .with_context(|| {
-        let environment = &environment.display_name;
-        format!("Unable to deploy to {environment}.")
+        let environment = &environment.id;
+        format!("Unable to deploy to {environment:?}.")
     })
 }
 
@@ -59,8 +59,8 @@ fn run_smoke_tests(
             .envs(&environment.variables),
     )
     .with_context(|| {
-        let environment = &environment.display_name;
-        format!("Smoke tests for {environment} failed.")
+        let environment = &environment.id;
+        format!("Smoke tests for {environment:?} failed.")
     })
 }
 
@@ -75,8 +75,8 @@ fn run_acceptance_tests(
             .envs(&environment.variables),
     )
     .with_context(|| {
-        let environment = &environment.display_name;
-        format!("Acceptance tests for {environment} failed.")
+        let environment = &environment.id;
+        format!("Acceptance tests for {environment:?} failed.")
     })
 }
 

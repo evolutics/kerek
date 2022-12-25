@@ -7,7 +7,7 @@ use std::fs;
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
     for folder in [&configuration.cache.folder, &configuration.cache.workbench] {
         fs::create_dir_all(folder)
-            .with_context(|| format!("Unable to create folder: {folder:?}"))?;
+            .with_context(|| format!("Unable to create cache folder: {folder:?}"))?;
     }
 
     for (file, contents) in [
@@ -37,7 +37,8 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
             &get_vagrantfile_contents(&configuration.staging)?,
         ),
     ] {
-        fs::write(file, contents)?;
+        fs::write(file, contents)
+            .with_context(|| format!("Unable to write cache file: {file:?}"))?;
     }
 
     Ok(())
@@ -54,7 +55,7 @@ fn get_vagrantfile_contents(
             None => borrow::Cow::from(include_str!("assets/Vagrantfile")),
             Some(path) => {
                 let contents = fs::read_to_string(path)
-                    .with_context(|| format!("Unable to read file: {path:?}"))?;
+                    .with_context(|| format!("Unable to read Vagrantfile: {path:?}"))?;
                 borrow::Cow::from(contents)
             }
         },

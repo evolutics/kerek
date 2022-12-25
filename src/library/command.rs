@@ -12,5 +12,5 @@ pub fn status(command: &mut process::Command) -> anyhow::Result<()> {
             }
         }
     }
-    .with_context(|| format!("{command:?}"))
+    .with_context(|| format!("Unable to run command: {command:?}"))
 }

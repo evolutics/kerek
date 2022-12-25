@@ -7,8 +7,8 @@
     "smoke": ["../scripts/smoke_test.sh"],
     "acceptance": ["../scripts/acceptance_test.sh"]
   },
-  "production": {
-    "variables": {
+  "environment_variables": {
+    "production": {
       "KEREK_IP_ADDRESS": "192.168.60.159",
       "KEREK_SSH_HOST": "default"
     }

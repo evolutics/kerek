@@ -7,7 +7,7 @@ import subprocess
 
 def main():
     local_images_folder = pathlib.Path(os.environ["KEREK_CACHE_WORKBENCH"])
-    remote_images_folder = pathlib.Path("/home") / "kerek" / "images"
+    remote_images_folder = "images"
     print("Synchronizing artifacts.")
     _synchronize_artifacts(local_images_folder, remote_images_folder)
     print("Deploying on remote.")

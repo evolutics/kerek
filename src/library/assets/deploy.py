@@ -6,14 +6,13 @@ import subprocess
 
 
 def main():
-    local_images_folder = pathlib.Path(os.environ["KEREK_CACHE_WORKBENCH"])
     print("Synchronizing artifacts.")
-    _synchronize_artifacts(local_images_folder)
+    _synchronize_artifacts()
     print("Deploying on remote.")
     _deploy_on_remote()
 
 
-def _synchronize_artifacts(local_images_folder):
+def _synchronize_artifacts():
     # TODO: Escape quotes.
     quoted_ssh_configuration = f"'{os.environ['KEREK_SSH_CONFIGURATION']}'"
     destination = f"kerek@{os.environ['KEREK_SSH_HOST']}"
@@ -26,7 +25,7 @@ def _synchronize_artifacts(local_images_folder):
             "--rsh",
             f"ssh -F {quoted_ssh_configuration}",
             "--",
-            f"{local_images_folder}/",
+            f"{os.environ['KEREK_CACHE_WORKBENCH']}/",
             f"{destination}:{os.environ['KEREK_REMOTE_IMAGES_FOLDER']}",
         ],
         check=True,

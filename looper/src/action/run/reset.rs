@@ -4,7 +4,6 @@ use crate::library::provision;
 use crate::library::set_up_cache;
 use crate::library::tear_down_cache;
 use anyhow::Context;
-use std::ffi;
 use std::fs;
 use std::process;
 
@@ -27,7 +26,7 @@ fn start_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
 }
 
 fn dump_staging_ssh_configuration(configuration: &configuration::Main) -> anyhow::Result<()> {
-    let path = &configuration.staging.variables[ffi::OsStr::new("KEREK_SSH_CONFIGURATION")];
+    let path = &configuration.cache.staging.ssh_configuration;
     let file = fs::File::create(path)
         .with_context(|| format!("Unable to create SSH configuration file: {path:?}"))?;
     command::status(

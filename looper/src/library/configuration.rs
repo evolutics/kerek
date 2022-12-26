@@ -41,6 +41,7 @@ pub struct CacheScripts {
 
 pub struct CacheStaging {
     pub folder: path::PathBuf,
+    pub ssh_configuration: path::PathBuf,
     pub vagrantfile: path::PathBuf,
 }
 
@@ -146,6 +147,7 @@ fn get_cache(folder: path::PathBuf) -> Cache {
         },
         staging: CacheStaging {
             folder: staging.clone(),
+            ssh_configuration: staging.join("ssh_configuration"),
             vagrantfile: staging.join("Vagrantfile"),
         },
         workbench,
@@ -237,7 +239,7 @@ fn get_staging(
                 ),
                 (
                     ffi::OsString::from("KEREK_SSH_CONFIGURATION"),
-                    cache.staging.folder.join("ssh_configuration").into(),
+                    cache.staging.ssh_configuration.clone().into(),
                 ),
                 (
                     ffi::OsString::from("KEREK_SSH_HOST"),

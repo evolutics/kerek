@@ -38,21 +38,12 @@
         key: "{{ ssh_authorized_keys.content | b64decode }}"
         user: kerek
 
-    - name: Configure files
+    - name: Configure OpenSSH daemon
       become: true
       ansible.builtin.lineinfile:
-        line: "{{ item.line }}"
-        path: "{{ item.path }}"
-        regexp: "{{ item.regexp }}"
-        validate: "{{ item.validate | default(None) }}"
-      loop:
-        - line: "%kerek ALL=(ALL:ALL) NOPASSWD:ALL"
-          path: /etc/sudoers
-          regexp: '^%kerek\b'
-          validate: "visudo --check --file %s --strict"
-        - line: "PermitRootLogin no"
-          path: /etc/ssh/sshd_config
-          regexp: '\bPermitRootLogin\b'
+        line: "PermitRootLogin no"
+        path: /etc/ssh/sshd_config
+        regexp: '\bPermitRootLogin\b'
 
     - name: Enable lingering for Podman # noqa no-changed-when
       become: true

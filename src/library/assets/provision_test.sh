@@ -41,6 +41,7 @@ test_user_management() {
   echo "${sshd_configuration}" | grep '^permitrootlogin no$'
 
   [[ "$(groups kerek)" == 'kerek : kerek' ]]
+  ! sudo --user kerek -- sudo --non-interactive --validate
 }
 
 main() {

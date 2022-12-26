@@ -24,14 +24,24 @@ pub struct Main {
 
 pub struct Cache {
     pub folder: path::PathBuf,
+    pub scripts: CacheScripts,
+    pub staging: CacheStaging,
+    pub workbench: path::PathBuf,
+}
+
+pub struct CacheScripts {
+    pub folder: path::PathBuf,
     pub build: path::PathBuf,
     pub deploy: path::PathBuf,
     pub deploy_on_remote: path::PathBuf,
     pub move_to_next_version: path::PathBuf,
     pub provision: path::PathBuf,
     pub provision_on_remote: path::PathBuf,
+}
+
+pub struct CacheStaging {
+    pub folder: path::PathBuf,
     pub vagrantfile: path::PathBuf,
-    pub workbench: path::PathBuf,
 }
 
 pub struct LifeCycle {
@@ -119,24 +129,25 @@ fn convert(main: UserFacingMain) -> Main {
 }
 
 fn get_cache(folder: path::PathBuf) -> Cache {
-    let build = folder.join("build.py");
-    let deploy = folder.join("deploy.py");
-    let deploy_on_remote = folder.join("deploy_on_remote.py");
-    let move_to_next_version = folder.join("move_to_next_version.sh");
-    let provision = folder.join("provision.py");
-    let provision_on_remote = folder.join("provision_on_remote.sh");
-    let vagrantfile = folder.join("Vagrantfile");
+    let scripts = folder.join("scripts");
+    let staging = folder.join("staging");
     let workbench = folder.join("workbench");
 
     Cache {
         folder,
-        build,
-        deploy,
-        deploy_on_remote,
-        move_to_next_version,
-        provision,
-        provision_on_remote,
-        vagrantfile,
+        scripts: CacheScripts {
+            folder: scripts.clone(),
+            build: scripts.join("build.py"),
+            deploy: scripts.join("deploy.py"),
+            deploy_on_remote: scripts.join("deploy_on_remote.py"),
+            move_to_next_version: scripts.join("move_to_next_version.sh"),
+            provision: scripts.join("provision.py"),
+            provision_on_remote: scripts.join("provision_on_remote.sh"),
+        },
+        staging: CacheStaging {
+            folder: staging.clone(),
+            vagrantfile: staging.join("Vagrantfile"),
+        },
         workbench,
     }
 }
@@ -147,28 +158,28 @@ fn get_life_cycle(cache: &Cache, life_cycle: UserFacingLifeCycle) -> LifeCycle {
             vec![
                 ffi::OsString::from("python3"),
                 ffi::OsString::from("--"),
-                ffi::OsString::from(&cache.provision),
+                ffi::OsString::from(&cache.scripts.provision),
             ]
         }),
         build: convert_nonempty_or_else(life_cycle.build, || {
             vec![
                 ffi::OsString::from("python3"),
                 ffi::OsString::from("--"),
-                ffi::OsString::from(&cache.build),
+                ffi::OsString::from(&cache.scripts.build),
             ]
         }),
         deploy: convert_nonempty_or_else(life_cycle.deploy, || {
             vec![
                 ffi::OsString::from("python3"),
                 ffi::OsString::from("--"),
-                ffi::OsString::from(&cache.deploy),
+                ffi::OsString::from(&cache.scripts.deploy),
             ]
         }),
         move_to_next_version: convert_nonempty_or_else(life_cycle.move_to_next_version, || {
             vec![
                 ffi::OsString::from("bash"),
                 ffi::OsString::from("--"),
-                ffi::OsString::from(&cache.move_to_next_version),
+                ffi::OsString::from(&cache.scripts.move_to_next_version),
             ]
         }),
     }
@@ -202,8 +213,8 @@ fn get_tests(tests: UserFacingTests) -> Tests {
 fn get_variables(cache: &Cache) -> collections::HashMap<ffi::OsString, ffi::OsString> {
     collections::HashMap::from([
         (
-            ffi::OsString::from("KEREK_CACHE_FOLDER"),
-            cache.folder.clone().into_os_string(),
+            ffi::OsString::from("KEREK_CACHE_SCRIPTS"),
+            cache.scripts.folder.clone().into_os_string(),
         ),
         (
             ffi::OsString::from("KEREK_CACHE_WORKBENCH"),
@@ -226,7 +237,7 @@ fn get_staging(
                 ),
                 (
                     ffi::OsString::from("KEREK_SSH_CONFIGURATION"),
-                    cache.folder.join("ssh_configuration").into(),
+                    cache.staging.folder.join("ssh_configuration").into(),
                 ),
                 (
                     ffi::OsString::from("KEREK_SSH_HOST"),

@@ -17,7 +17,7 @@ def main():
 
 
 def _do_provisioning():
-    cache_folder = pathlib.Path(os.environ["KEREK_CACHE_FOLDER"])
+    scripts_folder = pathlib.Path(os.environ["KEREK_CACHE_SCRIPTS"])
     subprocess.run(
         [
             "ssh",
@@ -31,7 +31,7 @@ def _do_provisioning():
             "do",
         ],
         check=True,
-        input=(cache_folder / "provision_on_remote.sh").read_bytes(),
+        input=(scripts_folder / "provision_on_remote.sh").read_bytes(),
     )
 
 
@@ -65,7 +65,7 @@ def _test_provisioning():
 
 
 def _try_to_test_provisioning(timeout):
-    cache_folder = pathlib.Path(os.environ["KEREK_CACHE_FOLDER"])
+    scripts_folder = pathlib.Path(os.environ["KEREK_CACHE_SCRIPTS"])
     subprocess.run(
         [
             "ssh",
@@ -81,7 +81,7 @@ def _try_to_test_provisioning(timeout):
             "test",
         ],
         check=True,
-        input=(cache_folder / "provision_on_remote.sh").read_bytes(),
+        input=(scripts_folder / "provision_on_remote.sh").read_bytes(),
         timeout=timeout.total_seconds(),
     )
 

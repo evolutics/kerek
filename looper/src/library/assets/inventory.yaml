@@ -1,0 +1,3 @@
+all:
+  hosts:
+    default: # TODO: Use `KEREK_SSH_HOST` environment variable.

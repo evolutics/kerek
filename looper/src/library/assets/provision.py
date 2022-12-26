@@ -18,20 +18,20 @@ def main():
 
 def _do_provisioning():
     scripts_folder = pathlib.Path(os.environ["KEREK_CACHE_SCRIPTS"])
+    # TODO: Escape quotes.
+    quoted_ssh_configuration = f"'{os.environ['KEREK_SSH_CONFIGURATION']}'"
+
     subprocess.run(
         [
-            "ssh",
-            "-F",
-            os.environ["KEREK_SSH_CONFIGURATION"],
-            os.environ["KEREK_SSH_HOST"],
+            "ansible-playbook",
+            "--inventory",
+            scripts_folder / "inventory.yaml",
+            "--ssh-common-args",
+            f"-F {quoted_ssh_configuration}",
             "--",
-            "bash",
-            "-s",
-            "--",
-            "do",
+            scripts_folder / "playbook.yaml",
         ],
         check=True,
-        input=(scripts_folder / "provision_on_remote.sh").read_bytes(),
     )
 
 
@@ -76,12 +76,9 @@ def _try_to_test_provisioning(timeout):
             os.environ["KEREK_SSH_HOST"],
             "--",
             "bash",
-            "-s",
-            "--",
-            "test",
         ],
         check=True,
-        input=(scripts_folder / "provision_on_remote.sh").read_bytes(),
+        input=(scripts_folder / "provision_test.sh").read_bytes(),
         timeout=timeout.total_seconds(),
     )
 

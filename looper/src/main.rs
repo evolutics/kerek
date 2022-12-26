@@ -20,7 +20,7 @@ fn main() -> anyhow::Result<()> {
 #[derive(Parser)]
 #[clap(version)]
 struct Arguments {
-    #[clap(default_value = "kerek.json", long, parse(from_os_str))]
+    #[clap(default_value = "kerek.json", long, value_parser)]
     configuration: path::PathBuf,
 
     #[clap(subcommand)]

@@ -5,35 +5,42 @@ use std::ffi;
 use std::fs;
 
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
-    for folder in [&configuration.cache.folder, &configuration.cache.workbench] {
+    for folder in [
+        &configuration.cache.scripts.folder,
+        &configuration.cache.staging.folder,
+        &configuration.cache.workbench,
+    ] {
         fs::create_dir_all(folder)
             .with_context(|| format!("Unable to create cache folder: {folder:?}"))?;
     }
 
     for (file, contents) in [
-        (&configuration.cache.build, include_str!("assets/build.py")),
         (
-            &configuration.cache.deploy,
+            &configuration.cache.scripts.build,
+            include_str!("assets/build.py"),
+        ),
+        (
+            &configuration.cache.scripts.deploy,
             include_str!("assets/deploy.py"),
         ),
         (
-            &configuration.cache.deploy_on_remote,
+            &configuration.cache.scripts.deploy_on_remote,
             include_str!("assets/deploy_on_remote.py"),
         ),
         (
-            &configuration.cache.move_to_next_version,
+            &configuration.cache.scripts.move_to_next_version,
             include_str!("assets/move_to_next_version.sh"),
         ),
         (
-            &configuration.cache.provision,
+            &configuration.cache.scripts.provision,
             include_str!("assets/provision.py"),
         ),
         (
-            &configuration.cache.provision_on_remote,
+            &configuration.cache.scripts.provision_on_remote,
             include_str!("assets/provision_on_remote.sh"),
         ),
         (
-            &configuration.cache.vagrantfile,
+            &configuration.cache.staging.vagrantfile,
             &get_vagrantfile_contents(&configuration.staging)?,
         ),
     ] {

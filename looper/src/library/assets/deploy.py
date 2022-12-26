@@ -34,7 +34,7 @@ def _synchronize_artifacts(local_images_folder, remote_images_folder):
 
 
 def _deploy_on_remote(remote_images_folder):
-    cache_folder = pathlib.Path(os.environ["KEREK_CACHE_FOLDER"])
+    scripts_folder = pathlib.Path(os.environ["KEREK_CACHE_SCRIPTS"])
     subprocess.run(
         [
             "ssh",
@@ -49,7 +49,7 @@ def _deploy_on_remote(remote_images_folder):
             remote_images_folder,
         ],
         check=True,
-        input=(cache_folder / "deploy_on_remote.py").read_bytes(),
+        input=(scripts_folder / "deploy_on_remote.py").read_bytes(),
     )
 
 

@@ -230,6 +230,10 @@ fn get_variables(cache: &Cache) -> collections::HashMap<ffi::OsString, ffi::OsSt
             ffi::OsString::from("KEREK_CACHE_WORKBENCH"),
             cache.workbench.clone().into_os_string(),
         ),
+        (
+            ffi::OsString::from("KEREK_REMOTE_IMAGES_FOLDER"),
+            ffi::OsString::from("images"),
+        ),
     ])
 }
 

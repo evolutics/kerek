@@ -6,9 +6,9 @@ import enum
 import functools
 import io
 import json
+import os
 import pathlib
 import subprocess
-import sys
 
 
 def main():
@@ -50,7 +50,7 @@ class _ContainerChange:
 
 
 def _load_target_images():
-    images_folder = pathlib.Path(sys.argv[1])
+    images_folder = pathlib.Path(os.environ["KEREK_REMOTE_IMAGES_FOLDER"])
     image_files = sorted(images_folder.iterdir())
     for image_file in image_files:
         print(f"Loading image file {str(image_file)!r}.")

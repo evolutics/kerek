@@ -59,9 +59,11 @@ def _test_provisioning():
     while True:
         try:
             return _try_to_test_provisioning(timeout)
-        except subprocess.SubprocessError:
+        except subprocess.CalledProcessError:
+            pass
+        except subprocess.TimeoutExpired:
             timeout *= 2
-            time.sleep(datetime.timedelta(seconds=1).total_seconds())
+        time.sleep(datetime.timedelta(seconds=1).total_seconds())
 
 
 def _try_to_test_provisioning(timeout):

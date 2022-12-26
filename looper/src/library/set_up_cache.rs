@@ -1,7 +1,6 @@
 use super::configuration;
 use anyhow::Context;
 use std::borrow;
-use std::ffi;
 use std::fs;
 
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
@@ -41,7 +40,7 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
         ),
         (
             &configuration.cache.staging.vagrantfile,
-            &get_vagrantfile_contents(&configuration.staging)?,
+            &get_vagrantfile_contents(configuration)?,
         ),
     ] {
         fs::write(file, contents)
@@ -52,19 +51,14 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
 }
 
 fn get_vagrantfile_contents(
-    environment: &configuration::Environment,
+    configuration: &configuration::Main,
 ) -> anyhow::Result<borrow::Cow<str>> {
-    Ok(
-        match environment
-            .variables
-            .get(ffi::OsStr::new("KEREK_VAGRANTFILE"))
-        {
-            None => borrow::Cow::from(include_str!("assets/Vagrantfile")),
-            Some(path) => {
-                let contents = fs::read_to_string(path)
-                    .with_context(|| format!("Unable to read Vagrantfile: {path:?}"))?;
-                borrow::Cow::from(contents)
-            }
-        },
-    )
+    Ok(match &configuration.vagrantfile {
+        None => borrow::Cow::from(include_str!("assets/Vagrantfile")),
+        Some(path) => {
+            let contents = fs::read_to_string(path)
+                .with_context(|| format!("Unable to read Vagrantfile: {path:?}"))?;
+            borrow::Cow::from(contents)
+        }
+    })
 }

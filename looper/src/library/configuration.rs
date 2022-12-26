@@ -15,6 +15,7 @@ pub fn get(path: path::PathBuf) -> anyhow::Result<Main> {
 
 pub struct Main {
     pub cache: Cache,
+    pub vagrantfile: Option<path::PathBuf>,
     pub life_cycle: LifeCycle,
     pub tests: Tests,
     pub variables: collections::HashMap<ffi::OsString, ffi::OsString>,
@@ -67,6 +68,7 @@ pub struct Environment {
 #[serde(deny_unknown_fields)]
 struct UserFacingMain {
     pub cache_folder: Option<path::PathBuf>,
+    pub vagrantfile: Option<path::PathBuf>,
     #[serde(default)]
     pub life_cycle: UserFacingLifeCycle,
     #[serde(default)]
@@ -113,6 +115,7 @@ fn convert(main: UserFacingMain) -> Main {
         main.cache_folder
             .unwrap_or_else(|| path::PathBuf::from(".kerek")),
     );
+    let vagrantfile = main.vagrantfile;
     let life_cycle = get_life_cycle(&cache, main.life_cycle);
     let tests = get_tests(main.tests);
     let variables = get_variables(&cache);
@@ -121,6 +124,7 @@ fn convert(main: UserFacingMain) -> Main {
 
     Main {
         cache,
+        vagrantfile,
         life_cycle,
         tests,
         variables,

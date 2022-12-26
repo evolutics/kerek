@@ -15,7 +15,7 @@ def main():
 def _synchronize_artifacts():
     # TODO: Escape quotes.
     quoted_ssh_configuration = f"'{os.environ['KEREK_SSH_CONFIGURATION']}'"
-    destination = f"kerek@{os.environ['KEREK_SSH_HOST']}"
+    destination = f"{os.environ['KEREK_DEPLOY_USER']}@{os.environ['KEREK_SSH_HOST']}"
 
     subprocess.run(
         [
@@ -40,7 +40,7 @@ def _deploy_on_remote():
             "-F",
             os.environ["KEREK_SSH_CONFIGURATION"],
             "-l",
-            "kerek",
+            os.environ["KEREK_DEPLOY_USER"],
             os.environ["KEREK_SSH_HOST"],
             "--",
             f"KEREK_REMOTE_IMAGES_FOLDER={os.environ['KEREK_REMOTE_IMAGES_FOLDER']}",

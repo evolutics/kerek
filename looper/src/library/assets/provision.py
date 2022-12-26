@@ -73,6 +73,7 @@ def _try_to_test_provisioning(timeout):
             os.environ["KEREK_SSH_CONFIGURATION"],
             os.environ["KEREK_SSH_HOST"],
             "--",
+            f"KEREK_DEPLOY_USER={os.environ['KEREK_DEPLOY_USER']}",
             "bash",
         ],
         check=True,

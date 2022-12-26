@@ -18,13 +18,13 @@
     - name: Manage group
       become: true
       ansible.builtin.group:
-        name: kerek
+        name: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
 
     - name: Manage user
       become: true
       ansible.builtin.user:
-        group: kerek
-        name: kerek
+        group: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+        name: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
         shell: /bin/bash
 
     - name: Read authorized SSH keys
@@ -36,7 +36,7 @@
       become: true
       ansible.posix.authorized_key:
         key: "{{ ssh_authorized_keys.content | b64decode }}"
-        user: kerek
+        user: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
 
     - name: Configure OpenSSH daemon
       become: true
@@ -47,7 +47,11 @@
 
     - name: Enable lingering for Podman # noqa no-changed-when
       become: true
-      ansible.builtin.command: loginctl enable-linger kerek
+      ansible.builtin.command:
+        argv:
+          - loginctl
+          - enable-linger
+          - "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
 
     - name: Reduce unprivileged port start for Podman
       become: true

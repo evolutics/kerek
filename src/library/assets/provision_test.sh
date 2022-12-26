@@ -6,20 +6,6 @@ set -o pipefail
 
 set -o xtrace
 
-test_package_management() {
-  [[ ! -f /var/run/reboot-required ]]
-
-  systemctl is-active unattended-upgrades.service
-}
-
-test_user_management() {
-  local -r sshd_configuration="$(sudo sshd -T)"
-  echo "${sshd_configuration}" | grep '^passwordauthentication no$'
-  echo "${sshd_configuration}" | grep '^permitrootlogin no$'
-
-  [[ "$(groups kerek)" == 'kerek : kerek' ]]
-}
-
 test_container_engine() {
   podman --version
   loginctl show-user kerek | grep '^Linger=yes$'
@@ -43,11 +29,25 @@ To                         Action      From
 ')
 }
 
+test_package_management() {
+  [[ ! -f /var/run/reboot-required ]]
+
+  systemctl is-active unattended-upgrades.service
+}
+
+test_user_management() {
+  local -r sshd_configuration="$(sudo sshd -T)"
+  echo "${sshd_configuration}" | grep '^passwordauthentication no$'
+  echo "${sshd_configuration}" | grep '^permitrootlogin no$'
+
+  [[ "$(groups kerek)" == 'kerek : kerek' ]]
+}
+
 main() {
-  test_package_management
-  test_user_management
   test_container_engine
   test_firewall
+  test_package_management
+  test_user_management
 }
 
 main "$@"

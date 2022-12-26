@@ -35,9 +35,11 @@ pub struct CacheScripts {
     pub build: path::PathBuf,
     pub deploy: path::PathBuf,
     pub deploy_on_remote: path::PathBuf,
+    pub inventory: path::PathBuf,
     pub move_to_next_version: path::PathBuf,
+    pub playbook: path::PathBuf,
     pub provision: path::PathBuf,
-    pub provision_on_remote: path::PathBuf,
+    pub provision_test: path::PathBuf,
 }
 
 pub struct CacheStaging {
@@ -145,9 +147,11 @@ fn get_cache(folder: path::PathBuf) -> Cache {
             build: scripts.join("build.py"),
             deploy: scripts.join("deploy.py"),
             deploy_on_remote: scripts.join("deploy_on_remote.py"),
+            inventory: scripts.join("inventory.yaml"),
             move_to_next_version: scripts.join("move_to_next_version.sh"),
+            playbook: scripts.join("playbook.yaml"),
             provision: scripts.join("provision.py"),
-            provision_on_remote: scripts.join("provision_on_remote.sh"),
+            provision_test: scripts.join("provision_test.sh"),
         },
         staging: CacheStaging {
             folder: staging.clone(),

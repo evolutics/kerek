@@ -6,26 +6,10 @@ set -o pipefail
 
 set -o xtrace
 
-do_package_management_setup() {
-  sudo apt-get update
-  sudo apt-get --yes upgrade
-  sudo apt-get install --yes unattended-upgrades
-}
-
 test_package_management_setup() {
   [[ ! -f /var/run/reboot-required ]]
 
   systemctl is-active unattended-upgrades.service
-}
-
-do_user_setup() {
-  sudo sed --in-place 's/^#\(PermitRootLogin\) .*$/\1 no/' /etc/ssh/sshd_config
-
-  sudo useradd --create-home --shell /bin/bash --user-group kerek
-  sudo rsync --archive --chown kerek:kerek "${HOME}/.ssh" /home/kerek
-
-  echo '%kerek ALL=(ALL:ALL) NOPASSWD:ALL' \
-    | sudo EDITOR='tee' visudo --file /etc/sudoers.d/kerek --strict
 }
 
 test_user_setup() {
@@ -36,30 +20,10 @@ test_user_setup() {
   [[ "$(groups kerek)" == 'kerek : kerek' ]]
 }
 
-do_podman_setup() {
-  sudo apt-get install --yes podman
-  sudo loginctl enable-linger kerek
-  echo 'net.ipv4.ip_unprivileged_port_start=80' \
-    | sudo tee --append /etc/sysctl.conf
-}
-
 test_podman_setup() {
   podman --version
   loginctl show-user kerek | grep '^Linger=yes$'
   [[ "$(sysctl --values net.ipv4.ip_unprivileged_port_start)" == 80 ]]
-}
-
-do_firewall_setup() {
-  sudo apt-get install ufw
-  sudo ufw --force reset
-
-  sudo ufw default deny incoming
-
-  sudo ufw allow http
-  sudo ufw allow https
-  sudo ufw allow ssh
-
-  sudo ufw --force enable
 }
 
 test_firewall_setup() {
@@ -80,13 +44,10 @@ To                         Action      From
 }
 
 main() {
-  for task in \
-    package_management_setup \
-    user_setup \
-    podman_setup \
-    firewall_setup; do
-    "$1_${task}"
-  done
+  test_package_management_setup
+  test_user_setup
+  test_podman_setup
+  test_firewall_setup
 }
 
 main "$@"

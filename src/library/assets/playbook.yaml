@@ -1,0 +1,83 @@
+- name: Provision
+  hosts: all
+  tasks:
+    - name: Manage packages
+      become: true
+      ansible.builtin.apt:
+        pkg:
+          - podman
+          - ufw
+          - unattended-upgrades
+        update_cache: true
+
+    - name: Upgrade packages
+      become: true
+      ansible.builtin.apt:
+        upgrade: safe
+
+    - name: Manage group
+      become: true
+      ansible.builtin.group:
+        name: kerek
+
+    - name: Manage user
+      become: true
+      ansible.builtin.user:
+        group: kerek
+        name: kerek
+        shell: /bin/bash
+
+    - name: Read authorized SSH keys
+      ansible.builtin.slurp:
+        src: "/home/{{ ansible_user_id }}/.ssh/authorized_keys"
+      register: ssh_authorized_keys
+
+    - name: Write authorized SSH keys
+      become: true
+      ansible.posix.authorized_key:
+        key: "{{ ssh_authorized_keys.content | b64decode }}"
+        user: kerek
+
+    - name: Configure files
+      become: true
+      ansible.builtin.lineinfile:
+        line: "{{ item.line }}"
+        path: "{{ item.path }}"
+        regexp: "{{ item.regexp }}"
+        validate: "{{ item.validate | default(None) }}"
+      loop:
+        - line: "%kerek ALL=(ALL:ALL) NOPASSWD:ALL"
+          path: /etc/sudoers
+          regexp: '^%kerek\b'
+          validate: "visudo --check --file %s --strict"
+        - line: "PermitRootLogin no"
+          path: /etc/ssh/sshd_config
+          regexp: '\bPermitRootLogin\b'
+
+    - name: Enable lingering for Podman # noqa no-changed-when
+      become: true
+      ansible.builtin.command: loginctl enable-linger kerek
+
+    - name: Reduce unprivileged port start for Podman
+      become: true
+      ansible.posix.sysctl:
+        name: net.ipv4.ip_unprivileged_port_start
+        value: "80"
+
+    - name: Configure firewall in general
+      become: true
+      community.general.ufw:
+        default: deny
+        direction: incoming
+        state: enabled
+
+    - name: Configure firewall exceptions
+      become: true
+      community.general.ufw:
+        direction: in
+        rule: allow
+        to_port: "{{ item }}"
+      loop:
+        - http
+        - https
+        - ssh

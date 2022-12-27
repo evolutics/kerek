@@ -8,7 +8,7 @@ while true; do
   git fetch --prune
 
   child_commit="$(git rev-list --ancestry-path --first-parent \
-    HEAD..origin/main | tail -1)"
+    HEAD.."${KEREK_GIT_BRANCH}" | tail -1)"
 
   if [[ -n "${child_commit}" ]]; then
     echo "Checking out Git commit ${child_commit}."

@@ -19,10 +19,10 @@ fn test(example: &str) -> anyhow::Result<()> {
     let log_file = folder.join("log.txt");
     fs::write(&log_file, "")?;
 
-    assert!(clean(&folder)?.success());
-    assert!(provision(&folder)?.success());
-    assert!(!run(&folder)?.success());
-    assert!(!dry_run(&folder)?.success());
+    assert!(execute_subcommand("clean", &folder)?.success());
+    assert!(execute_subcommand("provision", &folder)?.success());
+    assert!(!execute_subcommand("run", &folder)?.success());
+    assert!(!execute_subcommand("dry-run", &folder)?.success());
 
     assert_eq!(
         fs::read_to_string(log_file)?,
@@ -67,30 +67,9 @@ fn reset_fake_production(folder: &path::Path) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn clean(folder: &path::Path) -> io::Result<process::ExitStatus> {
+fn execute_subcommand(subcommand: &str, folder: &path::Path) -> io::Result<process::ExitStatus> {
     process::Command::new(env!("CARGO_BIN_EXE_kerek"))
-        .arg("clean")
-        .current_dir(folder)
-        .status()
-}
-
-fn provision(folder: &path::Path) -> io::Result<process::ExitStatus> {
-    process::Command::new(env!("CARGO_BIN_EXE_kerek"))
-        .arg("provision")
-        .current_dir(folder)
-        .status()
-}
-
-fn run(folder: &path::Path) -> io::Result<process::ExitStatus> {
-    process::Command::new(env!("CARGO_BIN_EXE_kerek"))
-        .arg("run")
-        .current_dir(folder)
-        .status()
-}
-
-fn dry_run(folder: &path::Path) -> io::Result<process::ExitStatus> {
-    process::Command::new(env!("CARGO_BIN_EXE_kerek"))
-        .arg("dry-run")
+        .arg(subcommand)
         .current_dir(folder)
         .status()
 }

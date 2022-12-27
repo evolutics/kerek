@@ -166,30 +166,26 @@ fn get_life_cycle(cache: &Cache, life_cycle: UserFacingLifeCycle) -> LifeCycle {
     LifeCycle {
         provision: convert_nonempty_or_else(life_cycle.provision, || {
             vec![
-                ffi::OsString::from("python3"),
-                ffi::OsString::from("--"),
-                ffi::OsString::from(&cache.scripts.provision),
+                "python3".into(),
+                "--".into(),
+                (&cache.scripts.provision).into(),
             ]
         }),
         build: convert_nonempty_or_else(life_cycle.build, || {
-            vec![
-                ffi::OsString::from("python3"),
-                ffi::OsString::from("--"),
-                ffi::OsString::from(&cache.scripts.build),
-            ]
+            vec!["python3".into(), "--".into(), (&cache.scripts.build).into()]
         }),
         deploy: convert_nonempty_or_else(life_cycle.deploy, || {
             vec![
-                ffi::OsString::from("python3"),
-                ffi::OsString::from("--"),
-                ffi::OsString::from(&cache.scripts.deploy),
+                "python3".into(),
+                "--".into(),
+                (&cache.scripts.deploy).into(),
             ]
         }),
         move_to_next_version: convert_nonempty_or_else(life_cycle.move_to_next_version, || {
             vec![
-                ffi::OsString::from("bash"),
-                ffi::OsString::from("--"),
-                ffi::OsString::from(&cache.scripts.move_to_next_version),
+                "bash".into(),
+                "--".into(),
+                (&cache.scripts.move_to_next_version).into(),
             ]
         }),
     }
@@ -208,48 +204,23 @@ fn convert_nonempty_or_else<F: Fn() -> Vec<U>, T, U: From<T>>(
 
 fn get_tests(tests: UserFacingTests) -> Tests {
     Tests {
-        base: convert_nonempty_or_else(tests.base, || {
-            vec![ffi::OsString::from("scripts/base_test.sh")]
-        }),
-        smoke: convert_nonempty_or_else(tests.smoke, || {
-            vec![ffi::OsString::from("scripts/smoke_test.sh")]
-        }),
+        base: convert_nonempty_or_else(tests.base, || vec!["scripts/base_test.sh".into()]),
+        smoke: convert_nonempty_or_else(tests.smoke, || vec!["scripts/smoke_test.sh".into()]),
         acceptance: convert_nonempty_or_else(tests.acceptance, || {
-            vec![ffi::OsString::from("scripts/acceptance_test.sh")]
+            vec!["scripts/acceptance_test.sh".into()]
         }),
     }
 }
 
 fn get_variables(cache: &Cache) -> collections::HashMap<ffi::OsString, ffi::OsString> {
     collections::HashMap::from([
-        (
-            ffi::OsString::from("KEREK_CACHE_SCRIPTS"),
-            cache.scripts.folder.clone().into_os_string(),
-        ),
-        (
-            ffi::OsString::from("KEREK_CACHE_WORKBENCH"),
-            cache.workbench.clone().into_os_string(),
-        ),
-        (
-            ffi::OsString::from("KEREK_CONTAINER_NETWORK"),
-            ffi::OsString::from("main"),
-        ),
-        (
-            ffi::OsString::from("KEREK_DEPLOY_USER"),
-            ffi::OsString::from("kerek"),
-        ),
-        (
-            ffi::OsString::from("KEREK_GIT_BRANCH"),
-            ffi::OsString::from("origin/main"),
-        ),
-        (
-            ffi::OsString::from("KEREK_MANIFEST_FILE"),
-            ffi::OsString::from("images.json"),
-        ),
-        (
-            ffi::OsString::from("KEREK_REMOTE_IMAGES_FOLDER"),
-            ffi::OsString::from("images"),
-        ),
+        ("KEREK_CACHE_SCRIPTS".into(), (&cache.scripts.folder).into()),
+        ("KEREK_CACHE_WORKBENCH".into(), (&cache.workbench).into()),
+        ("KEREK_CONTAINER_NETWORK".into(), "main".into()),
+        ("KEREK_DEPLOY_USER".into(), "kerek".into()),
+        ("KEREK_GIT_BRANCH".into(), "origin/main".into()),
+        ("KEREK_MANIFEST_FILE".into(), "images.json".into()),
+        ("KEREK_REMOTE_IMAGES_FOLDER".into(), "images".into()),
     ])
 }
 
@@ -261,18 +232,12 @@ fn get_staging(
         Environment {
             id: String::from("staging"),
             variables: collections::HashMap::from([
+                ("KEREK_IP_ADDRESS".into(), "192.168.60.158".into()),
                 (
-                    ffi::OsString::from("KEREK_IP_ADDRESS"),
-                    ffi::OsString::from("192.168.60.158"),
+                    "KEREK_SSH_CONFIGURATION".into(),
+                    (&cache.staging.ssh_configuration).into(),
                 ),
-                (
-                    ffi::OsString::from("KEREK_SSH_CONFIGURATION"),
-                    cache.staging.ssh_configuration.clone().into(),
-                ),
-                (
-                    ffi::OsString::from("KEREK_SSH_HOST"),
-                    ffi::OsString::from("default"),
-                ),
+                ("KEREK_SSH_HOST".into(), "default".into()),
             ]),
         },
         custom_variables,
@@ -301,7 +266,7 @@ fn get_production(custom_variables: collections::HashMap<String, String>) -> Env
         Environment {
             id: String::from("production"),
             variables: collections::HashMap::from([(
-                ffi::OsString::from("KEREK_SSH_CONFIGURATION"),
+                "KEREK_SSH_CONFIGURATION".into(),
                 ["safe", "ssh_configuration"]
                     .iter()
                     .collect::<path::PathBuf>()

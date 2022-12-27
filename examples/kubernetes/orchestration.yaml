@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
     - name: web
-      image: k8s.gcr.io/echoserver:1.4
+      image: k8s.gcr.io/echoserver:1.10
       ports:
         - containerPort: 8080
           hostPort: 80

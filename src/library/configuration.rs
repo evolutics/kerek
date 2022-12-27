@@ -235,6 +235,10 @@ fn get_variables(cache: &Cache) -> collections::HashMap<ffi::OsString, ffi::OsSt
             ffi::OsString::from("kerek"),
         ),
         (
+            ffi::OsString::from("KEREK_GIT_BRANCH"),
+            ffi::OsString::from("origin/main"),
+        ),
+        (
             ffi::OsString::from("KEREK_MANIFEST_FILE"),
             ffi::OsString::from("images.json"),
         ),

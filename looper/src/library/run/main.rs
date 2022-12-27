@@ -4,14 +4,14 @@ use super::iterate;
 use super::reset;
 use std::process;
 
-pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
+pub fn go(configuration: &configuration::Main, is_dry_run: bool) -> anyhow::Result<()> {
     load_snapshot(configuration).or_else(|_| {
         reset::go(configuration)?;
         save_snapshot(configuration)
     })?;
 
     loop {
-        iterate::go(configuration)?;
+        iterate::go(configuration, is_dry_run)?;
         load_snapshot(configuration)?;
     }
 }

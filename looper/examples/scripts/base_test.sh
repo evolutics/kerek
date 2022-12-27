@@ -6,6 +6,7 @@ set -o pipefail
 
 echo 'Base tests' >>log.txt
 
-if grep 'Move to next version' log.txt; then
+if [[ $(("$(grep --count 'Base tests' log.txt)" % 2)) == 0 ]]; then
+  echo '---' >>log.txt
   exit 1
 fi

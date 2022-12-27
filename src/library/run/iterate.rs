@@ -3,14 +3,16 @@ use super::super::configuration;
 use anyhow::Context;
 use std::process;
 
-pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
+pub fn go(configuration: &configuration::Main, is_dry_run: bool) -> anyhow::Result<()> {
     run_base_tests(configuration)?;
     build(configuration)?;
     deploy(configuration, &configuration.staging)?;
     run_smoke_tests(configuration, &configuration.staging)?;
     run_acceptance_tests(configuration, &configuration.staging)?;
-    deploy(configuration, &configuration.production)?;
-    run_smoke_tests(configuration, &configuration.production)?;
+    if !is_dry_run {
+        deploy(configuration, &configuration.production)?;
+        run_smoke_tests(configuration, &configuration.production)?;
+    }
     move_to_next_version(configuration)
 }
 

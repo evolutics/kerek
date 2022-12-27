@@ -4,5 +4,5 @@ use std::path;
 
 pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
     let configuration = configuration::get(configuration)?;
-    run::go(&configuration, false)
+    run::go(&configuration, true)
 }

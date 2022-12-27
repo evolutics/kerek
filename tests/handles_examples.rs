@@ -22,6 +22,7 @@ fn test(example: &str) -> anyhow::Result<()> {
     assert!(clean(&folder)?.success());
     assert!(provision(&folder)?.success());
     assert!(!run(&folder)?.success());
+    assert!(!dry_run(&folder)?.success());
 
     assert_eq!(
         fs::read_to_string(log_file)?,
@@ -31,6 +32,13 @@ Acceptance tests
 Smoke tests: production
 Move to next version
 Base tests
+---
+Base tests
+Smoke tests: staging
+Acceptance tests
+Move to next version
+Base tests
+---
 ",
     );
 
@@ -76,6 +84,13 @@ fn provision(folder: &path::Path) -> io::Result<process::ExitStatus> {
 fn run(folder: &path::Path) -> io::Result<process::ExitStatus> {
     process::Command::new(env!("CARGO_BIN_EXE_kerek"))
         .arg("run")
+        .current_dir(folder)
+        .status()
+}
+
+fn dry_run(folder: &path::Path) -> io::Result<process::ExitStatus> {
+    process::Command::new(env!("CARGO_BIN_EXE_kerek"))
+        .arg("dry-run")
         .current_dir(folder)
         .status()
 }

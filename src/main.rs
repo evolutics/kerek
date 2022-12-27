@@ -37,3 +37,14 @@ enum Action {
     /// Builds, tests, deploys in a loop.
     Run,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::CommandFactory;
+
+    #[test]
+    fn cli_verifies() {
+        Arguments::command().debug_assert()
+    }
+}

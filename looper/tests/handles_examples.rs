@@ -26,9 +26,9 @@ fn test(example: &str) -> anyhow::Result<()> {
     assert_eq!(
         fs::read_to_string(log_file)?,
         "Base tests
-Smoke tests
+Smoke tests: staging
 Acceptance tests
-Smoke tests
+Smoke tests: production
 Move to next version
 Base tests
 ",

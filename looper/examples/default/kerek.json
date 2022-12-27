@@ -8,7 +8,11 @@
     "acceptance": ["../scripts/acceptance_test.sh"]
   },
   "environment_variables": {
+    "staging": {
+      "KEREK_ENVIRONMENT_ID": "staging"
+    },
     "production": {
+      "KEREK_ENVIRONMENT_ID": "production",
       "KEREK_IP_ADDRESS": "192.168.60.159",
       "KEREK_SSH_HOST": "default"
     }

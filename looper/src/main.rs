@@ -18,12 +18,13 @@ fn main() -> anyhow::Result<()> {
 }
 
 #[derive(Parser)]
-#[clap(version)]
+#[command(author, version, about, long_about = None)]
 struct Arguments {
-    #[clap(default_value = "kerek.json", long, value_parser)]
+    /// Path to configuration file.
+    #[arg(default_value = "kerek.json", long)]
     configuration: path::PathBuf,
 
-    #[clap(subcommand)]
+    #[command(subcommand)]
     action: Action,
 }
 

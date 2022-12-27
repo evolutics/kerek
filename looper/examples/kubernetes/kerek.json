@@ -12,8 +12,8 @@
   },
   "environment_variables": {
     "staging": {
-      "KUBECONFIG": ".kerek/workbench/kubeconfig",
-      "KEREK_IP_ADDRESS": "192.168.60.160"
+      "KEREK_IP_ADDRESS": "192.168.60.160",
+      "KUBECONFIG": ".kerek/workbench/kubeconfig"
     },
     "production": {
       "KEREK_IP_ADDRESS": "192.168.60.161",

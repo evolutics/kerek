@@ -231,6 +231,10 @@ fn get_variables(cache: &Cache) -> collections::HashMap<ffi::OsString, ffi::OsSt
             cache.workbench.clone().into_os_string(),
         ),
         (
+            ffi::OsString::from("KEREK_CONTAINER_NETWORK"),
+            ffi::OsString::from("main"),
+        ),
+        (
             ffi::OsString::from("KEREK_DEPLOY_USER"),
             ffi::OsString::from("kerek"),
         ),

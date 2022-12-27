@@ -143,7 +143,6 @@ fn get_cache(folder: path::PathBuf) -> Cache {
     Cache {
         folder,
         scripts: CacheScripts {
-            folder: scripts.clone(),
             build: scripts.join("build.py"),
             deploy: scripts.join("deploy.py"),
             deploy_on_remote: scripts.join("deploy_on_remote.py"),
@@ -152,11 +151,12 @@ fn get_cache(folder: path::PathBuf) -> Cache {
             playbook: scripts.join("playbook.yaml"),
             provision: scripts.join("provision.py"),
             provision_test: scripts.join("provision_test.sh"),
+            folder: scripts,
         },
         staging: CacheStaging {
-            folder: staging.clone(),
             ssh_configuration: staging.join("ssh_configuration"),
             vagrantfile: staging.join("Vagrantfile"),
+            folder: staging,
         },
         workbench,
     }

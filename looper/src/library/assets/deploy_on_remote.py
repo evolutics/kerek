@@ -12,8 +12,6 @@ import subprocess
 
 
 def main():
-    network = "main"
-
     target_image_ids = _load_target_images()
     images = _get_images()
 
@@ -22,9 +20,9 @@ def main():
 
     changes = _plan_changes(actual_images, target_images)
 
-    _create_network_if_not_exists(network)
+    _create_network_if_not_exists()
     for change in changes:
-        _apply_change(network, change)
+        _apply_change(change)
     _collect_garbage()
 
 
@@ -127,7 +125,8 @@ def _plan_changes(actual_images, target_images):
     return changes
 
 
-def _create_network_if_not_exists(network):
+def _create_network_if_not_exists():
+    network = os.environ["KEREK_CONTAINER_NETWORK"]
     try:
         subprocess.run(["podman", "network", "exists", "--", network], check=True)
     except subprocess.CalledProcessError as error:
@@ -138,7 +137,7 @@ def _create_network_if_not_exists(network):
             raise
 
 
-def _apply_change(network, change):
+def _apply_change(change):
     # TODO: Restart containers on reboot with systemd.
     # TODO: Support volumes.
 
@@ -151,10 +150,10 @@ def _apply_change(network, change):
     }[change.operator]
 
     print(summary)
-    operation(network, change)
+    operation(change)
 
 
-def _add_container(network, change):
+def _add_container(change):
     subprocess.run(
         [
             "podman",
@@ -163,7 +162,7 @@ def _add_container(network, change):
             "--name",
             change.container_name,
             "--network",
-            network,
+            os.environ["KEREK_CONTAINER_NETWORK"],
         ]
         + [f"--publish={port_mapping}" for port_mapping in change.port_mappings]
         + ["--restart", "always", "--", change.image_id],
@@ -172,7 +171,7 @@ def _add_container(network, change):
     # TODO: Wait until healthy if there is a health check.
 
 
-def _remove_container(_network, change):
+def _remove_container(change):
     subprocess.run(["podman", "stop", "--", change.container_name], check=True)
     subprocess.run(["podman", "rm", "--", change.container_name], check=True)
 

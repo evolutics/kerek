@@ -1,6 +1,7 @@
 [package]
 name = "kerek"
 version = "0.1.0"
+authors = ["Benjamin Fischer <benjamin.fischer@evolutics.info>"]
 edition = "2021"
 
 [dependencies]

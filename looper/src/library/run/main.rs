@@ -1,21 +1,18 @@
+use super::super::command;
+use super::super::configuration;
 use super::iterate;
 use super::reset;
-use crate::library::command;
-use crate::library::configuration;
-use std::path;
 use std::process;
 
-pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
-    let configuration = configuration::get(configuration)?;
-
-    load_snapshot(&configuration).or_else(|_| {
-        reset::go(&configuration)?;
-        save_snapshot(&configuration)
+pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
+    load_snapshot(configuration).or_else(|_| {
+        reset::go(configuration)?;
+        save_snapshot(configuration)
     })?;
 
     loop {
-        iterate::go(&configuration)?;
-        load_snapshot(&configuration)?;
+        iterate::go(configuration)?;
+        load_snapshot(configuration)?;
     }
 }
 

@@ -7,8 +7,8 @@ import subprocess
 
 
 def main():
-    with pathlib.Path("images.json").open("br") as images_file:
-        build_contexts = json.load(images_file)
+    with pathlib.Path(os.environ["KEREK_MANIFEST_FILE"]).open("br") as manifest_file:
+        build_contexts = json.load(manifest_file)
 
     images_folder = pathlib.Path(os.environ["KEREK_CACHE_WORKBENCH"])
 

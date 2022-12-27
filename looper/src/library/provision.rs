@@ -1,5 +1,5 @@
 use super::command;
-use crate::library::configuration;
+use super::configuration;
 use std::process;
 
 pub fn go(

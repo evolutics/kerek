@@ -3,6 +3,7 @@
 import datetime
 import os
 import pathlib
+import shlex
 import subprocess
 import time
 
@@ -18,16 +19,13 @@ def main():
 
 def _do_provisioning():
     scripts_folder = pathlib.Path(os.environ["KEREK_CACHE_SCRIPTS"])
-    # TODO: Escape quotes.
-    quoted_ssh_configuration = f"'{os.environ['KEREK_SSH_CONFIGURATION']}'"
-
     subprocess.run(
         [
             "ansible-playbook",
             "--inventory",
             scripts_folder / "inventory.yaml",
             "--ssh-common-args",
-            f"-F {quoted_ssh_configuration}",
+            shlex.join(["-F", os.environ["KEREK_SSH_CONFIGURATION"]]),
             "--",
             scripts_folder / "playbook.yaml",
         ],

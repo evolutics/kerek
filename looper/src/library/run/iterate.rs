@@ -9,13 +9,12 @@ pub fn go(configuration: &configuration::Main, is_dry_run: bool) -> anyhow::Resu
     deploy(configuration, &configuration.staging)?;
     run_smoke_tests(configuration, &configuration.staging)?;
     run_acceptance_tests(configuration, &configuration.staging)?;
-    if is_dry_run {
-        Ok(())
-    } else {
+    if !is_dry_run {
         deploy(configuration, &configuration.production)?;
         run_smoke_tests(configuration, &configuration.production)?;
-        move_to_next_version(configuration)
+        move_to_next_version(configuration)?;
     }
+    Ok(())
 }
 
 fn run_base_tests(configuration: &configuration::Main) -> anyhow::Result<()> {

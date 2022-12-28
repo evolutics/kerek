@@ -36,7 +36,7 @@ enum Action {
     Clean,
     /// Builds, tests, deploys once to staging only.
     DryRun,
-    /// Sets up the production environment for the first time.
+    /// Applies provision script to production.
     Provision,
     /// Builds, tests, deploys in a loop.
     Run,

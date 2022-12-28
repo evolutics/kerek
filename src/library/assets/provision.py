@@ -23,7 +23,7 @@ def _do_provisioning():
         [
             "ansible-playbook",
             "--inventory",
-            scripts_folder / "inventory.yaml",
+            f",{os.environ['KEREK_SSH_HOST']}",
             "--ssh-common-args",
             shlex.join(["-F", os.environ["KEREK_SSH_CONFIGURATION"]]),
             "--",

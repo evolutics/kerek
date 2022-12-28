@@ -27,10 +27,6 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
             include_str!("assets/deploy_on_remote.py"),
         ),
         (
-            &configuration.cache.scripts.inventory,
-            include_str!("assets/inventory.yaml"),
-        ),
-        (
             &configuration.cache.scripts.move_to_next_version,
             include_str!("assets/move_to_next_version.sh"),
         ),

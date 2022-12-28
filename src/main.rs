@@ -34,11 +34,11 @@ struct Arguments {
 enum Action {
     /// Tears down internal resources such as the cache folder.
     Clean,
-    /// Builds, tests, deploys to staging in a loop.
+    /// Builds, tests, deploys once to staging only.
     DryRun,
     /// Sets up the production environment for the first time.
     Provision,
-    /// Builds, tests, deploys to staging, then to production, in a loop.
+    /// Builds, tests, deploys in a loop.
     Run,
 }
 

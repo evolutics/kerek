@@ -6,7 +6,7 @@ set -o pipefail
 
 echo 'Base tests' >>log.txt
 
-if [[ $(("$(grep --count 'Base tests' log.txt)" % 2)) == 0 ]]; then
+if (("$(grep --count 'Base tests' log.txt)" == 2)); then
   echo '---' >>log.txt
   exit 1
 fi

@@ -22,7 +22,7 @@ fn test(example: &str) -> anyhow::Result<()> {
     assert!(execute_subcommand("clean", &folder)?.success());
     assert!(execute_subcommand("provision", &folder)?.success());
     assert!(!execute_subcommand("run", &folder)?.success());
-    assert!(!execute_subcommand("dry-run", &folder)?.success());
+    assert!(execute_subcommand("dry-run", &folder)?.success());
 
     assert_eq!(
         fs::read_to_string(log_file)?,
@@ -36,9 +36,6 @@ Base tests
 Base tests
 Smoke tests: staging
 Acceptance tests
-Move to next version
-Base tests
----
 ",
     );
 

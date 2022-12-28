@@ -12,6 +12,9 @@ pub fn go(configuration: &configuration::Main, is_dry_run: bool) -> anyhow::Resu
 
     loop {
         iterate::go(configuration, is_dry_run)?;
+        if is_dry_run {
+            break Ok(());
+        }
         load_snapshot(configuration)?;
     }
 }

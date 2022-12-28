@@ -2,6 +2,7 @@
 
 import os
 import pathlib
+import shlex
 import subprocess
 
 
@@ -13,17 +14,14 @@ def main():
 
 
 def _synchronize_artifacts():
-    # TODO: Escape quotes.
-    quoted_ssh_configuration = f"'{os.environ['KEREK_SSH_CONFIGURATION']}'"
     destination = f"{os.environ['KEREK_DEPLOY_USER']}@{os.environ['KEREK_SSH_HOST']}"
-
     subprocess.run(
         [
             "rsync",
             "--archive",
             "--delete",
             "--rsh",
-            f"ssh -F {quoted_ssh_configuration}",
+            shlex.join(["ssh", "-F", os.environ["KEREK_SSH_CONFIGURATION"]]),
             "--",
             f"{os.environ['KEREK_CACHE_WORKBENCH']}/",
             f"{destination}:{os.environ['KEREK_REMOTE_IMAGES_FOLDER']}",

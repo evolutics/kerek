@@ -57,6 +57,8 @@ fn reset_fake_production(folder: &path::Path) -> anyhow::Result<()> {
     let ssh_configuration = fs::File::create(folder.join("safe/ssh_configuration"))?;
     assert!(process::Command::new("vagrant")
         .arg("ssh-config")
+        .arg("--host")
+        .arg("production")
         .current_dir(folder)
         .stdout(ssh_configuration)
         .status()?

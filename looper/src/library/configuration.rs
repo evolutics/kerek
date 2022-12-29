@@ -235,7 +235,7 @@ fn get_staging(
                     "KEREK_SSH_CONFIGURATION".into(),
                     (&cache.staging.ssh_configuration).into(),
                 ),
-                ("KEREK_SSH_HOST".into(), "default".into()),
+                ("KEREK_SSH_HOST".into(), "staging".into()),
             ]),
         },
         custom_variables,

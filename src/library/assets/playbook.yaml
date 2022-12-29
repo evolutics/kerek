@@ -1,4 +1,4 @@
-- name: Provision
+- name: Do provisioning
   hosts: all
   tasks:
     - name: Manage packages
@@ -44,6 +44,7 @@
         line: "PermitRootLogin no"
         path: /etc/ssh/sshd_config
         regexp: '\bPermitRootLogin\b'
+      notify: Restart OpenSSH daemon
 
     - name: Enable lingering for Podman # noqa no-changed-when
       become: true
@@ -76,3 +77,20 @@
         - http
         - https
         - ssh
+
+  handlers:
+    - name: Restart OpenSSH daemon
+      become: true
+      ansible.builtin.systemd:
+        name: ssh
+        state: restarted
+
+- name: Test provisioning
+  hosts: all
+  tasks:
+    - name: Run script
+      ansible.builtin.script: provision_test.sh
+      environment:
+        KEREK_DEPLOY_USER: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+      register: result
+      until: result.rc == 0

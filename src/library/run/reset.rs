@@ -4,6 +4,7 @@ use super::super::provision;
 use super::super::set_up_cache;
 use super::super::tear_down_cache;
 use anyhow::Context;
+use std::ffi;
 use std::fs;
 use std::process;
 
@@ -32,6 +33,8 @@ fn dump_staging_ssh_configuration(configuration: &configuration::Main) -> anyhow
     command::status(
         process::Command::new("vagrant")
             .arg("ssh-config")
+            .arg("--host")
+            .arg(&configuration.staging.variables[&ffi::OsString::from("KEREK_SSH_HOST")])
             .current_dir(&configuration.cache.staging.folder)
             .envs(&configuration.variables)
             .envs(&configuration.staging.variables)

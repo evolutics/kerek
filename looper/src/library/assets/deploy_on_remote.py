@@ -192,7 +192,6 @@ def _add_container(change):
     subprocess.run(
         ["systemctl", "--now", "--user", "enable", change.systemd_unit], check=True
     )
-    # TODO: Wait until healthy if there is a health check.
 
 
 def _remove_container(change):

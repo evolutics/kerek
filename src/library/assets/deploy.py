@@ -41,7 +41,6 @@ def _deploy_on_remote():
             os.environ["KEREK_DEPLOY_USER"],
             os.environ["KEREK_SSH_HOST"],
             "--",
-            f"KEREK_CONTAINER_NETWORK={os.environ['KEREK_CONTAINER_NETWORK']}",
             f"KEREK_REMOTE_IMAGES_FOLDER={os.environ['KEREK_REMOTE_IMAGES_FOLDER']}",
             "python3",
         ],

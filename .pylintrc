@@ -1,7 +1,5 @@
 [MESSAGES CONTROL]
 
 disable=
-    duplicate-code,
-    fixme,
     missing-function-docstring,
     missing-module-docstring,

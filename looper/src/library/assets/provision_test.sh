@@ -8,7 +8,7 @@ set -o xtrace
 
 test_container_engine() {
   podman --version
-  loginctl show-user "${KEREK_DEPLOY_USER}" | grep '^Linger=yes$'
+  [[ "$(loginctl --property Linger --value show-user "${KEREK_DEPLOY_USER}")" == "yes" ]]
   [[ "$(sysctl --values net.ipv4.ip_unprivileged_port_start)" == 80 ]]
 }
 
@@ -36,12 +36,10 @@ test_package_management() {
 }
 
 test_user_management() {
-  local -r sshd_configuration="$(sudo sshd -T)"
-  echo "${sshd_configuration}" | grep '^passwordauthentication no$'
-  echo "${sshd_configuration}" | grep '^permitrootlogin no$'
+  sudo sshd -T | grep '^passwordauthentication no$'
+  sudo sshd -T | grep '^permitrootlogin no$'
 
-  local -r memberships="$(groups "${KEREK_DEPLOY_USER}")"
-  [[ "${memberships}" == "${KEREK_DEPLOY_USER} : ${KEREK_DEPLOY_USER}" ]]
+  [[ "$(groups "${KEREK_DEPLOY_USER}")" == "${KEREK_DEPLOY_USER} : ${KEREK_DEPLOY_USER}" ]]
   ! sudo --user "${KEREK_DEPLOY_USER}" -- sudo --non-interactive --validate
 }
 

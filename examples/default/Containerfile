@@ -1,4 +1,5 @@
 FROM k8s.gcr.io/echoserver:1.10
 
 LABEL info.evolutics.kerek.container-names='web'
+LABEL info.evolutics.kerek.health-check='curl --fail localhost:8080 || exit 1'
 LABEL info.evolutics.kerek.port-mappings='80:8080'

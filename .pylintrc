@@ -3,3 +3,4 @@
 disable=
     missing-function-docstring,
     missing-module-docstring,
+    too-many-instance-attributes,

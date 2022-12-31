@@ -1,91 +1,95 @@
 - name: Do provisioning
   hosts: all
   tasks:
-    - name: Manage packages
+    - name: Provision packages
       become: true
-      ansible.builtin.apt:
-        pkg:
-          - podman
-          - ufw
-          - unattended-upgrades
-        update_cache: true
+      block:
+        - name: Manage packages
+          ansible.builtin.apt:
+            pkg:
+              - podman
+              - ufw
+              - unattended-upgrades
+            update_cache: true
 
-    - name: Upgrade packages
+        - name: Upgrade packages
+          ansible.builtin.apt:
+            upgrade: safe
+
+    - name: Provision access
+      block:
+        - name: Manage group
+          become: true
+          ansible.builtin.group:
+            name: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+
+        - name: Manage user
+          become: true
+          ansible.builtin.user:
+            group: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+            name: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+            shell: /bin/bash
+
+        - name: Read authorized SSH keys
+          ansible.builtin.slurp:
+            src: "/home/{{ ansible_user_id }}/.ssh/authorized_keys"
+          register: ssh_authorized_keys
+
+        - name: Write authorized SSH keys
+          become: true
+          ansible.posix.authorized_key:
+            key: "{{ ssh_authorized_keys.content | b64decode }}"
+            user: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+
+        - name: Configure OpenSSH daemon
+          become: true
+          ansible.builtin.lineinfile:
+            line: "PermitRootLogin no"
+            path: /etc/ssh/sshd_config
+            regexp: '\bPermitRootLogin\b'
+          notify: Restart OpenSSH daemon
+
+    - name: Provision container platform
       become: true
-      ansible.builtin.apt:
-        upgrade: safe
+      block:
+        - name: Create user systemd folder
+          ansible.builtin.file:
+            group: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+            mode: ug=rwx,o=rx
+            owner: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+            path: "/home/{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}/.config/systemd/user"
+            state: directory
 
-    - name: Manage group
+        - name: Enable user lingering # noqa no-changed-when
+          ansible.builtin.command:
+            argv:
+              - loginctl
+              - enable-linger
+              - "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+
+        - name: Reduce unprivileged port start
+          ansible.posix.sysctl:
+            name: net.ipv4.ip_unprivileged_port_start
+            value: "80"
+
+    - name: Provision firewall
       become: true
-      ansible.builtin.group:
-        name: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+      block:
+        - name: Configure firewall in general
+          community.general.ufw:
+            default: deny
+            direction: incoming
+            state: enabled
 
-    - name: Manage user
-      become: true
-      ansible.builtin.user:
-        group: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
-        name: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
-        shell: /bin/bash
-
-    - name: Read authorized SSH keys
-      ansible.builtin.slurp:
-        src: "/home/{{ ansible_user_id }}/.ssh/authorized_keys"
-      register: ssh_authorized_keys
-
-    - name: Write authorized SSH keys
-      become: true
-      ansible.posix.authorized_key:
-        key: "{{ ssh_authorized_keys.content | b64decode }}"
-        user: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
-
-    - name: Configure OpenSSH daemon
-      become: true
-      ansible.builtin.lineinfile:
-        line: "PermitRootLogin no"
-        path: /etc/ssh/sshd_config
-        regexp: '\bPermitRootLogin\b'
-      notify: Restart OpenSSH daemon
-
-    - name: Create user systemd folder for Podman
-      become: true
-      ansible.builtin.file:
-        group: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
-        mode: ug=rwx,o=rx
-        owner: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
-        path: "/home/{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}/.config/systemd/user"
-        state: directory
-
-    - name: Enable lingering for Podman # noqa no-changed-when
-      become: true
-      ansible.builtin.command:
-        argv:
-          - loginctl
-          - enable-linger
-          - "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
-
-    - name: Reduce unprivileged port start for Podman
-      become: true
-      ansible.posix.sysctl:
-        name: net.ipv4.ip_unprivileged_port_start
-        value: "80"
-
-    - name: Configure firewall in general
-      become: true
-      community.general.ufw:
-        default: deny
-        direction: incoming
-        state: enabled
-
-    - name: Configure firewall exceptions
-      become: true
-      community.general.ufw:
-        direction: in
-        rule: allow
-        to_port: "{{ item }}"
-      loop:
-        - http
-        - https
-        - ssh
+        - name: Configure firewall exceptions
+          community.general.ufw:
+            direction: in
+            rule: allow
+            to_port: "{{ item }}"
+          loop:
+            - http
+            - https
+            - ssh
 
   handlers:
     - name: Restart OpenSSH daemon

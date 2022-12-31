@@ -34,7 +34,7 @@ fn dump_staging_ssh_configuration(configuration: &configuration::Main) -> anyhow
         process::Command::new("vagrant")
             .arg("ssh-config")
             .arg("--host")
-            .arg(&configuration.staging.variables[&ffi::OsString::from("KEREK_SSH_HOST")])
+            .arg(&configuration.staging.variables[ffi::OsStr::new("KEREK_SSH_HOST")])
             .current_dir(&configuration.cache.staging.folder)
             .envs(&configuration.variables)
             .envs(&configuration.staging.variables)

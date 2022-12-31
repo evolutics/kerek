@@ -214,7 +214,6 @@ fn get_variables(cache: &Cache) -> collections::HashMap<ffi::OsString, ffi::OsSt
     collections::HashMap::from([
         ("KEREK_CACHE_SCRIPTS".into(), (&cache.scripts.folder).into()),
         ("KEREK_CACHE_WORKBENCH".into(), (&cache.workbench).into()),
-        ("KEREK_CONTAINER_NETWORK".into(), "main".into()),
         ("KEREK_DEPLOY_USER".into(), "kerek".into()),
         ("KEREK_GIT_BRANCH".into(), "origin/main".into()),
         ("KEREK_MANIFEST_FILE".into(), "images.json".into()),

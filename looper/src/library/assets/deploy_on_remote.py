@@ -22,7 +22,6 @@ def main():
 
     changes = _plan_changes(actual_images, target_images)
 
-    _create_network_if_not_exists()
     for change in changes:
         _apply_change(change)
     _collect_garbage()
@@ -38,6 +37,7 @@ class _Image:
     digest: str
     health_check: str | None
     image_id: str
+    networks: tuple[str, ...]
     port_mappings: tuple[str, ...]
     volume_mounts: tuple[str, ...]
 
@@ -51,6 +51,7 @@ class _ContainerChange:
     health_check: str | None
     image_digest: str
     image_id: str
+    networks: tuple[str, ...]
     operator: _Operator
     port_mappings: tuple[str, ...]
     systemd_unit: str
@@ -83,6 +84,7 @@ def _parse_image_metadata(image):
         digest=image["Digest"],
         health_check=labels.get("info.evolutics.kerek.health-check"),
         image_id=image["Id"],
+        networks=_csv_fields(labels.get("info.evolutics.kerek.networks")),
         port_mappings=_csv_fields(labels.get("info.evolutics.kerek.port-mappings")),
         volume_mounts=_csv_fields(labels.get("info.evolutics.kerek.volume-mounts")),
     )
@@ -101,6 +103,7 @@ def _plan_changes(actual_images, target_images):
             health_check=image.health_check,
             image_digest=image.digest,
             image_id=image.image_id,
+            networks=image.networks,
             operator=operator,
             port_mappings=image.port_mappings,
             systemd_unit=f"container-{container_name}.service",
@@ -140,18 +143,6 @@ def _plan_changes(actual_images, target_images):
     return changes
 
 
-def _create_network_if_not_exists():
-    network = os.environ["KEREK_CONTAINER_NETWORK"]
-    try:
-        subprocess.run(["podman", "network", "exists", "--", network], check=True)
-    except subprocess.CalledProcessError as error:
-        if error.returncode == 1:
-            print(f"Creating network {network!r}.")
-            subprocess.run(["podman", "network", "create", "--", network], check=True)
-        else:
-            raise
-
-
 def _apply_change(change):
     operand = f"container {change.container_name!r} of image {change.image_digest!r}"
 
@@ -166,15 +157,14 @@ def _apply_change(change):
 
 
 def _add_container(change):
+    for network in change.networks:
+        _create_network_if_not_exists(network)
+
     subprocess.run(
         ["podman", "create"]
         + ([f"--health-cmd={change.health_check}"] if change.health_check else [])
-        + [
-            "--name",
-            change.container_name,
-            "--network",
-            os.environ["KEREK_CONTAINER_NETWORK"],
-        ]
+        + ["--name", change.container_name]
+        + [f"--network={network}" for network in change.networks]
         + [f"--publish={port_mapping}" for port_mapping in change.port_mappings]
         + [f"--volume={volume_mount}" for volume_mount in change.volume_mounts]
         + ["--", change.image_id],
@@ -214,6 +204,17 @@ def _add_container(change):
         else:
             break
         time.sleep(timeout.total_seconds())
+
+
+def _create_network_if_not_exists(network):
+    try:
+        subprocess.run(["podman", "network", "exists", "--", network], check=True)
+    except subprocess.CalledProcessError as error:
+        if error.returncode == 1:
+            print(f"Creating network {network!r}.")
+            subprocess.run(["podman", "network", "create", "--", network], check=True)
+        else:
+            raise
 
 
 def _remove_container(change):

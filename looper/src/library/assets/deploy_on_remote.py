@@ -2,6 +2,7 @@
 
 import csv
 import dataclasses
+import datetime
 import enum
 import functools
 import io
@@ -9,6 +10,7 @@ import json
 import os
 import pathlib
 import subprocess
+import time
 
 
 def main():
@@ -34,6 +36,7 @@ class _Image:
     container_count: int
     container_names: tuple[str, ...]
     digest: str
+    health_check: str | None
     image_id: str
     port_mappings: tuple[str, ...]
     volume_mounts: tuple[str, ...]
@@ -45,6 +48,7 @@ _Operator = enum.Enum("_Operator", ["ADD", "KEEP", "REMOVE"])
 @dataclasses.dataclass
 class _ContainerChange:
     container_name: str
+    health_check: str | None
     image_digest: str
     image_id: str
     operator: _Operator
@@ -77,6 +81,7 @@ def _parse_image_metadata(image):
         container_count=int(image["Containers"]),
         container_names=_csv_fields(labels.get("info.evolutics.kerek.container-names")),
         digest=image["Digest"],
+        health_check=labels.get("info.evolutics.kerek.health-check"),
         image_id=image["Id"],
         port_mappings=_csv_fields(labels.get("info.evolutics.kerek.port-mappings")),
         volume_mounts=_csv_fields(labels.get("info.evolutics.kerek.volume-mounts")),
@@ -93,6 +98,7 @@ def _plan_changes(actual_images, target_images):
     changes = [
         _ContainerChange(
             container_name=container_name,
+            health_check=image.health_check,
             image_digest=image.digest,
             image_id=image.image_id,
             operator=operator,
@@ -169,6 +175,7 @@ def _add_container(change):
             "--network",
             os.environ["KEREK_CONTAINER_NETWORK"],
         ]
+        + ([f"--health-cmd={change.health_check}"] if change.health_check else [])
         + [f"--publish={port_mapping}" for port_mapping in change.port_mappings]
         + [f"--volume={volume_mount}" for volume_mount in change.volume_mounts]
         + ["--", change.image_id],
@@ -192,6 +199,22 @@ def _add_container(change):
     subprocess.run(
         ["systemctl", "--now", "--user", "enable", change.systemd_unit], check=True
     )
+
+    timeout = datetime.timedelta(seconds=5)
+    while change.health_check:
+        try:
+            subprocess.run(
+                ["podman", "healthcheck", "run", change.container_name],
+                check=True,
+                timeout=timeout.total_seconds(),
+            )
+        except subprocess.CalledProcessError:
+            pass
+        except subprocess.TimeoutExpired:
+            timeout *= 2
+        else:
+            break
+        time.sleep(timeout.total_seconds())
 
 
 def _remove_container(change):

@@ -167,15 +167,14 @@ def _apply_change(change):
 
 def _add_container(change):
     subprocess.run(
-        [
-            "podman",
-            "create",
+        ["podman", "create"]
+        + ([f"--health-cmd={change.health_check}"] if change.health_check else [])
+        + [
             "--name",
             change.container_name,
             "--network",
             os.environ["KEREK_CONTAINER_NETWORK"],
         ]
-        + ([f"--health-cmd={change.health_check}"] if change.health_check else [])
         + [f"--publish={port_mapping}" for port_mapping in change.port_mappings]
         + [f"--volume={volume_mount}" for volume_mount in change.volume_mounts]
         + ["--", change.image_id],

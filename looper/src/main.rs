@@ -32,7 +32,7 @@ struct Arguments {
 
 #[derive(clap::Subcommand)]
 enum Action {
-    /// Tears down internal resources such as the cache folder.
+    /// Removes internal resources such as the cache folder.
     Clean,
     /// Builds, tests, deploys once to staging only.
     DryRun,

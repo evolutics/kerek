@@ -46,6 +46,15 @@
         regexp: '\bPermitRootLogin\b'
       notify: Restart OpenSSH daemon
 
+    - name: Create user systemd folder for Podman
+      become: true
+      ansible.builtin.file:
+        group: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+        mode: ug=rwx,o=rx
+        owner: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+        path: "/home/{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}/.config/systemd/user"
+        state: directory
+
     - name: Enable lingering for Podman # noqa no-changed-when
       become: true
       ansible.builtin.command:

@@ -26,6 +26,9 @@ def main():
     _collect_garbage()
 
 
+_USER_SYSTEMD_FOLDER = pathlib.Path(".config") / "systemd" / "user"
+
+
 @dataclasses.dataclass(frozen=True)
 class _Image:
     container_count: int
@@ -45,6 +48,7 @@ class _ContainerChange:
     image_id: str
     operator: _Operator
     port_mappings: tuple[str, ...]
+    systemd_unit: str
 
 
 def _load_target_images():
@@ -90,6 +94,7 @@ def _plan_changes(actual_images, target_images):
             image_id=image.image_id,
             operator=operator,
             port_mappings=image.port_mappings,
+            systemd_unit=f"container-{container_name}.service",
         )
         for operator, images in (
             (_Operator.REMOVE, actual_images),
@@ -138,7 +143,6 @@ def _create_network_if_not_exists():
 
 
 def _apply_change(change):
-    # TODO: Restart containers on reboot with systemd.
     # TODO: Support volumes.
 
     operand = f"container {change.container_name!r} of image {change.image_digest!r}"
@@ -157,22 +161,42 @@ def _add_container(change):
     subprocess.run(
         [
             "podman",
-            "run",
-            "--detach",
+            "create",
             "--name",
             change.container_name,
             "--network",
             os.environ["KEREK_CONTAINER_NETWORK"],
         ]
         + [f"--publish={port_mapping}" for port_mapping in change.port_mappings]
-        + ["--restart", "always", "--", change.image_id],
+        + ["--", change.image_id],
         check=True,
+    )
+    subprocess.run(
+        [
+            "podman",
+            "generate",
+            "systemd",
+            "--files",
+            "--name",
+            "--restart-policy",
+            "always",
+            "--",
+            change.container_name,
+        ],
+        check=True,
+        cwd=_USER_SYSTEMD_FOLDER,
+    )
+    subprocess.run(
+        ["systemctl", "--now", "--user", "enable", change.systemd_unit], check=True
     )
     # TODO: Wait until healthy if there is a health check.
 
 
 def _remove_container(change):
-    subprocess.run(["podman", "stop", "--", change.container_name], check=True)
+    subprocess.run(
+        ["systemctl", "--now", "--user", "disable", change.systemd_unit], check=True
+    )
+    (_USER_SYSTEMD_FOLDER / change.systemd_unit).unlink()
     subprocess.run(["podman", "rm", "--", change.container_name], check=True)
 
 

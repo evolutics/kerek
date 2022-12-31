@@ -36,6 +36,7 @@ class _Image:
     digest: str
     image_id: str
     port_mappings: tuple[str, ...]
+    volume_mounts: tuple[str, ...]
 
 
 _Operator = enum.Enum("_Operator", ["ADD", "KEEP", "REMOVE"])
@@ -49,6 +50,7 @@ class _ContainerChange:
     operator: _Operator
     port_mappings: tuple[str, ...]
     systemd_unit: str
+    volume_mounts: tuple[str, ...]
 
 
 def _load_target_images():
@@ -77,6 +79,7 @@ def _parse_image_metadata(image):
         digest=image["Digest"],
         image_id=image["Id"],
         port_mappings=_csv_fields(labels.get("info.evolutics.kerek.port-mappings")),
+        volume_mounts=_csv_fields(labels.get("info.evolutics.kerek.volume-mounts")),
     )
 
 
@@ -95,6 +98,7 @@ def _plan_changes(actual_images, target_images):
             operator=operator,
             port_mappings=image.port_mappings,
             systemd_unit=f"container-{container_name}.service",
+            volume_mounts=image.volume_mounts,
         )
         for operator, images in (
             (_Operator.REMOVE, actual_images),
@@ -143,8 +147,6 @@ def _create_network_if_not_exists():
 
 
 def _apply_change(change):
-    # TODO: Support volumes.
-
     operand = f"container {change.container_name!r} of image {change.image_digest!r}"
 
     summary, operation = {
@@ -168,6 +170,7 @@ def _add_container(change):
             os.environ["KEREK_CONTAINER_NETWORK"],
         ]
         + [f"--publish={port_mapping}" for port_mapping in change.port_mappings]
+        + [f"--volume={volume_mount}" for volume_mount in change.volume_mounts]
         + ["--", change.image_id],
         check=True,
     )
@@ -202,7 +205,9 @@ def _remove_container(change):
 
 def _collect_garbage():
     print("Collecting garbage.")
-    subprocess.run(["podman", "system", "prune", "--all", "--force"], check=True)
+    subprocess.run(
+        ["podman", "system", "prune", "--all", "--force", "--volumes"], check=True
+    )
 
 
 if __name__ == "__main__":

@@ -1,2 +1,3 @@
-# wheelsticks
-Container orchestrator for lightweight environments
+# Wheelsticks
+
+Container orchestrator for lightweight environments.

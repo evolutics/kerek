@@ -98,6 +98,19 @@
         name: ssh
         state: restarted
 
+- name: Reboot if required
+  hosts: all
+  tasks:
+    - name: Get reboot status
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+
+    - name: Reboot if required according to status
+      become: true
+      ansible.builtin.reboot:
+      when: reboot_required.stat.exists
+
 - name: Test provisioning
   hosts: all
   tasks:

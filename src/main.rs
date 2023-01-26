@@ -1,3 +1,4 @@
+mod library;
 mod subcommand;
 
 use clap::Parser;

@@ -1,17 +1,17 @@
-mod command;
+mod subcommand;
 
 use clap::Parser;
-use command::build;
-use command::deploy;
-use command::provision;
+use subcommand::build;
+use subcommand::deploy;
+use subcommand::provision;
 
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
-    match cli.command {
-        Command::Build => build::go(),
-        Command::Deploy => deploy::go(),
-        Command::Provision => provision::go(),
+    match cli.subcommand {
+        Subcommand::Build => build::go(),
+        Subcommand::Deploy => deploy::go(),
+        Subcommand::Provision => provision::go(),
     }
 }
 
@@ -19,11 +19,11 @@ fn main() -> anyhow::Result<()> {
 #[command(author, version, about, long_about = None)]
 struct Cli {
     #[command(subcommand)]
-    command: Command,
+    subcommand: Subcommand,
 }
 
 #[derive(clap::Subcommand)]
-enum Command {
+enum Subcommand {
     Build,
     Deploy,
     Provision,

@@ -1,21 +1,21 @@
-mod action;
 mod library;
+mod subcommand;
 
-use action::clean;
-use action::dry_run;
-use action::provision;
-use action::run;
 use clap::Parser;
 use std::path;
+use subcommand::clean;
+use subcommand::dry_run;
+use subcommand::provision;
+use subcommand::run;
 
 fn main() -> anyhow::Result<()> {
     let arguments = Arguments::parse();
 
-    match arguments.action {
-        Action::Clean => clean::go(arguments.configuration),
-        Action::DryRun => dry_run::go(arguments.configuration),
-        Action::Provision => provision::go(arguments.configuration),
-        Action::Run => run::go(arguments.configuration),
+    match arguments.subcommand {
+        Subcommand::Clean => clean::go(arguments.configuration),
+        Subcommand::DryRun => dry_run::go(arguments.configuration),
+        Subcommand::Provision => provision::go(arguments.configuration),
+        Subcommand::Run => run::go(arguments.configuration),
     }
 }
 
@@ -27,11 +27,11 @@ struct Arguments {
     configuration: path::PathBuf,
 
     #[command(subcommand)]
-    action: Action,
+    subcommand: Subcommand,
 }
 
 #[derive(clap::Subcommand)]
-enum Action {
+enum Subcommand {
     /// Removes internal resources such as the cache folder.
     Clean,
     /// Builds, tests, deploys once to staging only.

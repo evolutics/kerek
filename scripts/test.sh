@@ -6,6 +6,8 @@ set -o pipefail
 
 check_general_cleanliness() {
   git ls-files -z | xargs -0 travel-kit check --
+
+  ansible-lint --strict
 }
 
 test_rust() {

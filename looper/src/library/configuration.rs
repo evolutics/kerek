@@ -163,21 +163,13 @@ fn get_cache(folder: path::PathBuf) -> Cache {
 fn get_life_cycle(cache: &Cache, life_cycle: UserFacingLifeCycle) -> LifeCycle {
     LifeCycle {
         provision: convert_nonempty_or_else(life_cycle.provision, || {
-            vec![
-                "python3".into(),
-                "--".into(),
-                (&cache.scripts.provision).into(),
-            ]
+            vec!["wheelsticks".into(), "provision".into()]
         }),
         build: convert_nonempty_or_else(life_cycle.build, || {
-            vec!["python3".into(), "--".into(), (&cache.scripts.build).into()]
+            vec!["wheelsticks".into(), "build".into()]
         }),
         deploy: convert_nonempty_or_else(life_cycle.deploy, || {
-            vec![
-                "python3".into(),
-                "--".into(),
-                (&cache.scripts.deploy).into(),
-            ]
+            vec!["wheelsticks".into(), "deploy".into()]
         }),
         move_to_next_version: convert_nonempty_or_else(life_cycle.move_to_next_version, || {
             vec![
@@ -212,7 +204,6 @@ fn get_tests(tests: UserFacingTests) -> Tests {
 
 fn get_variables(cache: &Cache) -> collections::HashMap<ffi::OsString, ffi::OsString> {
     collections::HashMap::from([
-        ("KEREK_CACHE_SCRIPTS".into(), (&cache.scripts.folder).into()),
         ("KEREK_CACHE_WORKBENCH".into(), (&cache.workbench).into()),
         ("KEREK_DEPLOY_USER".into(), "kerek".into()),
         ("KEREK_GIT_BRANCH".into(), "origin/main".into()),

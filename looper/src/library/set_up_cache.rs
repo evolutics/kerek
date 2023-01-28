@@ -15,32 +15,8 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
 
     for (file, contents) in [
         (
-            &configuration.cache.scripts.build,
-            include_str!("assets/build.py"),
-        ),
-        (
-            &configuration.cache.scripts.deploy,
-            include_str!("assets/deploy.py"),
-        ),
-        (
-            &configuration.cache.scripts.deploy_on_remote,
-            include_str!("assets/deploy_on_remote.py"),
-        ),
-        (
             &configuration.cache.scripts.move_to_next_version,
             include_str!("assets/move_to_next_version.sh"),
-        ),
-        (
-            &configuration.cache.scripts.playbook,
-            include_str!("assets/playbook.yaml"),
-        ),
-        (
-            &configuration.cache.scripts.provision,
-            include_str!("assets/provision.py"),
-        ),
-        (
-            &configuration.cache.scripts.provision_test,
-            include_str!("assets/provision_test.sh"),
         ),
         (
             &configuration.cache.staging.vagrantfile,

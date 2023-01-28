@@ -17,7 +17,6 @@
       devShell = pkgs.mkShellNoCC {
         buildInputs =
           (with pkgs; [
-            ansible-lint
             curl
           ])
           ++ [travel-kit.defaultApp.${system}];

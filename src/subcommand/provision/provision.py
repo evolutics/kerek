@@ -7,7 +7,6 @@ import subprocess
 
 
 def main():
-    scripts_folder = pathlib.Path(os.environ["KEREK_CACHE_SCRIPTS"])
     subprocess.run(
         [
             "ansible-playbook",
@@ -16,7 +15,7 @@ def main():
             "--ssh-common-args",
             shlex.join(["-F", os.environ["KEREK_SSH_CONFIGURATION"]]),
             "--",
-            scripts_folder / "playbook.yaml",
+            pathlib.Path(os.environ["WHEELSTICKS_PLAYBOOK"]),
         ],
         check=True,
     )

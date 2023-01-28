@@ -31,7 +31,6 @@ def _synchronize_artifacts():
 
 
 def _deploy_on_remote():
-    scripts_folder = pathlib.Path(os.environ["KEREK_CACHE_SCRIPTS"])
     subprocess.run(
         [
             "ssh",
@@ -45,7 +44,7 @@ def _deploy_on_remote():
             "python3",
         ],
         check=True,
-        input=(scripts_folder / "deploy_on_remote.py").read_bytes(),
+        input=pathlib.Path(os.environ["WHEELSTICKS_DEPLOY_ON_REMOTE"]).read_bytes(),
     )
 
 

@@ -115,7 +115,7 @@
   hosts: all
   tasks:
     - name: Run script
-      ansible.builtin.script: provision_test.sh
+      ansible.builtin.script: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_PROVISION_TEST') }}"
       environment:
         KEREK_DEPLOY_USER: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
       register: result

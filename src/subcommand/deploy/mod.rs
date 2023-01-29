@@ -26,6 +26,10 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
             .env(
                 "WHEELSTICKS_REMOTE_IMAGES_FOLDER",
                 configuration.x_wheelsticks.remote_images_folder,
+            )
+            .env(
+                "WHEELSTICKS_WORKBENCH",
+                configuration.x_wheelsticks.workbench,
             ),
     )
 }

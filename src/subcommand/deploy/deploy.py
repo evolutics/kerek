@@ -25,7 +25,7 @@ def _synchronize_artifacts():
             "--rsh",
             shlex.join(["ssh", "-F", os.environ["KEREK_SSH_CONFIGURATION"]]),
             "--",
-            f"{os.environ['KEREK_CACHE_WORKBENCH']}/",
+            f"{os.environ['WHEELSTICKS_WORKBENCH']}/",
             f"{destination}:{os.environ['WHEELSTICKS_REMOTE_IMAGES_FOLDER']}",
         ],
         check=True,

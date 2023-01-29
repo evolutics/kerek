@@ -8,7 +8,8 @@ import subprocess
 def main():
     build_contexts = os.environ["WHEELSTICKS_BUILD_CONTEXTS"].split(":")
 
-    images_folder = pathlib.Path(os.environ["KEREK_CACHE_WORKBENCH"])
+    images_folder = pathlib.Path(os.environ["WHEELSTICKS_WORKBENCH"])
+    images_folder.mkdir(exist_ok=True)
 
     image_files = {
         _build_image_file(build_context, images_folder)

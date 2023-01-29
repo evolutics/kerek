@@ -18,6 +18,10 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
             .env(
                 "WHEELSTICKS_BUILD_CONTEXTS",
                 configuration.x_wheelsticks.build_contexts.join(":"),
+            )
+            .env(
+                "WHEELSTICKS_WORKBENCH",
+                configuration.x_wheelsticks.workbench,
             ),
     )
 }

@@ -12,8 +12,24 @@ fn main() -> anyhow::Result<()> {
 
     match cli.subcommand {
         Subcommand::Build => build::go(cli.configuration),
-        Subcommand::Deploy => deploy::go(cli.configuration),
-        Subcommand::Provision => provision::go(cli.configuration),
+
+        Subcommand::Deploy {
+            ssh_configuration,
+            ssh_host,
+        } => deploy::go(deploy::In {
+            configuration: cli.configuration,
+            ssh_configuration,
+            ssh_host,
+        }),
+
+        Subcommand::Provision {
+            ssh_configuration,
+            ssh_host,
+        } => provision::go(provision::In {
+            configuration: cli.configuration,
+            ssh_configuration,
+            ssh_host,
+        }),
     }
 }
 
@@ -35,8 +51,18 @@ struct Cli {
 #[derive(clap::Subcommand)]
 enum Subcommand {
     Build,
-    Deploy,
-    Provision,
+    Deploy {
+        #[arg(long, short = 'F')]
+        ssh_configuration: Option<path::PathBuf>,
+
+        ssh_host: Option<String>,
+    },
+    Provision {
+        #[arg(long, short = 'F')]
+        ssh_configuration: Option<path::PathBuf>,
+
+        ssh_host: Option<String>,
+    },
 }
 
 #[cfg(test)]

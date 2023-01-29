@@ -5,8 +5,8 @@ use std::fs;
 use std::path;
 use std::process;
 
-pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
-    let configuration = configuration::get(&configuration)?;
+pub fn go(in_: In) -> anyhow::Result<()> {
+    let configuration = configuration::get(&in_.configuration)?;
 
     let deploy = tempfile::NamedTempFile::new()?;
     fs::write(&deploy, include_str!("deploy.py")).context("Unable to write file: deploy.py")?;
@@ -18,6 +18,11 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
         process::Command::new("python3")
             .arg("--")
             .arg(deploy.as_ref())
+            .env(
+                "KEREK_SSH_CONFIGURATION",
+                in_.ssh_configuration.unwrap_or_default(),
+            )
+            .env("KEREK_SSH_HOST", in_.ssh_host.unwrap_or_default())
             .env("WHEELSTICKS_DEPLOY_ON_REMOTE", deploy_on_remote.as_ref())
             .env(
                 "WHEELSTICKS_DEPLOY_USER",
@@ -32,4 +37,10 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
                 configuration.x_wheelsticks.workbench,
             ),
     )
+}
+
+pub struct In {
+    pub configuration: path::PathBuf,
+    pub ssh_configuration: Option<path::PathBuf>,
+    pub ssh_host: Option<String>,
 }

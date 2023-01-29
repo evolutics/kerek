@@ -27,7 +27,6 @@ pub struct Cache {
     pub folder: path::PathBuf,
     pub scripts: CacheScripts,
     pub staging: CacheStaging,
-    pub workbench: path::PathBuf,
 }
 
 pub struct CacheScripts {
@@ -119,7 +118,7 @@ fn convert(main: UserFacingMain) -> Main {
     let vagrantfile = main.vagrantfile;
     let life_cycle = get_life_cycle(&cache, main.life_cycle);
     let tests = get_tests(main.tests);
-    let variables = get_variables(&cache);
+    let variables = get_variables();
     let staging = get_staging(&cache, main.environment_variables.staging);
     let production = get_production(main.environment_variables.production);
 
@@ -137,7 +136,6 @@ fn convert(main: UserFacingMain) -> Main {
 fn get_cache(folder: path::PathBuf) -> Cache {
     let scripts = folder.join("scripts");
     let staging = folder.join("staging");
-    let workbench = folder.join("workbench");
 
     Cache {
         folder,
@@ -156,7 +154,6 @@ fn get_cache(folder: path::PathBuf) -> Cache {
             vagrantfile: staging.join("Vagrantfile"),
             folder: staging,
         },
-        workbench,
     }
 }
 
@@ -202,11 +199,8 @@ fn get_tests(tests: UserFacingTests) -> Tests {
     }
 }
 
-fn get_variables(cache: &Cache) -> collections::HashMap<ffi::OsString, ffi::OsString> {
-    collections::HashMap::from([
-        ("KEREK_CACHE_WORKBENCH".into(), (&cache.workbench).into()),
-        ("KEREK_GIT_BRANCH".into(), "origin/main".into()),
-    ])
+fn get_variables() -> collections::HashMap<ffi::OsString, ffi::OsString> {
+    collections::HashMap::from([("KEREK_GIT_BRANCH".into(), "origin/main".into())])
 }
 
 fn get_staging(

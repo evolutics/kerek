@@ -7,7 +7,6 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
     for folder in [
         &configuration.cache.scripts.folder,
         &configuration.cache.staging.folder,
-        &configuration.cache.workbench,
     ] {
         fs::create_dir_all(folder)
             .with_context(|| format!("Unable to create cache folder: {folder:?}"))?;

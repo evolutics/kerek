@@ -10,8 +10,8 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
 
     for (file, contents) in [
         (
-            &configuration.cache.move_to_next_version,
-            include_str!("assets/move_to_next_version.sh"),
+            &configuration.cache.scripts,
+            include_str!("assets/scripts.sh"),
         ),
         (
             &configuration.cache.vagrantfile,

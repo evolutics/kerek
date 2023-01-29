@@ -11,9 +11,9 @@ def main():
         [
             "ansible-playbook",
             "--inventory",
-            f",{os.environ['KEREK_SSH_HOST']}",
+            f",{os.environ['WHEELSTICKS_SSH_HOST']}",
             "--ssh-common-args",
-            shlex.join(["-F", os.environ["KEREK_SSH_CONFIGURATION"]]),
+            shlex.join(["-F", os.environ["WHEELSTICKS_SSH_CONFIGURATION"]]),
             "--",
             pathlib.Path(os.environ["WHEELSTICKS_PLAYBOOK"]),
         ],

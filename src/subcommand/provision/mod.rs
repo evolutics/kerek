@@ -23,16 +23,16 @@ pub fn go(in_: In) -> anyhow::Result<()> {
             .arg("--")
             .arg(provision.as_ref())
             .env(
-                "KEREK_SSH_CONFIGURATION",
-                in_.ssh_configuration.unwrap_or_default(),
-            )
-            .env("KEREK_SSH_HOST", in_.ssh_host.unwrap_or_default())
-            .env(
                 "WHEELSTICKS_DEPLOY_USER",
                 configuration.x_wheelsticks.deploy_user,
             )
             .env("WHEELSTICKS_PLAYBOOK", playbook.as_ref())
-            .env("WHEELSTICKS_PROVISION_TEST", provision_test.as_ref()),
+            .env("WHEELSTICKS_PROVISION_TEST", provision_test.as_ref())
+            .env(
+                "WHEELSTICKS_SSH_CONFIGURATION",
+                in_.ssh_configuration.unwrap_or_default(),
+            )
+            .env("WHEELSTICKS_SSH_HOST", in_.ssh_host.unwrap_or_default()),
     )
 }
 

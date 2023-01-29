@@ -18,11 +18,6 @@ pub fn go(in_: In) -> anyhow::Result<()> {
         process::Command::new("python3")
             .arg("--")
             .arg(deploy.as_ref())
-            .env(
-                "KEREK_SSH_CONFIGURATION",
-                in_.ssh_configuration.unwrap_or_default(),
-            )
-            .env("KEREK_SSH_HOST", in_.ssh_host.unwrap_or_default())
             .env("WHEELSTICKS_DEPLOY_ON_REMOTE", deploy_on_remote.as_ref())
             .env(
                 "WHEELSTICKS_DEPLOY_USER",
@@ -32,6 +27,11 @@ pub fn go(in_: In) -> anyhow::Result<()> {
                 "WHEELSTICKS_REMOTE_IMAGES_FOLDER",
                 configuration.x_wheelsticks.remote_images_folder,
             )
+            .env(
+                "WHEELSTICKS_SSH_CONFIGURATION",
+                in_.ssh_configuration.unwrap_or_default(),
+            )
+            .env("WHEELSTICKS_SSH_HOST", in_.ssh_host.unwrap_or_default())
             .env(
                 "WHEELSTICKS_WORKBENCH",
                 configuration.x_wheelsticks.workbench,

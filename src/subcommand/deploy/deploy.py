@@ -15,7 +15,7 @@ def main():
 
 def _synchronize_artifacts():
     destination = (
-        f"{os.environ['WHEELSTICKS_DEPLOY_USER']}@{os.environ['KEREK_SSH_HOST']}"
+        f"{os.environ['WHEELSTICKS_DEPLOY_USER']}@{os.environ['WHEELSTICKS_SSH_HOST']}"
     )
     subprocess.run(
         [
@@ -23,7 +23,7 @@ def _synchronize_artifacts():
             "--archive",
             "--delete",
             "--rsh",
-            shlex.join(["ssh", "-F", os.environ["KEREK_SSH_CONFIGURATION"]]),
+            shlex.join(["ssh", "-F", os.environ["WHEELSTICKS_SSH_CONFIGURATION"]]),
             "--",
             f"{os.environ['WHEELSTICKS_WORKBENCH']}/",
             f"{destination}:{os.environ['WHEELSTICKS_REMOTE_IMAGES_FOLDER']}",
@@ -37,10 +37,10 @@ def _deploy_on_remote():
         [
             "ssh",
             "-F",
-            os.environ["KEREK_SSH_CONFIGURATION"],
+            os.environ["WHEELSTICKS_SSH_CONFIGURATION"],
             "-l",
             os.environ["WHEELSTICKS_DEPLOY_USER"],
-            os.environ["KEREK_SSH_HOST"],
+            os.environ["WHEELSTICKS_SSH_HOST"],
             "--",
             f"WHEELSTICKS_REMOTE_IMAGES_FOLDER={os.environ['WHEELSTICKS_REMOTE_IMAGES_FOLDER']}",
             "python3",

@@ -22,7 +22,10 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
         process::Command::new("python3")
             .arg("--")
             .arg(provision.as_ref())
-            .env("KEREK_DEPLOY_USER", configuration.x_wheelsticks.deploy_user)
+            .env(
+                "WHEELSTICKS_DEPLOY_USER",
+                configuration.x_wheelsticks.deploy_user,
+            )
             .env("WHEELSTICKS_PLAYBOOK", playbook.as_ref())
             .env("WHEELSTICKS_PROVISION_TEST", provision_test.as_ref()),
     )

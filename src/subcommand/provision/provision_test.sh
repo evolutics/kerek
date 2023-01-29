@@ -8,7 +8,7 @@ set -o xtrace
 
 test_container_engine() {
   podman --version
-  [[ "$(loginctl --property Linger --value show-user "${KEREK_DEPLOY_USER}")" == "yes" ]]
+  [[ "$(loginctl --property Linger --value show-user "${WHEELSTICKS_DEPLOY_USER}")" == "yes" ]]
   [[ "$(sysctl --values net.ipv4.ip_unprivileged_port_start)" == 80 ]]
 }
 
@@ -39,8 +39,8 @@ test_user_management() {
   sudo sshd -T | grep '^passwordauthentication no$'
   sudo sshd -T | grep '^permitrootlogin no$'
 
-  [[ "$(groups "${KEREK_DEPLOY_USER}")" == "${KEREK_DEPLOY_USER} : ${KEREK_DEPLOY_USER}" ]]
-  ! sudo --user "${KEREK_DEPLOY_USER}" -- sudo --non-interactive --validate
+  [[ "$(groups "${WHEELSTICKS_DEPLOY_USER}")" == "${WHEELSTICKS_DEPLOY_USER} : ${WHEELSTICKS_DEPLOY_USER}" ]]
+  ! sudo --user "${WHEELSTICKS_DEPLOY_USER}" -- sudo --non-interactive --validate
 }
 
 main() {

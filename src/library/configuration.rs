@@ -29,7 +29,7 @@ impl Default for Wheelsticks {
     fn default() -> Self {
         Self {
             build_contexts: vec![],
-            deploy_user: String::from("kerek"),
+            deploy_user: String::from("wheelsticks"),
             remote_images_folder: String::from("images"),
         }
     }

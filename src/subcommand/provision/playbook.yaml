@@ -21,13 +21,13 @@
         - name: Manage group
           become: true
           ansible.builtin.group:
-            name: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+            name: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
 
         - name: Manage user
           become: true
           ansible.builtin.user:
-            group: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
-            name: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+            group: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
+            name: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
             shell: /bin/bash
 
         - name: Read authorized SSH keys
@@ -39,7 +39,7 @@
           become: true
           ansible.posix.authorized_key:
             key: "{{ ssh_authorized_keys.content | b64decode }}"
-            user: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+            user: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
 
         - name: Configure OpenSSH daemon
           become: true
@@ -54,10 +54,10 @@
       block:
         - name: Create user systemd folder
           ansible.builtin.file:
-            group: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+            group: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
             mode: ug=rwx,o=rx
-            owner: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
-            path: "/home/{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}/.config/systemd/user"
+            owner: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
+            path: "/home/{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}/.config/systemd/user"
             state: directory
 
         - name: Enable user lingering # noqa no-changed-when
@@ -65,7 +65,7 @@
             argv:
               - loginctl
               - enable-linger
-              - "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+              - "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
 
         - name: Reduce unprivileged port start
           ansible.posix.sysctl:
@@ -117,6 +117,6 @@
     - name: Run script
       ansible.builtin.script: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_PROVISION_TEST') }}"
       environment:
-        KEREK_DEPLOY_USER: "{{ lookup('ansible.builtin.env', 'KEREK_DEPLOY_USER') }}"
+        WHEELSTICKS_DEPLOY_USER: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
       register: result
       until: result.rc == 0

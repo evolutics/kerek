@@ -59,7 +59,7 @@ class _ContainerChange:
 
 
 def _load_target_images():
-    images_folder = pathlib.Path(os.environ["KEREK_REMOTE_IMAGES_FOLDER"])
+    images_folder = pathlib.Path(os.environ["WHEELSTICKS_REMOTE_IMAGES_FOLDER"])
     image_files = sorted(images_folder.iterdir())
     for image_file in image_files:
         print(f"Loading image file {str(image_file)!r}.")
@@ -80,13 +80,19 @@ def _parse_image_metadata(image):
     labels = image["Labels"]
     return _Image(
         container_count=int(image["Containers"]),
-        container_names=_csv_fields(labels.get("info.evolutics.kerek.container-names")),
+        container_names=_csv_fields(
+            labels.get("info.evolutics.wheelsticks.container-names")
+        ),
         digest=image["Digest"],
-        health_check=labels.get("info.evolutics.kerek.health-check"),
+        health_check=labels.get("info.evolutics.wheelsticks.health-check"),
         image_id=image["Id"],
-        networks=_csv_fields(labels.get("info.evolutics.kerek.networks")),
-        port_mappings=_csv_fields(labels.get("info.evolutics.kerek.port-mappings")),
-        volume_mounts=_csv_fields(labels.get("info.evolutics.kerek.volume-mounts")),
+        networks=_csv_fields(labels.get("info.evolutics.wheelsticks.networks")),
+        port_mappings=_csv_fields(
+            labels.get("info.evolutics.wheelsticks.port-mappings")
+        ),
+        volume_mounts=_csv_fields(
+            labels.get("info.evolutics.wheelsticks.volume-mounts")
+        ),
     )
 
 

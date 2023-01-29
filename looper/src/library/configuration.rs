@@ -101,7 +101,7 @@ fn convert(main: UserFacingMain) -> Main {
     );
     let vagrantfile = main.vagrantfile;
     let life_cycle = get_life_cycle(&cache, main.life_cycle);
-    let tests = get_tests(main.tests);
+    let tests = get_tests(&cache, main.tests);
     let variables = get_variables();
     let staging = get_staging(&cache, main.environment_variables.staging);
     let production = get_production(main.environment_variables.production);
@@ -128,44 +128,35 @@ fn get_cache(folder: path::PathBuf) -> Cache {
 
 fn get_life_cycle(cache: &Cache, life_cycle: UserFacingLifeCycle) -> LifeCycle {
     LifeCycle {
-        provision: convert_nonempty_or_else(life_cycle.provision, || {
-            vec!["wheelsticks".into(), "provision".into()]
-        }),
-        build: convert_nonempty_or_else(life_cycle.build, || {
-            vec!["wheelsticks".into(), "build".into()]
-        }),
-        deploy: convert_nonempty_or_else(life_cycle.deploy, || {
-            vec!["wheelsticks".into(), "deploy".into()]
-        }),
-        move_to_next_version: convert_nonempty_or_else(life_cycle.move_to_next_version, || {
-            vec![
-                "bash".into(),
-                "--".into(),
-                (&cache.scripts).into(),
-                "move_to_next_version".into(),
-            ]
-        }),
+        provision: command_or_default(life_cycle.provision, cache, "provision"),
+        build: command_or_default(life_cycle.build, cache, "build"),
+        deploy: command_or_default(life_cycle.deploy, cache, "deploy"),
+        move_to_next_version: command_or_default(
+            life_cycle.move_to_next_version,
+            cache,
+            "move_to_next_version",
+        ),
     }
 }
 
-fn convert_nonempty_or_else<F: Fn() -> Vec<U>, T, U: From<T>>(
-    sequence: Vec<T>,
-    if_empty: F,
-) -> Vec<U> {
-    if sequence.is_empty() {
-        if_empty()
+fn command_or_default(command: Vec<String>, cache: &Cache, default: &str) -> Vec<ffi::OsString> {
+    if command.is_empty() {
+        vec![
+            "bash".into(),
+            "--".into(),
+            (&cache.scripts).into(),
+            default.into(),
+        ]
     } else {
-        sequence.into_iter().map(|element| element.into()).collect()
+        command.into_iter().map(|element| element.into()).collect()
     }
 }
 
-fn get_tests(tests: UserFacingTests) -> Tests {
+fn get_tests(cache: &Cache, tests: UserFacingTests) -> Tests {
     Tests {
-        base: convert_nonempty_or_else(tests.base, || vec!["scripts/base_test.sh".into()]),
-        smoke: convert_nonempty_or_else(tests.smoke, || vec!["scripts/smoke_test.sh".into()]),
-        acceptance: convert_nonempty_or_else(tests.acceptance, || {
-            vec!["scripts/acceptance_test.sh".into()]
-        }),
+        base: command_or_default(tests.base, cache, "base_test"),
+        smoke: command_or_default(tests.smoke, cache, "smoke_test"),
+        acceptance: command_or_default(tests.acceptance, cache, "acceptance_test"),
     }
 }
 

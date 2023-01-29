@@ -4,6 +4,18 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+provision() {
+  wheelsticks provision
+}
+
+build() {
+  wheelsticks build
+}
+
+deploy() {
+  wheelsticks deploy
+}
+
 move_to_next_version() {
   while true; do
     git fetch --prune
@@ -19,6 +31,18 @@ move_to_next_version() {
 
     sleep "$(("${RANDOM}" % 20))s"
   done
+}
+
+base_test() {
+  scripts/base_test.sh
+}
+
+smoke_test() {
+  scripts/smoke_test.sh
+}
+
+acceptance_test() {
+  scripts/acceptance_test.sh
 }
 
 main() {

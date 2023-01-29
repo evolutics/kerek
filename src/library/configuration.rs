@@ -25,7 +25,7 @@ pub struct Main {
 
 pub struct Cache {
     pub folder: path::PathBuf,
-    pub move_to_next_version: path::PathBuf,
+    pub scripts: path::PathBuf,
     pub ssh_configuration: path::PathBuf,
     pub vagrantfile: path::PathBuf,
 }
@@ -119,7 +119,7 @@ fn convert(main: UserFacingMain) -> Main {
 
 fn get_cache(folder: path::PathBuf) -> Cache {
     Cache {
-        move_to_next_version: folder.join("move_to_next_version.sh"),
+        scripts: folder.join("scripts.sh"),
         ssh_configuration: folder.join("ssh_configuration"),
         vagrantfile: folder.join("Vagrantfile"),
         folder,
@@ -141,7 +141,8 @@ fn get_life_cycle(cache: &Cache, life_cycle: UserFacingLifeCycle) -> LifeCycle {
             vec![
                 "bash".into(),
                 "--".into(),
-                (&cache.move_to_next_version).into(),
+                (&cache.scripts).into(),
+                "move_to_next_version".into(),
             ]
         }),
     }

@@ -10,12 +10,12 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
 }
 
 fn remove_vm_if_exists(configuration: &configuration::Main) -> anyhow::Result<()> {
-    if configuration.cache.staging.vagrantfile.exists() {
+    if configuration.cache.vagrantfile.exists() {
         command::status(
             process::Command::new("vagrant")
                 .arg("destroy")
                 .arg("--force")
-                .current_dir(&configuration.cache.staging.folder)
+                .current_dir(&configuration.cache.folder)
                 .envs(&configuration.variables)
                 .envs(&configuration.staging.variables),
         )

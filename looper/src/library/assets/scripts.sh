@@ -5,7 +5,8 @@ set -o nounset
 set -o pipefail
 
 provision() {
-  wheelsticks provision
+  wheelsticks provision --ssh-configuration "${KEREK_SSH_CONFIGURATION}" \
+    "${KEREK_SSH_HOST}"
 }
 
 build() {
@@ -13,7 +14,8 @@ build() {
 }
 
 deploy() {
-  wheelsticks deploy
+  wheelsticks deploy --ssh-configuration "${KEREK_SSH_CONFIGURATION}" \
+    "${KEREK_SSH_HOST}"
 }
 
 move_to_next_version() {

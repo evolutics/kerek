@@ -1,2 +1,3 @@
 x-wheelsticks:
   deploy_user: my_deploy_user
+  remote_images_folder: my_remote_images_folder

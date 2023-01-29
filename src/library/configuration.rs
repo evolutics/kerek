@@ -21,12 +21,14 @@ pub struct Main {
 #[serde(default, deny_unknown_fields)]
 pub struct Wheelsticks {
     pub deploy_user: String,
+    pub remote_images_folder: String,
 }
 
 impl Default for Wheelsticks {
     fn default() -> Self {
         Self {
             deploy_user: String::from("kerek"),
+            remote_images_folder: String::from("images"),
         }
     }
 }
@@ -47,6 +49,7 @@ mod tests {
             Main {
                 x_wheelsticks: Wheelsticks {
                     deploy_user: String::from("kerek"),
+                    remote_images_folder: String::from("images"),
                 },
             },
         );
@@ -65,6 +68,7 @@ mod tests {
             Main {
                 x_wheelsticks: Wheelsticks {
                     deploy_user: String::from("my_deploy_user"),
+                    remote_images_folder: String::from("my_remote_images_folder"),
                 },
             },
         );

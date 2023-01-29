@@ -19,6 +19,10 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
             .arg("--")
             .arg(deploy.as_ref())
             .env("KEREK_DEPLOY_USER", configuration.x_wheelsticks.deploy_user)
+            .env(
+                "KEREK_REMOTE_IMAGES_FOLDER",
+                configuration.x_wheelsticks.remote_images_folder,
+            )
             .env("WHEELSTICKS_DEPLOY_ON_REMOTE", deploy_on_remote.as_ref()),
     )
 }

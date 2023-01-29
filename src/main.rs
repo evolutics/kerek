@@ -2,6 +2,7 @@ mod library;
 mod subcommand;
 
 use clap::Parser;
+use std::path;
 use subcommand::build;
 use subcommand::deploy;
 use subcommand::provision;
@@ -10,15 +11,18 @@ fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.subcommand {
-        Subcommand::Build => build::go(),
-        Subcommand::Deploy => deploy::go(),
-        Subcommand::Provision => provision::go(),
+        Subcommand::Build => build::go(cli.configuration),
+        Subcommand::Deploy => deploy::go(cli.configuration),
+        Subcommand::Provision => provision::go(cli.configuration),
     }
 }
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
+    #[arg(default_value = "compose.yaml", long = "file", short = 'f')]
+    configuration: path::PathBuf,
+
     #[command(subcommand)]
     subcommand: Subcommand,
 }

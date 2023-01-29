@@ -1,9 +1,10 @@
 use crate::library::command;
 use anyhow::Context;
 use std::fs;
+use std::path;
 use std::process;
 
-pub fn go() -> anyhow::Result<()> {
+pub fn go(_configuration: path::PathBuf) -> anyhow::Result<()> {
     let playbook = tempfile::NamedTempFile::new()?;
     fs::write(&playbook, include_str!("playbook.yaml"))
         .context("Unable to write file: playbook.yaml")?;

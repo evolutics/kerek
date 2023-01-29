@@ -1,9 +1,10 @@
 use crate::library::command;
 use anyhow::Context;
 use std::fs;
+use std::path;
 use std::process;
 
-pub fn go() -> anyhow::Result<()> {
+pub fn go(_configuration: path::PathBuf) -> anyhow::Result<()> {
     let deploy = tempfile::NamedTempFile::new()?;
     fs::write(&deploy, include_str!("deploy.py")).context("Unable to write file: deploy.py")?;
     let deploy_on_remote = tempfile::NamedTempFile::new()?;

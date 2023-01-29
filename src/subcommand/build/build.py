@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 
-import json
 import os
 import pathlib
 import subprocess
 
 
 def main():
-    with pathlib.Path(os.environ["KEREK_MANIFEST_FILE"]).open("br") as manifest_file:
-        build_contexts = json.load(manifest_file)
+    build_contexts = os.environ["WHEELSTICKS_BUILD_CONTEXTS"].split(":")
 
     images_folder = pathlib.Path(os.environ["KEREK_CACHE_WORKBENCH"])
 

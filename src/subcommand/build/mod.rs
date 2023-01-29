@@ -1,16 +1,23 @@
 use crate::library::command;
+use crate::library::configuration;
 use anyhow::Context;
 use std::fs;
 use std::path;
 use std::process;
 
-pub fn go(_configuration: path::PathBuf) -> anyhow::Result<()> {
+pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
+    let configuration = configuration::get(&configuration)?;
+
     let build = tempfile::NamedTempFile::new()?;
     fs::write(&build, include_str!("build.py")).context("Unable to write file: build.py")?;
 
     command::status_ok(
         process::Command::new("python3")
             .arg("--")
-            .arg(build.as_ref()),
+            .arg(build.as_ref())
+            .env(
+                "WHEELSTICKS_BUILD_CONTEXTS",
+                configuration.x_wheelsticks.build_contexts.join(":"),
+            ),
     )
 }

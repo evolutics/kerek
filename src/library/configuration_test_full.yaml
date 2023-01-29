@@ -1,3 +1,6 @@
 x-wheelsticks:
+  build_contexts:
+    - my_build_context_0
+    - my_build_context_1
   deploy_user: my_deploy_user
   remote_images_folder: my_remote_images_folder

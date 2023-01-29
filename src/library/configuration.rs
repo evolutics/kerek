@@ -20,6 +20,7 @@ pub struct Main {
 #[derive(Debug, PartialEq, serde::Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Wheelsticks {
+    pub build_contexts: Vec<String>,
     pub deploy_user: String,
     pub remote_images_folder: String,
 }
@@ -27,6 +28,7 @@ pub struct Wheelsticks {
 impl Default for Wheelsticks {
     fn default() -> Self {
         Self {
+            build_contexts: vec![],
             deploy_user: String::from("kerek"),
             remote_images_folder: String::from("images"),
         }
@@ -48,6 +50,7 @@ mod tests {
             main,
             Main {
                 x_wheelsticks: Wheelsticks {
+                    build_contexts: vec![],
                     deploy_user: String::from("kerek"),
                     remote_images_folder: String::from("images"),
                 },
@@ -67,6 +70,10 @@ mod tests {
             main,
             Main {
                 x_wheelsticks: Wheelsticks {
+                    build_contexts: vec![
+                        String::from("my_build_context_0"),
+                        String::from("my_build_context_1"),
+                    ],
                     deploy_user: String::from("my_deploy_user"),
                     remote_images_folder: String::from("my_remote_images_folder"),
                 },

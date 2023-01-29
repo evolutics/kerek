@@ -46,16 +46,7 @@ mod tests {
 
         let main = get(file.as_ref())?;
 
-        assert_eq!(
-            main,
-            Main {
-                x_wheelsticks: Wheelsticks {
-                    build_contexts: vec![],
-                    deploy_user: String::from("kerek"),
-                    remote_images_folder: String::from("images"),
-                },
-            },
-        );
+        assert_eq!(main, Main::default());
         Ok(())
     }
 

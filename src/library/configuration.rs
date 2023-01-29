@@ -25,17 +25,7 @@ pub struct Main {
 
 pub struct Cache {
     pub folder: path::PathBuf,
-    pub scripts: CacheScripts,
-    pub staging: CacheStaging,
-}
-
-pub struct CacheScripts {
-    pub folder: path::PathBuf,
     pub move_to_next_version: path::PathBuf,
-}
-
-pub struct CacheStaging {
-    pub folder: path::PathBuf,
     pub ssh_configuration: path::PathBuf,
     pub vagrantfile: path::PathBuf,
 }
@@ -128,20 +118,11 @@ fn convert(main: UserFacingMain) -> Main {
 }
 
 fn get_cache(folder: path::PathBuf) -> Cache {
-    let scripts = folder.join("scripts");
-    let staging = folder.join("staging");
-
     Cache {
+        move_to_next_version: folder.join("move_to_next_version.sh"),
+        ssh_configuration: folder.join("ssh_configuration"),
+        vagrantfile: folder.join("Vagrantfile"),
         folder,
-        scripts: CacheScripts {
-            move_to_next_version: scripts.join("move_to_next_version.sh"),
-            folder: scripts,
-        },
-        staging: CacheStaging {
-            ssh_configuration: staging.join("ssh_configuration"),
-            vagrantfile: staging.join("Vagrantfile"),
-            folder: staging,
-        },
     }
 }
 
@@ -160,7 +141,7 @@ fn get_life_cycle(cache: &Cache, life_cycle: UserFacingLifeCycle) -> LifeCycle {
             vec![
                 "bash".into(),
                 "--".into(),
-                (&cache.scripts.move_to_next_version).into(),
+                (&cache.move_to_next_version).into(),
             ]
         }),
     }
@@ -202,7 +183,7 @@ fn get_staging(
                 ("KEREK_IP_ADDRESS".into(), "192.168.60.158".into()),
                 (
                     "KEREK_SSH_CONFIGURATION".into(),
-                    (&cache.staging.ssh_configuration).into(),
+                    (&cache.ssh_configuration).into(),
                 ),
                 ("KEREK_SSH_HOST".into(), "staging".into()),
             ]),

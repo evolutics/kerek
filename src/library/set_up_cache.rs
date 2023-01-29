@@ -4,21 +4,17 @@ use std::borrow;
 use std::fs;
 
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
-    for folder in [
-        &configuration.cache.scripts.folder,
-        &configuration.cache.staging.folder,
-    ] {
-        fs::create_dir_all(folder)
-            .with_context(|| format!("Unable to create cache folder: {folder:?}"))?;
-    }
+    let folder = &configuration.cache.folder;
+    fs::create_dir_all(folder)
+        .with_context(|| format!("Unable to create cache folder: {folder:?}"))?;
 
     for (file, contents) in [
         (
-            &configuration.cache.scripts.move_to_next_version,
+            &configuration.cache.move_to_next_version,
             include_str!("assets/move_to_next_version.sh"),
         ),
         (
-            &configuration.cache.staging.vagrantfile,
+            &configuration.cache.vagrantfile,
             &get_vagrantfile_contents(configuration)?,
         ),
     ] {

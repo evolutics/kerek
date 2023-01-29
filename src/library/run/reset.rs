@@ -20,14 +20,14 @@ fn start_staging(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
         process::Command::new("vagrant")
             .arg("up")
-            .current_dir(&configuration.cache.staging.folder)
+            .current_dir(&configuration.cache.folder)
             .envs(&configuration.variables)
             .envs(&configuration.staging.variables),
     )
 }
 
 fn dump_staging_ssh_configuration(configuration: &configuration::Main) -> anyhow::Result<()> {
-    let path = &configuration.cache.staging.ssh_configuration;
+    let path = &configuration.cache.ssh_configuration;
     let file = fs::File::create(path)
         .with_context(|| format!("Unable to create SSH configuration file: {path:?}"))?;
     command::status(
@@ -35,7 +35,7 @@ fn dump_staging_ssh_configuration(configuration: &configuration::Main) -> anyhow
             .arg("ssh-config")
             .arg("--host")
             .arg(&configuration.staging.variables[ffi::OsStr::new("KEREK_SSH_HOST")])
-            .current_dir(&configuration.cache.staging.folder)
+            .current_dir(&configuration.cache.folder)
             .envs(&configuration.variables)
             .envs(&configuration.staging.variables)
             .stdout(file),

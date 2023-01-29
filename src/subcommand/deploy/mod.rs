@@ -1,10 +1,13 @@
 use crate::library::command;
+use crate::library::configuration;
 use anyhow::Context;
 use std::fs;
 use std::path;
 use std::process;
 
-pub fn go(_configuration: path::PathBuf) -> anyhow::Result<()> {
+pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
+    let configuration = configuration::get(&configuration)?;
+
     let deploy = tempfile::NamedTempFile::new()?;
     fs::write(&deploy, include_str!("deploy.py")).context("Unable to write file: deploy.py")?;
     let deploy_on_remote = tempfile::NamedTempFile::new()?;
@@ -15,6 +18,7 @@ pub fn go(_configuration: path::PathBuf) -> anyhow::Result<()> {
         process::Command::new("python3")
             .arg("--")
             .arg(deploy.as_ref())
+            .env("KEREK_DEPLOY_USER", configuration.x_wheelsticks.deploy_user)
             .env("WHEELSTICKS_DEPLOY_ON_REMOTE", deploy_on_remote.as_ref()),
     )
 }

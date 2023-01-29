@@ -3,7 +3,6 @@ use std::fs;
 use std::io;
 use std::path;
 
-#[allow(dead_code)]
 pub fn get(path: &path::Path) -> anyhow::Result<Main> {
     let file = fs::File::open(path)
         .with_context(|| format!("Unable to open configuration file: {path:?}"))?;
@@ -18,25 +17,55 @@ pub struct Main {
     pub x_wheelsticks: Wheelsticks,
 }
 
-#[derive(Debug, Default, PartialEq, serde::Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Wheelsticks {}
+#[derive(Debug, PartialEq, serde::Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Wheelsticks {
+    pub deploy_user: String,
+}
+
+impl Default for Wheelsticks {
+    fn default() -> Self {
+        Self {
+            deploy_user: String::from("kerek"),
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn handles() -> anyhow::Result<()> {
+    fn handles_minimal() -> anyhow::Result<()> {
         let file = tempfile::NamedTempFile::new()?;
-        fs::write(&file, include_str!("configuration_test.yaml"))?;
+        fs::write(&file, include_str!("configuration_test_minimal.yaml"))?;
 
         let main = get(file.as_ref())?;
 
         assert_eq!(
             main,
             Main {
-                x_wheelsticks: Wheelsticks {},
+                x_wheelsticks: Wheelsticks {
+                    deploy_user: String::from("kerek"),
+                },
+            },
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn handles_full() -> anyhow::Result<()> {
+        let file = tempfile::NamedTempFile::new()?;
+        fs::write(&file, include_str!("configuration_test_full.yaml"))?;
+
+        let main = get(file.as_ref())?;
+
+        assert_eq!(
+            main,
+            Main {
+                x_wheelsticks: Wheelsticks {
+                    deploy_user: String::from("my_deploy_user"),
+                },
             },
         );
         Ok(())

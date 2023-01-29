@@ -1,10 +1,13 @@
 use crate::library::command;
+use crate::library::configuration;
 use anyhow::Context;
 use std::fs;
 use std::path;
 use std::process;
 
-pub fn go(_configuration: path::PathBuf) -> anyhow::Result<()> {
+pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
+    let configuration = configuration::get(&configuration)?;
+
     let playbook = tempfile::NamedTempFile::new()?;
     fs::write(&playbook, include_str!("playbook.yaml"))
         .context("Unable to write file: playbook.yaml")?;
@@ -19,6 +22,7 @@ pub fn go(_configuration: path::PathBuf) -> anyhow::Result<()> {
         process::Command::new("python3")
             .arg("--")
             .arg(provision.as_ref())
+            .env("KEREK_DEPLOY_USER", configuration.x_wheelsticks.deploy_user)
             .env("WHEELSTICKS_PLAYBOOK", playbook.as_ref())
             .env("WHEELSTICKS_PROVISION_TEST", provision_test.as_ref()),
     )

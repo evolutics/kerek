@@ -36,12 +36,7 @@ fn main() -> anyhow::Result<()> {
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
-    #[arg(
-        default_value = "compose.yaml",
-        global = true,
-        long = "file",
-        short = 'f'
-    )]
+    #[arg(default_value = "compose.yaml", global = true, long, short = 'f')]
     configuration: path::PathBuf,
 
     #[command(subcommand)]

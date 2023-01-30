@@ -56,7 +56,7 @@ enum Subcommand {
         #[arg(long, short = 'F')]
         ssh_configuration: Option<path::PathBuf>,
 
-        ssh_host: Option<String>,
+        ssh_host: String,
     },
 }
 

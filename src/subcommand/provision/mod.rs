@@ -15,16 +15,19 @@ pub fn go(in_: In) -> anyhow::Result<()> {
     fs::write(&provision_test, include_str!("provision_test.sh"))
         .context("Unable to write file: provision_test.sh")?;
 
-    // TODO: Support provisioning on same machine without SSH.
-    let ssh_host = in_.ssh_host.unwrap_or_default();
-    let ssh_configuration = in_.ssh_configuration.unwrap_or_default();
+    let ssh_host = in_.ssh_host;
+
+    let mut command = process::Command::new("ansible-playbook");
+    let command = command.arg("--inventory").arg(format!(",{ssh_host}"));
+
+    if let Some(ssh_configuration) = in_.ssh_configuration {
+        command
+            .arg("--ssh-common-args")
+            .arg(format!("-F {ssh_configuration:?}"));
+    }
 
     command::status_ok(
-        process::Command::new("ansible-playbook")
-            .arg("--inventory")
-            .arg(format!(",{ssh_host}"))
-            .arg("--ssh-common-args")
-            .arg(format!("-F {ssh_configuration:?}"))
+        command
             .arg("--")
             .arg(playbook.as_ref())
             .env(
@@ -38,5 +41,5 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 pub struct In {
     pub configuration: path::PathBuf,
     pub ssh_configuration: Option<path::PathBuf>,
-    pub ssh_host: Option<String>,
+    pub ssh_host: String,
 }

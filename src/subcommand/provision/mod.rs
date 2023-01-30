@@ -11,30 +11,27 @@ pub fn go(in_: In) -> anyhow::Result<()> {
     let playbook = tempfile::NamedTempFile::new()?;
     fs::write(&playbook, include_str!("playbook.yaml"))
         .context("Unable to write file: playbook.yaml")?;
-    let provision = tempfile::NamedTempFile::new()?;
-    fs::write(&provision, include_str!("provision.py"))
-        .context("Unable to write file: provision.py")?;
     let provision_test = tempfile::NamedTempFile::new()?;
     fs::write(&provision_test, include_str!("provision_test.sh"))
         .context("Unable to write file: provision_test.sh")?;
 
     // TODO: Support provisioning on same machine without SSH.
+    let ssh_host = in_.ssh_host.unwrap_or_default();
+    let ssh_configuration = in_.ssh_configuration.unwrap_or_default();
 
     command::status_ok(
-        process::Command::new("python3")
+        process::Command::new("ansible-playbook")
+            .arg("--inventory")
+            .arg(format!(",{ssh_host}"))
+            .arg("--ssh-common-args")
+            .arg(format!("-F {ssh_configuration:?}"))
             .arg("--")
-            .arg(provision.as_ref())
+            .arg(playbook.as_ref())
             .env(
                 "WHEELSTICKS_DEPLOY_USER",
                 configuration.x_wheelsticks.deploy_user,
             )
-            .env("WHEELSTICKS_PLAYBOOK", playbook.as_ref())
-            .env("WHEELSTICKS_PROVISION_TEST", provision_test.as_ref())
-            .env(
-                "WHEELSTICKS_SSH_CONFIGURATION",
-                in_.ssh_configuration.unwrap_or_default(),
-            )
-            .env("WHEELSTICKS_SSH_HOST", in_.ssh_host.unwrap_or_default()),
+            .env("WHEELSTICKS_PROVISION_TEST", provision_test.as_ref()),
     )
 }
 

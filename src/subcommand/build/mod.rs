@@ -11,6 +11,8 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
     let build = tempfile::NamedTempFile::new()?;
     fs::write(&build, include_str!("build.py")).context("Unable to write file: build.py")?;
 
+    // TODO: Short-circuit if building to deploy on same machine without SSH.
+
     command::status_ok(
         process::Command::new("python3")
             .arg("--")

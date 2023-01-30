@@ -14,6 +14,8 @@ pub fn go(in_: In) -> anyhow::Result<()> {
     fs::write(&deploy_on_remote, include_str!("deploy_on_remote.py"))
         .context("Unable to write file: deploy_on_remote.py")?;
 
+    // TODO: Support deploying on same machine without SSH.
+
     command::status_ok(
         process::Command::new("python3")
             .arg("--")

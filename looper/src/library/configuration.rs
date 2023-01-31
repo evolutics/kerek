@@ -95,10 +95,7 @@ struct UserFacingEnvironmentVariables {
 }
 
 fn convert(main: UserFacingMain) -> Main {
-    let cache = get_cache(
-        main.cache_folder
-            .unwrap_or_else(|| path::PathBuf::from(".kerek")),
-    );
+    let cache = get_cache(main.cache_folder.unwrap_or_else(|| ".kerek".into()));
     let vagrantfile = main.vagrantfile;
     let life_cycle = get_life_cycle(&cache, main.life_cycle);
     let tests = get_tests(&cache, main.tests);
@@ -170,7 +167,7 @@ fn get_staging(
 ) -> Environment {
     with_custom_variables(
         Environment {
-            id: String::from("staging"),
+            id: "staging".to_owned(),
             variables: collections::HashMap::from([
                 ("KEREK_IP_ADDRESS".into(), "192.168.60.158".into()),
                 (
@@ -204,7 +201,7 @@ fn with_custom_variables(
 fn get_production(custom_variables: collections::HashMap<String, String>) -> Environment {
     with_custom_variables(
         Environment {
-            id: String::from("production"),
+            id: "production".to_owned(),
             variables: collections::HashMap::from([(
                 "KEREK_SSH_CONFIGURATION".into(),
                 ["safe", "ssh_configuration"]

@@ -28,7 +28,7 @@ pub fn status_ok(command: &mut process::Command) -> anyhow::Result<()> {
 pub fn stderr_utf8(command: &mut process::Command) -> anyhow::Result<String> {
     go(command, process::Command::output, |output| {
         if output.status.success() {
-            String::from_utf8(output.stderr).with_context(|| "Stderr is not valid UTF-8")
+            String::from_utf8(output.stderr).context("Stderr is not valid UTF-8")
         } else {
             status_error(output.status)
         }
@@ -39,7 +39,7 @@ pub fn stderr_utf8(command: &mut process::Command) -> anyhow::Result<String> {
 pub fn stdout_utf8(command: &mut process::Command) -> anyhow::Result<String> {
     go(command, process::Command::output, |output| {
         if output.status.success() {
-            String::from_utf8(output.stdout).with_context(|| "Stdout is not valid UTF-8")
+            String::from_utf8(output.stdout).context("Stdout is not valid UTF-8")
         } else {
             status_error(output.status)
         }

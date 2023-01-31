@@ -30,9 +30,9 @@ impl Default for Wheelsticks {
     fn default() -> Self {
         Self {
             build_contexts: vec![],
-            deploy_user: String::from("wheelsticks"),
-            remote_images_folder: String::from("images"),
-            workbench: path::PathBuf::from(".wheelsticks"),
+            deploy_user: "wheelsticks".to_owned(),
+            remote_images_folder: "images".to_owned(),
+            workbench: ".wheelsticks".into(),
         }
     }
 }
@@ -64,12 +64,12 @@ mod tests {
             Main {
                 x_wheelsticks: Wheelsticks {
                     build_contexts: vec![
-                        String::from("my_build_context_0"),
-                        String::from("my_build_context_1"),
+                        "my_build_context_0".to_owned(),
+                        "my_build_context_1".to_owned(),
                     ],
-                    deploy_user: String::from("my_deploy_user"),
-                    remote_images_folder: String::from("my_remote_images_folder"),
-                    workbench: path::PathBuf::from("my_workbench"),
+                    deploy_user: "my_deploy_user".to_owned(),
+                    remote_images_folder: "my_remote_images_folder".to_owned(),
+                    workbench: "my_workbench".into(),
                 },
             },
         );

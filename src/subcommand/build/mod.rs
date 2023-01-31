@@ -19,7 +19,13 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
             .arg(build.as_ref())
             .env(
                 "WHEELSTICKS_BUILD_CONTEXTS",
-                configuration.x_wheelsticks.build_contexts.join(":"),
+                configuration
+                    .x_wheelsticks
+                    .build_contexts
+                    .iter()
+                    .map(|build_context| build_context.to_string_lossy())
+                    .collect::<Vec<_>>()
+                    .join(":"),
             )
             .env(
                 "WHEELSTICKS_WORKBENCH",

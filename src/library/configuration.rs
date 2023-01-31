@@ -20,7 +20,7 @@ pub struct Main {
 #[derive(Debug, PartialEq, serde::Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Wheelsticks {
-    pub build_contexts: Vec<String>,
+    pub build_contexts: Vec<path::PathBuf>,
     pub deploy_user: String,
     pub remote_images_folder: String,
     pub workbench: path::PathBuf,
@@ -63,10 +63,7 @@ mod tests {
             main,
             Main {
                 x_wheelsticks: Wheelsticks {
-                    build_contexts: vec![
-                        "my_build_context_0".to_owned(),
-                        "my_build_context_1".to_owned(),
-                    ],
+                    build_contexts: vec!["my_build_context_0".into(), "my_build_context_1".into()],
                     deploy_user: "my_deploy_user".to_owned(),
                     remote_images_folder: "my_remote_images_folder".to_owned(),
                     workbench: "my_workbench".into(),

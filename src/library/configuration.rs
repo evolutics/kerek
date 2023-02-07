@@ -22,8 +22,8 @@ pub struct Main {
 pub struct Wheelsticks {
     pub build_contexts: Vec<path::PathBuf>,
     pub deploy_user: String,
-    pub remote_images_folder: String,
-    pub workbench: path::PathBuf,
+    pub local_workbench: path::PathBuf,
+    pub remote_workbench: String,
 }
 
 impl Default for Wheelsticks {
@@ -31,8 +31,8 @@ impl Default for Wheelsticks {
         Self {
             build_contexts: vec![],
             deploy_user: "wheelsticks".to_owned(),
-            remote_images_folder: "images".to_owned(),
-            workbench: ".wheelsticks".into(),
+            local_workbench: ".wheelsticks".into(),
+            remote_workbench: ".wheelsticks".to_owned(),
         }
     }
 }
@@ -65,8 +65,8 @@ mod tests {
                 x_wheelsticks: Wheelsticks {
                     build_contexts: vec!["my_build_context_0".into(), "my_build_context_1".into()],
                     deploy_user: "my_deploy_user".to_owned(),
-                    remote_images_folder: "my_remote_images_folder".to_owned(),
-                    workbench: "my_workbench".into(),
+                    local_workbench: "my_local_workbench".into(),
+                    remote_workbench: "my_remote_workbench".to_owned(),
                 },
             },
         );

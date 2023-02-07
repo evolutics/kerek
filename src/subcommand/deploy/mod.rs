@@ -26,18 +26,18 @@ pub fn go(in_: In) -> anyhow::Result<()> {
                 configuration.x_wheelsticks.deploy_user,
             )
             .env(
-                "WHEELSTICKS_REMOTE_IMAGES_FOLDER",
-                configuration.x_wheelsticks.remote_images_folder,
+                "WHEELSTICKS_LOCAL_WORKBENCH",
+                configuration.x_wheelsticks.local_workbench,
+            )
+            .env(
+                "WHEELSTICKS_REMOTE_WORKBENCH",
+                configuration.x_wheelsticks.remote_workbench,
             )
             .env(
                 "WHEELSTICKS_SSH_CONFIGURATION",
                 in_.ssh_configuration.unwrap_or_default(),
             )
-            .env("WHEELSTICKS_SSH_HOST", in_.ssh_host.unwrap_or_default())
-            .env(
-                "WHEELSTICKS_WORKBENCH",
-                configuration.x_wheelsticks.workbench,
-            ),
+            .env("WHEELSTICKS_SSH_HOST", in_.ssh_host.unwrap_or_default()),
     )
 }
 

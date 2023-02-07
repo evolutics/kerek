@@ -12,15 +12,15 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
 
     let build_contexts = configuration.x_wheelsticks.build_contexts;
 
-    let images_folder = configuration.x_wheelsticks.workbench;
-    fs::create_dir_all(&images_folder)?;
+    let local_workbench = configuration.x_wheelsticks.local_workbench;
+    fs::create_dir_all(&local_workbench)?;
 
     let image_files = build_contexts
         .iter()
-        .flat_map(|build_context| build_image_file(build_context, &images_folder))
+        .flat_map(|build_context| build_image_file(build_context, &local_workbench))
         .collect::<collections::BTreeSet<_>>();
 
-    let existing_files = fs::read_dir(images_folder)?
+    let existing_files = fs::read_dir(local_workbench)?
         .into_iter()
         .flatten()
         .map(|entry| entry.path())
@@ -37,12 +37,12 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
 
 fn build_image_file(
     build_context: &path::Path,
-    images_folder: &path::Path,
+    local_workbench: &path::Path,
 ) -> anyhow::Result<path::PathBuf> {
     println!("Building image for context {build_context:?}.");
     let image_id = build_image(build_context)?;
 
-    let image_file = images_folder.join(format!("{image_id}.tar"));
+    let image_file = local_workbench.join(format!("{image_id}.tar"));
 
     if !image_file.try_exists()? {
         println!("Saving image {image_id:?} to {image_file:?}.");

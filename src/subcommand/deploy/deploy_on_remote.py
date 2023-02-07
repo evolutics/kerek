@@ -60,7 +60,7 @@ class _ContainerChange:
 
 def _load_target_images():
     remote_workbench = pathlib.Path(os.environ["WHEELSTICKS_REMOTE_WORKBENCH"])
-    image_files = sorted(remote_workbench.iterdir())
+    image_files = sorted(remote_workbench.glob("*.tar"))
     for image_file in image_files:
         print(f"Loading image file {str(image_file)!r}.")
         subprocess.run(["podman", "load", "--input", image_file], check=True)

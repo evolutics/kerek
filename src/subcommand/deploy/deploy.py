@@ -33,6 +33,7 @@ def _synchronize_artifacts():
 
 
 def _deploy_on_remote():
+    remote_workbench = pathlib.Path(os.environ["WHEELSTICKS_REMOTE_WORKBENCH"])
     subprocess.run(
         [
             "ssh",
@@ -42,11 +43,11 @@ def _deploy_on_remote():
             os.environ["WHEELSTICKS_DEPLOY_USER"],
             os.environ["WHEELSTICKS_SSH_HOST"],
             "--",
-            f"WHEELSTICKS_REMOTE_WORKBENCH={os.environ['WHEELSTICKS_REMOTE_WORKBENCH']}",
+            f"WHEELSTICKS_REMOTE_WORKBENCH={remote_workbench}",
             "python3",
+            remote_workbench / "deploy_on_remote.py",
         ],
         check=True,
-        input=pathlib.Path(os.environ["WHEELSTICKS_DEPLOY_ON_REMOTE"]).read_bytes(),
     )
 
 

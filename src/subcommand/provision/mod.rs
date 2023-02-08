@@ -1,6 +1,7 @@
 use crate::library::command;
 use crate::library::configuration;
 use anyhow::Context;
+use std::env;
 use std::fs;
 use std::path;
 use std::process;
@@ -33,6 +34,10 @@ pub fn go(in_: In) -> anyhow::Result<()> {
             .env(
                 "WHEELSTICKS_DEPLOY_USER",
                 configuration.x_wheelsticks.deploy_user,
+            )
+            .env(
+                "WHEELSTICKS_EXECUTABLE",
+                env::current_exe().context("Unable to get current executable.")?,
             )
             .env("WHEELSTICKS_PROVISION_TEST", provision_test.as_ref()),
     )

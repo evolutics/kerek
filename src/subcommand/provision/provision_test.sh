@@ -6,10 +6,11 @@ set -o pipefail
 
 set -o xtrace
 
-test_container_engine() {
+test_container_platform() {
   podman --version
   [[ "$(loginctl --property Linger --value show-user "${WHEELSTICKS_DEPLOY_USER}")" == "yes" ]]
   [[ "$(sysctl --values net.ipv4.ip_unprivileged_port_start)" == 80 ]]
+  wheelsticks --version
 }
 
 test_firewall() {
@@ -44,7 +45,7 @@ test_user_management() {
 }
 
 main() {
-  test_container_engine
+  test_container_platform
   test_firewall
   test_package_management
   test_user_management

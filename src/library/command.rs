@@ -1,6 +1,8 @@
 use anyhow::Context;
 use std::io;
 use std::process;
+use std::time;
+use wait_timeout::ChildExt;
 
 #[allow(dead_code)]
 pub fn status_bit(command: &mut process::Command) -> anyhow::Result<bool> {
@@ -22,6 +24,43 @@ pub fn status_ok(command: &mut process::Command) -> anyhow::Result<()> {
             status_error(status)
         }
     })
+}
+
+#[allow(dead_code)]
+pub fn status_within_time(
+    command: &mut process::Command,
+    timeout: time::Duration,
+) -> anyhow::Result<StatusWithinTime> {
+    go(
+        command,
+        |command| {
+            let mut child = command.spawn()?;
+            let status = child.wait_timeout(timeout)?;
+            Ok((child, status))
+        },
+        |(mut child, status)| {
+            Ok(match status {
+                None => {
+                    let _ = child.kill();
+                    let _ = child.wait();
+                    StatusWithinTime::Timeout
+                }
+                Some(status) => {
+                    if status.success() {
+                        StatusWithinTime::Success
+                    } else {
+                        StatusWithinTime::Failure
+                    }
+                }
+            })
+        },
+    )
+}
+
+pub enum StatusWithinTime {
+    Failure,
+    Success,
+    Timeout,
 }
 
 #[allow(dead_code)]

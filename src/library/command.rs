@@ -57,6 +57,7 @@ pub fn status_within_time(
     )
 }
 
+#[derive(Debug, PartialEq)]
 pub enum StatusWithinTime {
     Failure,
     Success,

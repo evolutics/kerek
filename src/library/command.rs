@@ -106,3 +106,64 @@ fn go<
 fn status_error<T>(status: process::ExitStatus) -> anyhow::Result<T> {
     Err(anyhow::anyhow!("{status}"))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test_case::test_case(invalid_program_(), None; "invalid program")]
+    #[test_case::test_case(shell("exit 0"), Some(false); "zero")]
+    #[test_case::test_case(shell("exit 1"), Some(true); "one")]
+    #[test_case::test_case(shell("exit 2"), None; "other")]
+    fn status_bit_handles(mut command: process::Command, expected: Option<bool>) {
+        assert_eq!(status_bit(&mut command).ok(), expected)
+    }
+
+    #[test_case::test_case(invalid_program_(), false; "invalid program")]
+    #[test_case::test_case(shell("exit 0"), true; "success")]
+    #[test_case::test_case(shell("exit 1"), false; "failure")]
+    fn status_ok_handles(mut command: process::Command, expected: bool) {
+        assert_eq!(status_ok(&mut command).is_ok(), expected)
+    }
+
+    #[test_case::test_case(invalid_program_(), None; "invalid program")]
+    #[test_case::test_case(shell("exit 0"), Some(StatusWithinTime::Success); "success")]
+    #[test_case::test_case(shell("exit 1"), Some(StatusWithinTime::Failure); "failure")]
+    #[test_case::test_case(shell("sleep 5"), Some(StatusWithinTime::Timeout); "timeout")]
+    fn status_within_time_handles(
+        mut command: process::Command,
+        expected: Option<StatusWithinTime>,
+    ) {
+        assert_eq!(
+            status_within_time(&mut command, time::Duration::from_secs_f32(0.01)).ok(),
+            expected,
+        )
+    }
+
+    #[test_case::test_case(invalid_program_(), None, None; "invalid program")]
+    #[test_case::test_case(
+        shell(">&2 printf Error; printf Output"),
+        Some("Error".to_owned()),
+        Some("Output".to_owned());
+        "success"
+    )]
+    #[test_case::test_case(shell("exit 1"), None, None; "failure")]
+    fn std_utf8_handle(
+        mut command: process::Command,
+        expected_stderr: Option<String>,
+        expected_stdout: Option<String>,
+    ) {
+        assert_eq!(stderr_utf8(&mut command).ok(), expected_stderr);
+        assert_eq!(stdout_utf8(&mut command).ok(), expected_stdout);
+    }
+
+    fn invalid_program_() -> process::Command {
+        process::Command::new("")
+    }
+
+    fn shell(script: &str) -> process::Command {
+        let mut command = process::Command::new("sh");
+        command.arg("-c").arg(script);
+        command
+    }
+}

@@ -22,10 +22,12 @@ pub fn go(in_: In) -> anyhow::Result<()> {
         process::Command::new("ansible-playbook")
             .arg("--inventory")
             .arg(format!(",{ssh_host}"))
-            .args(
-                in_.ssh_configuration
-                    .map(|ssh_configuration| format!("--ssh-common-args=-F {ssh_configuration:?}")),
-            )
+            .args(in_.ssh_configuration.iter().flat_map(|ssh_configuration| {
+                [
+                    "--ssh-common-args".into(),
+                    format!("-F {ssh_configuration:?}"),
+                ]
+            }))
             .arg("--")
             .arg(playbook.as_ref())
             .env(

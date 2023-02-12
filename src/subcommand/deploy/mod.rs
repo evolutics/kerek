@@ -13,15 +13,12 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 
     match in_.ssh_host {
         None => deploy_locally::go(&configuration),
-        Some(ssh_host) => {
-            let ssh_configuration = in_.ssh_configuration.unwrap_or_default();
-            deploy_remotely(
-                &in_.configuration,
-                &configuration,
-                &ssh_configuration,
-                &ssh_host,
-            )
-        }
+        Some(ssh_host) => deploy_remotely(
+            &in_.configuration,
+            &configuration,
+            &in_.ssh_configuration,
+            &ssh_host,
+        ),
     }
 }
 
@@ -34,7 +31,7 @@ pub struct In {
 fn deploy_remotely(
     configuration_path: &path::Path,
     configuration: &configuration::Main,
-    ssh_configuration: &path::Path,
+    ssh_configuration: &Option<path::PathBuf>,
     ssh_host: &str,
 ) -> anyhow::Result<()> {
     println!("Assembling artifacts.");
@@ -61,7 +58,7 @@ fn assemble_artifacts(
 
 fn synchronize_artifacts(
     configuration: &configuration::Main,
-    ssh_configuration: &path::Path,
+    ssh_configuration: &Option<path::PathBuf>,
     ssh_host: &str,
 ) -> anyhow::Result<()> {
     let mut source = ffi::OsString::from(&configuration.x_wheelsticks.local_workbench);
@@ -79,8 +76,9 @@ fn synchronize_artifacts(
         process::Command::new("rsync")
             .arg("--archive")
             .arg("--delete")
-            .arg("--rsh")
-            .arg(format!("ssh -F {ssh_configuration:?}"))
+            .args(ssh_configuration.iter().flat_map(|ssh_configuration| {
+                ["--rsh".into(), format!("ssh -F {ssh_configuration:?}")]
+            }))
             .arg("--")
             .arg(source)
             .arg(destination),
@@ -89,13 +87,14 @@ fn synchronize_artifacts(
 
 fn run_deploy_on_remote(
     configuration: &configuration::Main,
-    ssh_configuration: &path::Path,
+    ssh_configuration: &Option<path::PathBuf>,
     ssh_host: &str,
 ) -> anyhow::Result<()> {
     command::status_ok(
         process::Command::new("ssh")
-            .arg("-F")
-            .arg(ssh_configuration)
+            .args(ssh_configuration.iter().flat_map(|ssh_configuration| {
+                [ffi::OsStr::new("-F"), ssh_configuration.as_os_str()]
+            }))
             .arg("-l")
             .arg(&configuration.x_wheelsticks.deploy_user)
             .arg(ssh_host)

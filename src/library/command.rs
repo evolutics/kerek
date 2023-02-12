@@ -65,6 +65,17 @@ pub enum StatusWithinTime {
 }
 
 #[allow(dead_code)]
+pub fn stdout_raw(command: &mut process::Command) -> anyhow::Result<Vec<u8>> {
+    go(command, process::Command::output, |output| {
+        if output.status.success() {
+            Ok(output.stdout)
+        } else {
+            status_error(output.status)
+        }
+    })
+}
+
+#[allow(dead_code)]
 pub fn stdout_utf8(command: &mut process::Command) -> anyhow::Result<String> {
     go(command, process::Command::output, |output| {
         if output.status.success() {
@@ -127,6 +138,13 @@ mod tests {
             status_within_time(&mut command, time::Duration::from_secs_f32(0.01)).ok(),
             expected,
         )
+    }
+
+    #[test_case::test_case(invalid_program_(), None; "invalid program")]
+    #[test_case::test_case(shell("exit 1"), None; "failure")]
+    #[test_case::test_case(shell("printf Hi"), Some("Hi".into()); "success")]
+    fn stdout_raw_handles(mut command: process::Command, expected: Option<Vec<u8>>) {
+        assert_eq!(stdout_raw(&mut command).ok(), expected);
     }
 
     #[test_case::test_case(invalid_program_(), None; "invalid program")]

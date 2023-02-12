@@ -62,7 +62,7 @@ fn build_image(build_context: &path::Path) -> anyhow::Result<String> {
             .stderr(process::Stdio::inherit()),
     )?
     .trim_end()
-    .to_owned())
+    .into())
 }
 
 fn save_image(image_id: &str, image_file: &path::Path) -> anyhow::Result<()> {

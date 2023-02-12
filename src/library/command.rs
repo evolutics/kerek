@@ -143,8 +143,8 @@ mod tests {
     #[test_case::test_case(invalid_program_(), None, None; "invalid program")]
     #[test_case::test_case(
         shell(">&2 printf Error; printf Output"),
-        Some("Error".to_owned()),
-        Some("Output".to_owned());
+        Some("Error".into()),
+        Some("Output".into());
         "success"
     )]
     #[test_case::test_case(shell("exit 1"), None, None; "failure")]

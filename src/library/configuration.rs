@@ -30,7 +30,7 @@ impl Default for Wheelsticks {
     fn default() -> Self {
         Self {
             build_contexts: vec![],
-            deploy_user: "wheelsticks".to_owned(),
+            deploy_user: "wheelsticks".into(),
             local_workbench: ".wheelsticks".into(),
             remote_workbench: ".wheelsticks".into(),
         }
@@ -64,7 +64,7 @@ mod tests {
             Main {
                 x_wheelsticks: Wheelsticks {
                     build_contexts: vec!["my_build_context_0".into(), "my_build_context_1".into()],
-                    deploy_user: "my_deploy_user".to_owned(),
+                    deploy_user: "my_deploy_user".into(),
                     local_workbench: "my_local_workbench".into(),
                     remote_workbench: "my_remote_workbench".into(),
                 },

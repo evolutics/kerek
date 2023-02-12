@@ -65,17 +65,6 @@ pub enum StatusWithinTime {
 }
 
 #[allow(dead_code)]
-pub fn stderr_utf8(command: &mut process::Command) -> anyhow::Result<String> {
-    go(command, process::Command::output, |output| {
-        if output.status.success() {
-            String::from_utf8(output.stderr).context("Stderr is not valid UTF-8")
-        } else {
-            status_error(output.status)
-        }
-    })
-}
-
-#[allow(dead_code)]
 pub fn stdout_utf8(command: &mut process::Command) -> anyhow::Result<String> {
     go(command, process::Command::output, |output| {
         if output.status.success() {
@@ -140,21 +129,11 @@ mod tests {
         )
     }
 
-    #[test_case::test_case(invalid_program_(), None, None; "invalid program")]
-    #[test_case::test_case(
-        shell(">&2 printf Error; printf Output"),
-        Some("Error".into()),
-        Some("Output".into());
-        "success"
-    )]
-    #[test_case::test_case(shell("exit 1"), None, None; "failure")]
-    fn std_utf8_handle(
-        mut command: process::Command,
-        expected_stderr: Option<String>,
-        expected_stdout: Option<String>,
-    ) {
-        assert_eq!(stderr_utf8(&mut command).ok(), expected_stderr);
-        assert_eq!(stdout_utf8(&mut command).ok(), expected_stdout);
+    #[test_case::test_case(invalid_program_(), None; "invalid program")]
+    #[test_case::test_case(shell("exit 1"), None; "failure")]
+    #[test_case::test_case(shell("printf Hi"), Some("Hi".into()); "success")]
+    fn stdout_utf8_handles(mut command: process::Command, expected: Option<String>) {
+        assert_eq!(stdout_utf8(&mut command).ok(), expected);
     }
 
     fn invalid_program_() -> process::Command {

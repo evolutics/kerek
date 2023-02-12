@@ -100,7 +100,7 @@ fn run_deploy_on_remote(
                 "--",
                 "wheelsticks",
                 "deploy",
-                "--configuration",
+                "--compose-file",
             ])
             .arg(
                 configuration

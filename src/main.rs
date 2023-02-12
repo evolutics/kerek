@@ -11,13 +11,13 @@ fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.subcommand {
-        Subcommand::Build => build::go(cli.configuration),
+        Subcommand::Build => build::go(cli.compose_file),
 
         Subcommand::Deploy {
             ssh_configuration,
             ssh_host,
         } => deploy::go(deploy::In {
-            configuration: cli.configuration,
+            configuration: cli.compose_file,
             ssh_configuration,
             ssh_host,
         }),
@@ -26,7 +26,7 @@ fn main() -> anyhow::Result<()> {
             ssh_configuration,
             ssh_host,
         } => provision::go(provision::In {
-            configuration: cli.configuration,
+            configuration: cli.compose_file,
             ssh_configuration,
             ssh_host,
         }),
@@ -37,7 +37,7 @@ fn main() -> anyhow::Result<()> {
 #[command(author, version, about, long_about = None)]
 struct Cli {
     #[arg(default_value = "compose.yaml", global = true, long, short = 'f')]
-    configuration: path::PathBuf,
+    compose_file: path::PathBuf,
 
     #[command(subcommand)]
     subcommand: Subcommand,

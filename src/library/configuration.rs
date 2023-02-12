@@ -167,7 +167,7 @@ fn get_staging(
 ) -> Environment {
     with_custom_variables(
         Environment {
-            id: "staging".to_owned(),
+            id: "staging".into(),
             variables: collections::HashMap::from([
                 ("KEREK_IP_ADDRESS".into(), "192.168.60.158".into()),
                 (
@@ -201,7 +201,7 @@ fn with_custom_variables(
 fn get_production(custom_variables: collections::HashMap<String, String>) -> Environment {
     with_custom_variables(
         Environment {
-            id: "production".to_owned(),
+            id: "production".into(),
             variables: collections::HashMap::from([(
                 "KEREK_SSH_CONFIGURATION".into(),
                 ["safe", "ssh_configuration"]

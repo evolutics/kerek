@@ -77,8 +77,9 @@ fn load_target_images(
     let remote_workbench = &configuration.x_wheelsticks.remote_workbench;
     let image_files = fs::read_dir(remote_workbench)?
         .into_iter()
-        .flatten()
-        .map(|entry| entry.path())
+        .map(|result| result.map(|entry| entry.path()))
+        .collect::<Result<Vec<_>, _>>()?
+        .into_iter()
         .filter(|path| path.extension() == Some("tar".as_ref()))
         .collect::<collections::BTreeSet<_>>();
     for image_file in image_files.iter() {

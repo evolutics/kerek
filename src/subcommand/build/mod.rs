@@ -22,9 +22,8 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
 
     let existing_files = fs::read_dir(local_workbench)?
         .into_iter()
-        .flatten()
-        .map(|entry| entry.path())
-        .collect::<collections::BTreeSet<_>>();
+        .map(|result| result.map(|entry| entry.path()))
+        .collect::<Result<collections::BTreeSet<_>, _>>()?;
 
     let obsolete_files = existing_files.difference(&image_files);
     for obsolete_file in obsolete_files {

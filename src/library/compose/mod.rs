@@ -44,7 +44,7 @@ mod tests {
     #[test]
     fn handles_minimal() -> anyhow::Result<()> {
         let file = tempfile::NamedTempFile::new()?;
-        fs::write(&file, include_str!("compose_test_minimal.yaml"))?;
+        fs::write(&file, include_str!("test_minimal.yaml"))?;
 
         let main = get(file.as_ref())?;
 
@@ -55,7 +55,7 @@ mod tests {
     #[test]
     fn handles_full() -> anyhow::Result<()> {
         let file = tempfile::NamedTempFile::new()?;
-        fs::write(&file, include_str!("compose_test_full.yaml"))?;
+        fs::write(&file, include_str!("test_full.yaml"))?;
 
         let main = get(file.as_ref())?;
 

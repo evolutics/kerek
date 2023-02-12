@@ -158,7 +158,7 @@ fn get_tests(cache: &Cache, tests: UserFacingTests) -> Tests {
 }
 
 fn get_variables() -> collections::HashMap<ffi::OsString, ffi::OsString> {
-    collections::HashMap::from([("KEREK_GIT_BRANCH".into(), "origin/main".into())])
+    [("KEREK_GIT_BRANCH".into(), "origin/main".into())].into()
 }
 
 fn get_staging(
@@ -168,14 +168,15 @@ fn get_staging(
     with_custom_variables(
         Environment {
             id: "staging".into(),
-            variables: collections::HashMap::from([
+            variables: [
                 ("KEREK_IP_ADDRESS".into(), "192.168.60.158".into()),
                 (
                     "KEREK_SSH_CONFIGURATION".into(),
                     (&cache.ssh_configuration).into(),
                 ),
                 ("KEREK_SSH_HOST".into(), "staging".into()),
-            ]),
+            ]
+            .into(),
         },
         custom_variables,
     )
@@ -202,13 +203,14 @@ fn get_production(custom_variables: collections::HashMap<String, String>) -> Env
     with_custom_variables(
         Environment {
             id: "production".into(),
-            variables: collections::HashMap::from([(
+            variables: [(
                 "KEREK_SSH_CONFIGURATION".into(),
                 ["safe", "ssh_configuration"]
                     .iter()
                     .collect::<path::PathBuf>()
                     .into(),
-            )]),
+            )]
+            .into(),
         },
         custom_variables,
     )

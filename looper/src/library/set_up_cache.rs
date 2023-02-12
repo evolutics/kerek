@@ -29,11 +29,11 @@ fn get_vagrantfile_contents(
     configuration: &configuration::Main,
 ) -> anyhow::Result<borrow::Cow<str>> {
     Ok(match &configuration.vagrantfile {
-        None => borrow::Cow::from(include_str!("assets/Vagrantfile")),
+        None => include_str!("assets/Vagrantfile").into(),
         Some(path) => {
             let contents = fs::read_to_string(path)
                 .with_context(|| format!("Unable to read Vagrantfile: {path:?}"))?;
-            borrow::Cow::from(contents)
+            contents.into()
         }
     })
 }

@@ -163,7 +163,7 @@ mod tests {
 
     fn shell(script: &str) -> process::Command {
         let mut command = process::Command::new("sh");
-        command.arg("-c").arg(script);
+        command.args(["-c", script]);
         command
     }
 }

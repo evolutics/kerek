@@ -20,8 +20,7 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 
     command::status_ok(
         process::Command::new("ansible-playbook")
-            .arg("--inventory")
-            .arg(format!(",{ssh_host}"))
+            .args(["--inventory", &format!(",{ssh_host}")])
             .args(in_.ssh_configuration.iter().flat_map(|ssh_configuration| {
                 [
                     "--ssh-common-args".into(),

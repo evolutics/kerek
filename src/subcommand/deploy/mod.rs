@@ -74,14 +74,12 @@ fn synchronize_artifacts(
 
     command::status_ok(
         process::Command::new("rsync")
-            .arg("--archive")
-            .arg("--delete")
+            .args(["--archive", "--delete"])
             .args(ssh_configuration.iter().flat_map(|ssh_configuration| {
                 ["--rsh".into(), format!("ssh -F {ssh_configuration:?}")]
             }))
             .arg("--")
-            .arg(source)
-            .arg(destination),
+            .args([source, destination]),
     )
 }
 
@@ -95,13 +93,15 @@ fn run_deploy_on_remote(
             .args(ssh_configuration.iter().flat_map(|ssh_configuration| {
                 [ffi::OsStr::new("-F"), ssh_configuration.as_os_str()]
             }))
-            .arg("-l")
-            .arg(&configuration.x_wheelsticks.deploy_user)
-            .arg(ssh_host)
-            .arg("--")
-            .arg("wheelsticks")
-            .arg("deploy")
-            .arg("--configuration")
+            .args([
+                "-l",
+                &configuration.x_wheelsticks.deploy_user,
+                ssh_host,
+                "--",
+                "wheelsticks",
+                "deploy",
+                "--configuration",
+            ])
             .arg(
                 configuration
                     .x_wheelsticks

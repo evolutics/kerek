@@ -55,9 +55,7 @@ fn build_image_file(
 fn build_image(build_context: &path::Path) -> anyhow::Result<String> {
     Ok(command::stdout_utf8(
         process::Command::new("podman")
-            .arg("build")
-            .arg("--quiet")
-            .arg("--")
+            .args(["build", "--quiet", "--"])
             .arg(build_context)
             .stderr(process::Stdio::inherit()),
     )?
@@ -68,12 +66,8 @@ fn build_image(build_context: &path::Path) -> anyhow::Result<String> {
 fn save_image(image_id: &str, image_file: &path::Path) -> anyhow::Result<()> {
     command::status_ok(
         process::Command::new("podman")
-            .arg("save")
-            .arg("--format")
-            .arg("oci-archive")
-            .arg("--output")
+            .args(["save", "--format", "oci-archive", "--output"])
             .arg(image_file)
-            .arg("--")
-            .arg(image_id),
+            .args(["--", image_id]),
     )
 }

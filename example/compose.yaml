@@ -1,0 +1,3 @@
+x-wheelsticks:
+  build_contexts:
+    - .

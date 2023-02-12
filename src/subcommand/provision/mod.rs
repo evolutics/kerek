@@ -18,17 +18,14 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 
     let ssh_host = in_.ssh_host;
 
-    let mut command = process::Command::new("ansible-playbook");
-    let command = command.arg("--inventory").arg(format!(",{ssh_host}"));
-
-    if let Some(ssh_configuration) = in_.ssh_configuration {
-        command
-            .arg("--ssh-common-args")
-            .arg(format!("-F {ssh_configuration:?}"));
-    }
-
     command::status_ok(
-        command
+        process::Command::new("ansible-playbook")
+            .arg("--inventory")
+            .arg(format!(",{ssh_host}"))
+            .args(
+                in_.ssh_configuration
+                    .map(|ssh_configuration| format!("--ssh-common-args=-F {ssh_configuration:?}")),
+            )
             .arg("--")
             .arg(playbook.as_ref())
             .env(

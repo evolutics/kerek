@@ -1,7 +1,7 @@
 mod deploy_locally;
 
 use crate::library::command;
-use crate::library::configuration;
+use crate::library::compose;
 use anyhow::Context;
 use std::ffi;
 use std::fs;
@@ -9,13 +9,13 @@ use std::path;
 use std::process;
 
 pub fn go(in_: In) -> anyhow::Result<()> {
-    let configuration = configuration::get(&in_.configuration)?;
+    let compose = compose::get(&in_.compose_file)?;
 
     match in_.ssh_host {
-        None => deploy_locally::go(&configuration),
+        None => deploy_locally::go(&compose),
         Some(ssh_host) => deploy_remotely(
-            &in_.configuration,
-            &configuration,
+            &in_.compose_file,
+            &compose,
             &in_.ssh_configuration,
             &ssh_host,
         ),
@@ -23,53 +23,47 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 }
 
 pub struct In {
-    pub configuration: path::PathBuf,
+    pub compose_file: path::PathBuf,
     pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: Option<String>,
 }
 
 fn deploy_remotely(
-    configuration_path: &path::Path,
-    configuration: &configuration::Main,
+    compose_file: &path::Path,
+    compose: &compose::Main,
     ssh_configuration: &Option<path::PathBuf>,
     ssh_host: &str,
 ) -> anyhow::Result<()> {
     println!("Assembling artifacts.");
-    assemble_artifacts(configuration_path, configuration)?;
+    assemble_artifacts(compose_file, compose)?;
     println!("Synchronizing artifacts.");
-    synchronize_artifacts(configuration, ssh_configuration, ssh_host)?;
+    synchronize_artifacts(compose, ssh_configuration, ssh_host)?;
     println!("Deploying on remote.");
-    run_deploy_on_remote(configuration, ssh_configuration, ssh_host)
+    run_deploy_on_remote(compose, ssh_configuration, ssh_host)
 }
 
-fn assemble_artifacts(
-    configuration_path: &path::Path,
-    configuration: &configuration::Main,
-) -> anyhow::Result<()> {
-    let source = configuration_path;
-    let destination = configuration
-        .x_wheelsticks
-        .local_workbench
-        .join("compose.yaml");
+fn assemble_artifacts(compose_file: &path::Path, compose: &compose::Main) -> anyhow::Result<()> {
+    let source = compose_file;
+    let destination = compose.x_wheelsticks.local_workbench.join("compose.yaml");
     let _ = fs::copy(source, &destination)
         .with_context(|| format!("Unable to copy file {source:?} to {destination:?}"))?;
     Ok(())
 }
 
 fn synchronize_artifacts(
-    configuration: &configuration::Main,
+    compose: &compose::Main,
     ssh_configuration: &Option<path::PathBuf>,
     ssh_host: &str,
 ) -> anyhow::Result<()> {
-    let mut source = ffi::OsString::from(&configuration.x_wheelsticks.local_workbench);
+    let mut source = ffi::OsString::from(&compose.x_wheelsticks.local_workbench);
     source.push("/");
     let source = source;
 
-    let mut destination = ffi::OsString::from(&configuration.x_wheelsticks.deploy_user);
+    let mut destination = ffi::OsString::from(&compose.x_wheelsticks.deploy_user);
     destination.push("@");
     destination.push(ssh_host);
     destination.push(":");
-    destination.push(&configuration.x_wheelsticks.remote_workbench);
+    destination.push(&compose.x_wheelsticks.remote_workbench);
     let destination = destination;
 
     command::status_ok(
@@ -84,7 +78,7 @@ fn synchronize_artifacts(
 }
 
 fn run_deploy_on_remote(
-    configuration: &configuration::Main,
+    compose: &compose::Main,
     ssh_configuration: &Option<path::PathBuf>,
     ssh_host: &str,
 ) -> anyhow::Result<()> {
@@ -95,18 +89,13 @@ fn run_deploy_on_remote(
             }))
             .args([
                 "-l",
-                &configuration.x_wheelsticks.deploy_user,
+                &compose.x_wheelsticks.deploy_user,
                 ssh_host,
                 "--",
                 "wheelsticks",
                 "deploy",
                 "--compose-file",
             ])
-            .arg(
-                configuration
-                    .x_wheelsticks
-                    .remote_workbench
-                    .join("compose.yaml"),
-            ),
+            .arg(compose.x_wheelsticks.remote_workbench.join("compose.yaml")),
     )
 }

@@ -4,10 +4,10 @@ use std::io;
 use std::path;
 
 pub fn get(path: &path::Path) -> anyhow::Result<Main> {
-    let file = fs::File::open(path)
-        .with_context(|| format!("Unable to open configuration file: {path:?}"))?;
+    let file =
+        fs::File::open(path).with_context(|| format!("Unable to open Compose file: {path:?}"))?;
     serde_yaml::from_reader(io::BufReader::new(file))
-        .with_context(|| format!("Unable to deserialize configuration file: {path:?}"))
+        .with_context(|| format!("Unable to deserialize Compose file: {path:?}"))
 }
 
 #[derive(Debug, Default, PartialEq, serde::Deserialize)]
@@ -44,7 +44,7 @@ mod tests {
     #[test]
     fn handles_minimal() -> anyhow::Result<()> {
         let file = tempfile::NamedTempFile::new()?;
-        fs::write(&file, include_str!("configuration_test_minimal.yaml"))?;
+        fs::write(&file, include_str!("compose_test_minimal.yaml"))?;
 
         let main = get(file.as_ref())?;
 
@@ -55,7 +55,7 @@ mod tests {
     #[test]
     fn handles_full() -> anyhow::Result<()> {
         let file = tempfile::NamedTempFile::new()?;
-        fs::write(&file, include_str!("configuration_test_full.yaml"))?;
+        fs::write(&file, include_str!("compose_test_full.yaml"))?;
 
         let main = get(file.as_ref())?;
 

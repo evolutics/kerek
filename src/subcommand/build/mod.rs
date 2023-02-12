@@ -1,18 +1,18 @@
 use crate::library::command;
-use crate::library::configuration;
+use crate::library::compose;
 use std::collections;
 use std::fs;
 use std::path;
 use std::process;
 
-pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
-    let configuration = configuration::get(&configuration)?;
+pub fn go(compose_file: path::PathBuf) -> anyhow::Result<()> {
+    let compose = compose::get(&compose_file)?;
 
     // TODO: Short-circuit if building to deploy on same machine without SSH.
 
-    let build_contexts = configuration.x_wheelsticks.build_contexts;
+    let build_contexts = compose.x_wheelsticks.build_contexts;
 
-    let local_workbench = configuration.x_wheelsticks.local_workbench;
+    let local_workbench = compose.x_wheelsticks.local_workbench;
     fs::create_dir_all(&local_workbench)?;
 
     let image_files = build_contexts

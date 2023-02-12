@@ -1,5 +1,5 @@
 use crate::library::command;
-use crate::library::configuration;
+use crate::library::compose;
 use anyhow::Context;
 use std::env;
 use std::fs;
@@ -7,7 +7,7 @@ use std::path;
 use std::process;
 
 pub fn go(in_: In) -> anyhow::Result<()> {
-    let configuration = configuration::get(&in_.configuration)?;
+    let compose = compose::get(&in_.compose_file)?;
 
     let playbook = tempfile::NamedTempFile::new()?;
     fs::write(&playbook, include_str!("playbook.yaml"))
@@ -29,10 +29,7 @@ pub fn go(in_: In) -> anyhow::Result<()> {
             }))
             .arg("--")
             .arg(playbook.as_ref())
-            .env(
-                "WHEELSTICKS_DEPLOY_USER",
-                configuration.x_wheelsticks.deploy_user,
-            )
+            .env("WHEELSTICKS_DEPLOY_USER", compose.x_wheelsticks.deploy_user)
             .env(
                 "WHEELSTICKS_EXECUTABLE",
                 env::current_exe().context("Unable to get current executable.")?,
@@ -42,7 +39,7 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 }
 
 pub struct In {
-    pub configuration: path::PathBuf,
+    pub compose_file: path::PathBuf,
     pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: String,
 }

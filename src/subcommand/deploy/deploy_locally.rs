@@ -1,5 +1,5 @@
 use crate::library::command;
-use crate::library::configuration;
+use crate::library::compose;
 use std::collections;
 use std::fs;
 use std::path;
@@ -7,8 +7,8 @@ use std::process;
 use std::thread;
 use std::time;
 
-pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
-    let target_image_ids = load_target_images(configuration)?;
+pub fn go(compose: &compose::Main) -> anyhow::Result<()> {
+    let target_image_ids = load_target_images(compose)?;
     let images = get_images()?;
 
     let actual_images = images
@@ -71,10 +71,8 @@ enum Operator {
     Remove,
 }
 
-fn load_target_images(
-    configuration: &configuration::Main,
-) -> anyhow::Result<collections::HashSet<String>> {
-    let remote_workbench = &configuration.x_wheelsticks.remote_workbench;
+fn load_target_images(compose: &compose::Main) -> anyhow::Result<collections::HashSet<String>> {
+    let remote_workbench = &compose.x_wheelsticks.remote_workbench;
     let image_files = fs::read_dir(remote_workbench)?
         .into_iter()
         .map(|result| result.map(|entry| entry.path()))

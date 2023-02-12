@@ -17,7 +17,7 @@ fn main() -> anyhow::Result<()> {
             ssh_configuration,
             ssh_host,
         } => deploy::go(deploy::In {
-            configuration: cli.compose_file,
+            compose_file: cli.compose_file,
             ssh_configuration,
             ssh_host,
         }),
@@ -26,7 +26,7 @@ fn main() -> anyhow::Result<()> {
             ssh_configuration,
             ssh_host,
         } => provision::go(provision::In {
-            configuration: cli.compose_file,
+            compose_file: cli.compose_file,
             ssh_configuration,
             ssh_host,
         }),

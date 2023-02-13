@@ -5,9 +5,9 @@ use std::path;
 
 pub fn get(path: &path::Path) -> anyhow::Result<Main> {
     let file =
-        fs::File::open(path).with_context(|| format!("Unable to open Compose file: {path:?}"))?;
+        fs::File::open(path).with_context(|| format!("Unable to open Compose file {path:?}"))?;
     serde_yaml::from_reader(io::BufReader::new(file))
-        .with_context(|| format!("Unable to deserialize Compose file: {path:?}"))
+        .with_context(|| format!("Unable to deserialize Compose file {path:?}"))
 }
 
 #[derive(Debug, Default, PartialEq, serde::Deserialize)]

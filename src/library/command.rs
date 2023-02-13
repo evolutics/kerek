@@ -95,7 +95,7 @@ fn go<
         Err(error) => Err(anyhow::anyhow!(error)),
         Ok(value) => evaluate(value),
     }
-    .with_context(|| format!("Unable to run command: {command:?}"))
+    .with_context(|| format!("Unable to run command {command:?}"))
 }
 
 fn status_error<T>(status: process::ExitStatus) -> anyhow::Result<T> {

@@ -1,5 +1,9 @@
 - name: Do provisioning
   hosts: all
+  vars:
+    deploy_user: null
+    own_executable: null
+
   tasks:
     - name: Provision packages
       become: true
@@ -21,13 +25,13 @@
         - name: Manage group
           become: true
           ansible.builtin.group:
-            name: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
+            name: "{{ deploy_user }}"
 
         - name: Manage user
           become: true
           ansible.builtin.user:
-            group: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
-            name: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
+            group: "{{ deploy_user }}"
+            name: "{{ deploy_user }}"
             shell: /bin/bash
 
         - name: Read authorized SSH keys
@@ -39,7 +43,7 @@
           become: true
           ansible.posix.authorized_key:
             key: "{{ ssh_authorized_keys.content | b64decode }}"
-            user: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
+            user: "{{ deploy_user }}"
 
         - name: Configure OpenSSH daemon
           become: true
@@ -54,10 +58,10 @@
       block:
         - name: Create user systemd folder
           ansible.builtin.file:
-            group: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
+            group: "{{ deploy_user }}"
             mode: ug=rwx,o=rx
-            owner: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
-            path: "/home/{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}/.config/systemd/user"
+            owner: "{{ deploy_user }}"
+            path: "/home/{{ deploy_user }}/.config/systemd/user"
             state: directory
 
         - name: Enable user lingering # noqa no-changed-when
@@ -65,7 +69,7 @@
             argv:
               - loginctl
               - enable-linger
-              - "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
+              - "{{ deploy_user }}"
 
         - name: Reduce unprivileged port start
           ansible.posix.sysctl:
@@ -76,7 +80,7 @@
           ansible.builtin.copy:
             dest: /usr/local/bin/wheelsticks
             mode: u=rwx,go=rx
-            src: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_EXECUTABLE') }}"
+            src: "{{ own_executable }}"
 
     - name: Provision firewall
       become: true
@@ -119,10 +123,13 @@
 
 - name: Test provisioning
   hosts: all
+  vars:
+    own_executable: null
+    provision_test: null
   tasks:
     - name: Run script
-      ansible.builtin.script: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_PROVISION_TEST') }}"
+      ansible.builtin.script: "{{ provision_test }}"
       environment:
-        WHEELSTICKS_DEPLOY_USER: "{{ lookup('ansible.builtin.env', 'WHEELSTICKS_DEPLOY_USER') }}"
+        WHEELSTICKS_DEPLOY_USER: "{{ deploy_user }}"
       register: result
       until: result.rc == 0

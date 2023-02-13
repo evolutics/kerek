@@ -2,6 +2,5 @@ x-wheelsticks:
   build_contexts:
     - my_build_context_0
     - my_build_context_1
-  deploy_user: my_deploy_user
   local_workbench: my_local_workbench
   remote_workbench: my_remote_workbench

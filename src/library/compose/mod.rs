@@ -21,7 +21,6 @@ pub struct Main {
 #[serde(default, deny_unknown_fields)]
 pub struct Wheelsticks {
     pub build_contexts: Vec<path::PathBuf>,
-    pub deploy_user: String,
     pub local_workbench: path::PathBuf,
     pub remote_workbench: path::PathBuf,
 }
@@ -30,7 +29,6 @@ impl Default for Wheelsticks {
     fn default() -> Self {
         Self {
             build_contexts: vec![],
-            deploy_user: "wheelsticks".into(),
             local_workbench: ".wheelsticks".into(),
             remote_workbench: ".wheelsticks".into(),
         }
@@ -64,7 +62,6 @@ mod tests {
             Main {
                 x_wheelsticks: Wheelsticks {
                     build_contexts: vec!["my_build_context_0".into(), "my_build_context_1".into()],
-                    deploy_user: "my_deploy_user".into(),
                     local_workbench: "my_local_workbench".into(),
                     remote_workbench: "my_remote_workbench".into(),
                 },

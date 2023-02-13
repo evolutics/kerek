@@ -11,22 +11,26 @@ fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.subcommand {
-        Subcommand::Build => build::go(cli.compose_file),
+        Subcommand::Build { compose_file } => build::go(compose_file),
 
         Subcommand::Deploy {
+            compose_file,
             ssh_configuration,
             ssh_host,
+            ssh_user,
         } => deploy::go(deploy::In {
-            compose_file: cli.compose_file,
+            compose_file,
             ssh_configuration,
             ssh_host,
+            ssh_user,
         }),
 
         Subcommand::Provision {
+            deploy_user,
             ssh_configuration,
             ssh_host,
         } => provision::go(provision::In {
-            compose_file: cli.compose_file,
+            deploy_user,
             ssh_configuration,
             ssh_host,
         }),
@@ -36,23 +40,32 @@ fn main() -> anyhow::Result<()> {
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
-    #[arg(default_value = "compose.yaml", global = true, long, short = 'f')]
-    compose_file: path::PathBuf,
-
     #[command(subcommand)]
     subcommand: Subcommand,
 }
 
 #[derive(clap::Subcommand)]
 enum Subcommand {
-    Build,
+    Build {
+        #[arg(default_value = "compose.yaml", long, short = 'f')]
+        compose_file: path::PathBuf,
+    },
     Deploy {
+        #[arg(default_value = "compose.yaml", long, short = 'f')]
+        compose_file: path::PathBuf,
+
         #[arg(long, short = 'F')]
         ssh_configuration: Option<path::PathBuf>,
+
+        #[arg(long)]
+        ssh_user: Option<String>,
 
         ssh_host: Option<String>,
     },
     Provision {
+        #[arg(default_value = "wheelsticks", long)]
+        deploy_user: String,
+
         #[arg(long, short = 'F')]
         ssh_configuration: Option<path::PathBuf>,
 

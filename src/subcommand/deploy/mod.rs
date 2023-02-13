@@ -18,6 +18,7 @@ pub fn go(in_: In) -> anyhow::Result<()> {
             &compose,
             &in_.ssh_configuration,
             &ssh_host,
+            &in_.ssh_user,
         ),
     }
 }
@@ -26,6 +27,7 @@ pub struct In {
     pub compose_file: path::PathBuf,
     pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: Option<String>,
+    pub ssh_user: Option<String>,
 }
 
 fn deploy_remotely(
@@ -33,13 +35,14 @@ fn deploy_remotely(
     compose: &compose::Main,
     ssh_configuration: &Option<path::PathBuf>,
     ssh_host: &str,
+    ssh_user: &Option<String>,
 ) -> anyhow::Result<()> {
     println!("Assembling artifacts.");
     assemble_artifacts(compose_file, compose)?;
     println!("Synchronizing artifacts.");
-    synchronize_artifacts(compose, ssh_configuration, ssh_host)?;
+    synchronize_artifacts(compose, ssh_configuration, ssh_host, ssh_user)?;
     println!("Deploying on remote.");
-    run_deploy_on_remote(compose, ssh_configuration, ssh_host)
+    run_deploy_on_remote(compose, ssh_configuration, ssh_host, ssh_user)
 }
 
 fn assemble_artifacts(compose_file: &path::Path, compose: &compose::Main) -> anyhow::Result<()> {
@@ -54,13 +57,17 @@ fn synchronize_artifacts(
     compose: &compose::Main,
     ssh_configuration: &Option<path::PathBuf>,
     ssh_host: &str,
+    ssh_user: &Option<String>,
 ) -> anyhow::Result<()> {
     let mut source = ffi::OsString::from(&compose.x_wheelsticks.local_workbench);
     source.push("/");
     let source = source;
 
-    let mut destination = ffi::OsString::from(&compose.x_wheelsticks.deploy_user);
-    destination.push("@");
+    let mut destination = ffi::OsString::new();
+    if let Some(ssh_user) = ssh_user {
+        destination.push(ssh_user);
+        destination.push("@");
+    }
     destination.push(ssh_host);
     destination.push(":");
     destination.push(&compose.x_wheelsticks.remote_workbench);
@@ -81,21 +88,15 @@ fn run_deploy_on_remote(
     compose: &compose::Main,
     ssh_configuration: &Option<path::PathBuf>,
     ssh_host: &str,
+    ssh_user: &Option<String>,
 ) -> anyhow::Result<()> {
     command::status_ok(
         process::Command::new("ssh")
             .args(ssh_configuration.iter().flat_map(|ssh_configuration| {
                 [ffi::OsStr::new("-F"), ssh_configuration.as_os_str()]
             }))
-            .args([
-                "-l",
-                &compose.x_wheelsticks.deploy_user,
-                ssh_host,
-                "--",
-                "wheelsticks",
-                "deploy",
-                "--compose-file",
-            ])
+            .args(ssh_user.iter().flat_map(|ssh_user| ["-l", ssh_user]))
+            .args([ssh_host, "--", "wheelsticks", "deploy", "--compose-file"])
             .arg(compose.x_wheelsticks.remote_workbench.join("compose.yaml")),
     )
 }

@@ -15,6 +15,8 @@ fn go() -> anyhow::Result<()> {
 
     assert_command_in_context(process::Command::new(EXECUTABLE).args([
         "provision",
+        "--deploy-user",
+        DEPLOY_USER,
         "--ssh-configuration",
         SSH_CONFIGURATION_FILE,
         "--",
@@ -25,6 +27,8 @@ fn go() -> anyhow::Result<()> {
         "deploy",
         "--ssh-configuration",
         SSH_CONFIGURATION_FILE,
+        "--ssh-user",
+        DEPLOY_USER,
         "--",
         SSH_HOST,
     ]))?;
@@ -43,6 +47,8 @@ fn go() -> anyhow::Result<()> {
     ]))?;
     Ok(())
 }
+
+const DEPLOY_USER: &str = "wheelsticks";
 
 const EXECUTABLE: &str = env!("CARGO_BIN_EXE_wheelsticks");
 

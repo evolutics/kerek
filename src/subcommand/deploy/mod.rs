@@ -9,7 +9,7 @@ use std::path;
 use std::process;
 
 pub fn go(in_: In) -> anyhow::Result<()> {
-    let compose = compose::get(&in_.compose_file)?;
+    let compose = compose::parse(&in_.compose_file)?;
 
     match in_.ssh_host {
         None => deploy_locally::go(&compose),

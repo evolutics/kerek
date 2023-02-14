@@ -6,7 +6,7 @@ use std::path;
 use std::process;
 
 pub fn go(compose_file: path::PathBuf) -> anyhow::Result<()> {
-    let compose = compose::get(&compose_file)?;
+    let compose = compose::parse(&compose_file)?;
 
     // TODO: Short-circuit if building to deploy on same machine without SSH.
 

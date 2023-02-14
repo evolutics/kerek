@@ -3,6 +3,7 @@
   vars:
     deploy_user:
     own_executable:
+    upgrade_packages:
 
   tasks:
     - name: Provision packages
@@ -19,6 +20,7 @@
         - name: Upgrade packages
           ansible.builtin.apt:
             upgrade: safe
+          when: upgrade_packages
 
     - name: Provision access
       block:

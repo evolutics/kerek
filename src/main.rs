@@ -36,11 +36,13 @@ fn main() -> anyhow::Result<()> {
                 ssh_user,
             },
             ssh_host,
+            upgrade_packages,
         } => provision::go(provision::In {
             deploy_user,
             ssh_configuration,
             ssh_host,
             ssh_user,
+            upgrade_packages,
         }),
     }
 }
@@ -73,6 +75,9 @@ enum Subcommand {
 
         #[command(flatten)]
         ssh: Ssh,
+
+        #[arg(long)]
+        upgrade_packages: bool,
 
         ssh_host: String,
     },

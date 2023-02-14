@@ -24,6 +24,7 @@ pub fn go(in_: In) -> anyhow::Result<()> {
                     own_executable: &env::current_exe()
                         .context("Unable to get current executable")?,
                     provision_test: provision_test.as_ref(),
+                    upgrade_packages: in_.upgrade_packages,
                 })?,
                 "--inventory",
                 &format!(",{ssh_host}"),
@@ -49,6 +50,7 @@ pub struct In {
     pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: String,
     pub ssh_user: Option<String>,
+    pub upgrade_packages: bool,
 }
 
 #[derive(serde::Serialize)]
@@ -56,4 +58,5 @@ struct PlaybookVariables<'a> {
     deploy_user: &'a str,
     own_executable: &'a path::Path,
     provision_test: &'a path::Path,
+    upgrade_packages: bool,
 }

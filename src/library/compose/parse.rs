@@ -16,6 +16,15 @@ mod tests {
     use super::*;
 
     #[test]
+    fn given_empty_string_it_errs() -> anyhow::Result<()> {
+        let file = tempfile::NamedTempFile::new()?;
+        fs::write(&file, "")?;
+
+        assert!(go(file.as_ref()).is_err());
+        Ok(())
+    }
+
+    #[test]
     fn handles_minimal() -> anyhow::Result<()> {
         let file = tempfile::NamedTempFile::new()?;
         fs::write(&file, include_str!("test_minimal.yaml"))?;
@@ -36,8 +45,22 @@ mod tests {
         assert_eq!(
             main,
             model::Main {
+                services: [
+                    (
+                        "my_service_0".into(),
+                        model::Service {
+                            build: "my_build_context_0".into(),
+                        },
+                    ),
+                    (
+                        "my_service_1".into(),
+                        model::Service {
+                            build: "my_build_context_1".into(),
+                        },
+                    ),
+                ]
+                .into(),
                 x_wheelsticks: model::Wheelsticks {
-                    build_contexts: vec!["my_build_context_0".into(), "my_build_context_1".into()],
                     local_workbench: "my_local_workbench".into(),
                     remote_workbench: "my_remote_workbench".into(),
                 },

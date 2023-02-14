@@ -10,14 +10,13 @@ pub fn go(compose_file: path::PathBuf) -> anyhow::Result<()> {
 
     // TODO: Short-circuit if building to deploy on same machine without SSH.
 
-    let build_contexts = compose.x_wheelsticks.build_contexts;
-
     let local_workbench = compose.x_wheelsticks.local_workbench;
     fs::create_dir_all(&local_workbench)?;
 
-    let image_files = build_contexts
-        .iter()
-        .flat_map(|build_context| build_image_file(build_context, &local_workbench))
+    let image_files = compose
+        .services
+        .values()
+        .flat_map(|service| build_image_file(service, &local_workbench))
         .collect::<collections::BTreeSet<_>>();
 
     let existing_files = fs::read_dir(local_workbench)?
@@ -35,9 +34,10 @@ pub fn go(compose_file: path::PathBuf) -> anyhow::Result<()> {
 }
 
 fn build_image_file(
-    build_context: &path::Path,
+    service: &compose::Service,
     local_workbench: &path::Path,
 ) -> anyhow::Result<path::PathBuf> {
+    let build_context = &service.build;
     println!("Building image for context {build_context:?}.");
     let image_id = build_image(build_context)?;
 

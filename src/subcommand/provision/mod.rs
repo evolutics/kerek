@@ -34,6 +34,11 @@ pub fn go(in_: In) -> anyhow::Result<()> {
                     format!("-F {ssh_configuration:?}"),
                 ]
             }))
+            .args(
+                in_.ssh_user
+                    .iter()
+                    .flat_map(|ssh_user| ["--user", ssh_user]),
+            )
             .arg("--")
             .arg(playbook.as_ref()),
     )
@@ -43,6 +48,7 @@ pub struct In {
     pub deploy_user: String,
     pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: String,
+    pub ssh_user: Option<String>,
 }
 
 #[derive(serde::Serialize)]

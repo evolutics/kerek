@@ -17,9 +17,11 @@ fn main() -> anyhow::Result<()> {
 
         Subcommand::Deploy {
             compose: Compose { compose_file },
-            ssh: Ssh { ssh_configuration },
+            ssh: Ssh {
+                ssh_configuration,
+                ssh_user,
+            },
             ssh_host,
-            ssh_user,
         } => deploy::go(deploy::In {
             compose_file,
             ssh_configuration,
@@ -29,12 +31,16 @@ fn main() -> anyhow::Result<()> {
 
         Subcommand::Provision {
             deploy_user,
-            ssh: Ssh { ssh_configuration },
+            ssh: Ssh {
+                ssh_configuration,
+                ssh_user,
+            },
             ssh_host,
         } => provision::go(provision::In {
             deploy_user,
             ssh_configuration,
             ssh_host,
+            ssh_user,
         }),
     }
 }
@@ -59,9 +65,6 @@ enum Subcommand {
         #[command(flatten)]
         ssh: Ssh,
 
-        #[arg(long)]
-        ssh_user: Option<String>,
-
         ssh_host: Option<String>,
     },
     Provision {
@@ -85,6 +88,9 @@ struct Compose {
 struct Ssh {
     #[arg(long, short = 'F')]
     ssh_configuration: Option<path::PathBuf>,
+
+    #[arg(long)]
+    ssh_user: Option<String>,
 }
 
 #[cfg(test)]

@@ -11,11 +11,13 @@ fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.subcommand {
-        Subcommand::Build { compose_file } => build::go(compose_file),
+        Subcommand::Build {
+            compose: Compose { compose_file },
+        } => build::go(compose_file),
 
         Subcommand::Deploy {
-            compose_file,
-            ssh_configuration,
+            compose: Compose { compose_file },
+            ssh: Ssh { ssh_configuration },
             ssh_host,
             ssh_user,
         } => deploy::go(deploy::In {
@@ -27,7 +29,7 @@ fn main() -> anyhow::Result<()> {
 
         Subcommand::Provision {
             deploy_user,
-            ssh_configuration,
+            ssh: Ssh { ssh_configuration },
             ssh_host,
         } => provision::go(provision::In {
             deploy_user,
@@ -47,15 +49,15 @@ struct Cli {
 #[derive(clap::Subcommand)]
 enum Subcommand {
     Build {
-        #[arg(default_value = "compose.yaml", long, short = 'f')]
-        compose_file: path::PathBuf,
+        #[command(flatten)]
+        compose: Compose,
     },
     Deploy {
-        #[arg(default_value = "compose.yaml", long, short = 'f')]
-        compose_file: path::PathBuf,
+        #[command(flatten)]
+        compose: Compose,
 
-        #[arg(long, short = 'F')]
-        ssh_configuration: Option<path::PathBuf>,
+        #[command(flatten)]
+        ssh: Ssh,
 
         #[arg(long)]
         ssh_user: Option<String>,
@@ -66,11 +68,23 @@ enum Subcommand {
         #[arg(default_value = "wheelsticks", long)]
         deploy_user: String,
 
-        #[arg(long, short = 'F')]
-        ssh_configuration: Option<path::PathBuf>,
+        #[command(flatten)]
+        ssh: Ssh,
 
         ssh_host: String,
     },
+}
+
+#[derive(clap::Args)]
+struct Compose {
+    #[arg(default_value = "compose.yaml", long, short = 'f')]
+    compose_file: path::PathBuf,
+}
+
+#[derive(clap::Args)]
+struct Ssh {
+    #[arg(long, short = 'F')]
+    ssh_configuration: Option<path::PathBuf>,
 }
 
 #[cfg(test)]

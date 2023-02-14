@@ -29,9 +29,7 @@ mod tests {
         let file = tempfile::NamedTempFile::new()?;
         fs::write(&file, include_str!("test_minimal.yaml"))?;
 
-        let main = go(file.as_ref())?;
-
-        assert_eq!(main, model::Main::default());
+        assert_eq!(go(file.as_ref())?, model::Main::default());
         Ok(())
     }
 
@@ -40,10 +38,8 @@ mod tests {
         let file = tempfile::NamedTempFile::new()?;
         fs::write(&file, include_str!("test_full.yaml"))?;
 
-        let main = go(file.as_ref())?;
-
         assert_eq!(
-            main,
+            go(file.as_ref())?,
             model::Main {
                 services: [
                     (

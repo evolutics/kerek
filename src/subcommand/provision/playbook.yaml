@@ -1,8 +1,8 @@
 - name: Do provisioning
   hosts: all
   vars:
-    deploy_user: null
-    own_executable: null
+    deploy_user:
+    own_executable:
 
   tasks:
     - name: Provision packages
@@ -124,8 +124,8 @@
 - name: Test provisioning
   hosts: all
   vars:
-    own_executable: null
-    provision_test: null
+    own_executable:
+    provision_test:
   tasks:
     - name: Run script
       ansible.builtin.script: "{{ provision_test }}"

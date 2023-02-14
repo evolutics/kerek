@@ -139,14 +139,14 @@ mod tests {
     #[test_case::test_case(shell("exit 1"), None; "failure")]
     #[test_case::test_case(shell("printf Hi"), Some("Hi".into()); "success")]
     fn stdout_raw_handles(mut command: process::Command, expected: Option<Vec<u8>>) {
-        assert_eq!(stdout_raw(&mut command).ok(), expected);
+        assert_eq!(stdout_raw(&mut command).ok(), expected)
     }
 
     #[test_case::test_case(invalid_program_(), None; "invalid program")]
     #[test_case::test_case(shell("exit 1"), None; "failure")]
     #[test_case::test_case(shell("printf Hi"), Some("Hi".into()); "success")]
     fn stdout_utf8_handles(mut command: process::Command, expected: Option<String>) {
-        assert_eq!(stdout_utf8(&mut command).ok(), expected);
+        assert_eq!(stdout_utf8(&mut command).ok(), expected)
     }
 
     fn invalid_program_() -> process::Command {

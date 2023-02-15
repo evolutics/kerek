@@ -4,7 +4,7 @@ use std::fs;
 use std::io;
 use std::path;
 
-pub fn go(path: &path::Path) -> anyhow::Result<model::Main> {
+pub fn go(path: &path::Path) -> anyhow::Result<model::Project> {
     let file =
         fs::File::open(path).with_context(|| format!("Unable to open Compose file {path:?}"))?;
     serde_yaml::from_reader(io::BufReader::new(file))
@@ -29,7 +29,7 @@ mod tests {
         let file = tempfile::NamedTempFile::new()?;
         fs::write(&file, include_str!("test_minimal.yaml"))?;
 
-        assert_eq!(go(file.as_ref())?, model::Main::default());
+        assert_eq!(go(file.as_ref())?, model::Project::default());
         Ok(())
     }
 
@@ -40,7 +40,7 @@ mod tests {
 
         assert_eq!(
             go(file.as_ref())?,
-            model::Main {
+            model::Project {
                 services: [
                     (
                         "my_service_0".into(),

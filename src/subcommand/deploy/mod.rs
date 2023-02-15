@@ -9,13 +9,13 @@ use std::path;
 use std::process;
 
 pub fn go(in_: In) -> anyhow::Result<()> {
-    let compose = compose::parse(&in_.compose_file)?;
+    let project = compose::parse(&in_.compose_file)?;
 
     match in_.ssh_host {
-        None => deploy_locally::go(&compose),
+        None => deploy_locally::go(&project),
         Some(ssh_host) => deploy_remotely(
             &in_.compose_file,
-            &compose,
+            &project,
             &Ssh {
                 configuration: in_.ssh_configuration,
                 host: ssh_host,
@@ -40,27 +40,27 @@ struct Ssh {
 
 fn deploy_remotely(
     compose_file: &path::Path,
-    compose: &compose::Main,
+    project: &compose::Project,
     ssh: &Ssh,
 ) -> anyhow::Result<()> {
     println!("Assembling artifacts.");
-    assemble_artifacts(compose_file, compose)?;
+    assemble_artifacts(compose_file, project)?;
     println!("Synchronizing artifacts.");
-    synchronize_artifacts(compose, ssh)?;
+    synchronize_artifacts(project, ssh)?;
     println!("Deploying on remote.");
-    run_deploy_on_remote(compose, ssh)
+    run_deploy_on_remote(project, ssh)
 }
 
-fn assemble_artifacts(compose_file: &path::Path, compose: &compose::Main) -> anyhow::Result<()> {
+fn assemble_artifacts(compose_file: &path::Path, project: &compose::Project) -> anyhow::Result<()> {
     let source = compose_file;
-    let destination = compose.x_wheelsticks.local_workbench.join("compose.yaml");
+    let destination = project.x_wheelsticks.local_workbench.join("compose.yaml");
     let _ = fs::copy(source, &destination)
         .with_context(|| format!("Unable to copy file {source:?} to {destination:?}"))?;
     Ok(())
 }
 
-fn synchronize_artifacts(compose: &compose::Main, ssh: &Ssh) -> anyhow::Result<()> {
-    let mut source = ffi::OsString::from(&compose.x_wheelsticks.local_workbench);
+fn synchronize_artifacts(project: &compose::Project, ssh: &Ssh) -> anyhow::Result<()> {
+    let mut source = ffi::OsString::from(&project.x_wheelsticks.local_workbench);
     source.push("/");
     let source = source;
 
@@ -71,7 +71,7 @@ fn synchronize_artifacts(compose: &compose::Main, ssh: &Ssh) -> anyhow::Result<(
     }
     destination.push(&ssh.host);
     destination.push(":");
-    destination.push(&compose.x_wheelsticks.remote_workbench);
+    destination.push(&project.x_wheelsticks.remote_workbench);
     let destination = destination;
 
     command::status_ok(
@@ -87,7 +87,7 @@ fn synchronize_artifacts(compose: &compose::Main, ssh: &Ssh) -> anyhow::Result<(
     )
 }
 
-fn run_deploy_on_remote(compose: &compose::Main, ssh: &Ssh) -> anyhow::Result<()> {
+fn run_deploy_on_remote(project: &compose::Project, ssh: &Ssh) -> anyhow::Result<()> {
     command::status_ok(
         process::Command::new("ssh")
             .args(
@@ -97,6 +97,6 @@ fn run_deploy_on_remote(compose: &compose::Main, ssh: &Ssh) -> anyhow::Result<()
             )
             .args(ssh.user.iter().flat_map(|user| ["-l", user]))
             .args([&ssh.host, "--", "wheelsticks", "deploy", "--compose-file"])
-            .arg(compose.x_wheelsticks.remote_workbench.join("compose.yaml")),
+            .arg(project.x_wheelsticks.remote_workbench.join("compose.yaml")),
     )
 }

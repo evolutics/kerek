@@ -6,14 +6,14 @@ use std::path;
 use std::process;
 
 pub fn go(compose_file: path::PathBuf) -> anyhow::Result<()> {
-    let compose = compose::parse(&compose_file)?;
+    let project = compose::parse(&compose_file)?;
 
     // TODO: Short-circuit if building to deploy on same machine without SSH.
 
-    let local_workbench = compose.x_wheelsticks.local_workbench;
+    let local_workbench = project.x_wheelsticks.local_workbench;
     fs::create_dir_all(&local_workbench)?;
 
-    let image_files = compose
+    let image_files = project
         .services
         .values()
         .flat_map(|service| build_image_file(service, &local_workbench))

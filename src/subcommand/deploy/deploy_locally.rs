@@ -7,8 +7,8 @@ use std::process;
 use std::thread;
 use std::time;
 
-pub fn go(compose: &compose::Main) -> anyhow::Result<()> {
-    let target_image_ids = load_target_images(compose)?;
+pub fn go(project: &compose::Project) -> anyhow::Result<()> {
+    let target_image_ids = load_target_images(project)?;
     let images = get_images()?;
 
     let actual_images = images
@@ -71,8 +71,8 @@ enum Operator {
     Remove,
 }
 
-fn load_target_images(compose: &compose::Main) -> anyhow::Result<collections::HashSet<String>> {
-    let remote_workbench = &compose.x_wheelsticks.remote_workbench;
+fn load_target_images(project: &compose::Project) -> anyhow::Result<collections::HashSet<String>> {
+    let remote_workbench = &project.x_wheelsticks.remote_workbench;
     let image_files = fs::read_dir(remote_workbench)?
         .into_iter()
         .map(|result| result.map(|entry| entry.path()))

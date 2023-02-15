@@ -4,6 +4,8 @@ use std::path;
 #[derive(Debug, Default, PartialEq, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Project {
+    pub name: Option<String>,
+
     pub services: collections::BTreeMap<String, Service>,
 
     #[serde(default, rename = "x-wheelsticks")]

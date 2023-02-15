@@ -41,6 +41,7 @@ mod tests {
         assert_eq!(
             go(file.as_ref())?,
             model::Project {
+                name: Some("my_project".into()),
                 services: [
                     (
                         "my_service_0".into(),

@@ -1,3 +1,4 @@
+name: my_project
 services:
   my_service_0:
     build: my_build_context_0

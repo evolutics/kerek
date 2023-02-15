@@ -1,4 +1,4 @@
 name: example
 services:
-  example:
+  web:
     build: "."

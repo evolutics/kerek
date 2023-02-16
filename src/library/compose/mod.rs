@@ -1,5 +1,6 @@
-mod model;
+mod ir;
 mod parse;
+mod schema;
 
-pub use model::*;
+pub use ir::*;
 pub use parse::go as parse;

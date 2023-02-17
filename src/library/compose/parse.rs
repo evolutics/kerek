@@ -8,9 +8,9 @@ use std::path;
 pub fn go(path: &path::Path) -> anyhow::Result<ir::Project> {
     let file =
         fs::File::open(path).with_context(|| format!("Unable to open Compose file {path:?}"))?;
-    let raw = serde_yaml::from_reader(io::BufReader::new(file))
+    let project = serde_yaml::from_reader(io::BufReader::new(file))
         .with_context(|| format!("Unable to deserialize Compose file {path:?}"))?;
-    Ok(promote(raw))
+    Ok(promote(project))
 }
 
 fn promote(project: schema::Project) -> ir::Project {

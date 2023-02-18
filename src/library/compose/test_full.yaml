@@ -2,8 +2,13 @@ name: my_project
 services:
   my_service_0:
     build: my_build_context_0
+    unknown: foo
   my_service_1:
     build: my_build_context_1
+    unsupported: bar
+x-extension:
+  foo:
+  bar:
 x-wheelsticks:
   local_workbench: my_local_workbench
   remote_workbench: my_remote_workbench

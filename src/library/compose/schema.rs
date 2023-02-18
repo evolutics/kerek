@@ -2,7 +2,6 @@ use std::collections;
 use std::path;
 
 #[derive(serde::Deserialize)]
-#[serde(deny_unknown_fields)]
 pub struct Project {
     pub name: Option<String>,
 
@@ -10,17 +9,33 @@ pub struct Project {
 
     #[serde(default, rename = "x-wheelsticks")]
     pub x_wheelsticks: Wheelsticks,
+
+    #[serde(flatten)]
+    pub unknowns: Unknowns,
 }
 
-#[derive(Debug, PartialEq, serde::Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(serde::Deserialize)]
 pub struct Service {
     pub build: path::PathBuf,
+    #[serde(flatten)]
+    pub unknowns: Unknowns,
 }
 
 #[derive(Default, serde::Deserialize)]
-#[serde(deny_unknown_fields)]
 pub struct Wheelsticks {
     pub local_workbench: Option<path::PathBuf>,
     pub remote_workbench: Option<path::PathBuf>,
+    #[serde(flatten)]
+    pub unknowns: Unknowns,
+}
+
+pub type Unknowns = collections::BTreeMap<String, Unknown>;
+
+#[derive(serde::Serialize)]
+pub struct Unknown;
+
+impl<'d> serde::Deserialize<'d> for Unknown {
+    fn deserialize<D: serde::Deserializer<'d>>(_deserializer: D) -> Result<Unknown, D::Error> {
+        Ok(Unknown)
+    }
 }

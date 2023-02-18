@@ -17,7 +17,18 @@ fn promote(project: schema::Project) -> ir::Project {
     ir::Project {
         // TODO: Follow Compose specification for project name.
         name: project.name.unwrap_or_default(),
-        services: project.services,
+        services: project
+            .services
+            .into_iter()
+            .map(|(key, service)| {
+                (
+                    key,
+                    ir::Service {
+                        build: service.build,
+                    },
+                )
+            })
+            .collect(),
         x_wheelsticks: ir::Wheelsticks {
             local_workbench: project
                 .x_wheelsticks

@@ -6,6 +6,7 @@ pub struct Project {
     pub name: String,
     pub services: collections::BTreeMap<String, Service>,
     pub x_wheelsticks: Wheelsticks,
+    pub unknowns: Option<serde_yaml::Value>,
 }
 
 #[derive(Debug, PartialEq)]

@@ -10,11 +10,15 @@ pub fn go(path: &path::Path) -> anyhow::Result<ir::Project> {
         fs::File::open(path).with_context(|| format!("Unable to open Compose file {path:?}"))?;
     let project = serde_yaml::from_reader(io::BufReader::new(file))
         .with_context(|| format!("Unable to deserialize Compose file {path:?}"))?;
-    Ok(promote(project))
+    let project = promote(project)?;
+    handle_unknowns(&project)?;
+    Ok(project)
 }
 
-fn promote(project: schema::Project) -> ir::Project {
-    ir::Project {
+fn promote(project: schema::Project) -> anyhow::Result<ir::Project> {
+    let value = serde_yaml::to_value(&project)?;
+
+    Ok(ir::Project {
         // TODO: Follow Compose specification for project name.
         name: project.name.unwrap_or_default(),
         services: project
@@ -39,7 +43,40 @@ fn promote(project: schema::Project) -> ir::Project {
                 .remote_workbench
                 .unwrap_or_else(|| ".wheelsticks".into()),
         },
+        unknowns: collect_unknowns(value),
+    })
+}
+
+fn collect_unknowns(value: serde_yaml::Value) -> Option<serde_yaml::Value> {
+    match value {
+        serde_yaml::Value::Mapping(mapping) => {
+            let unknowns = mapping
+                .into_iter()
+                .flat_map(|(key, value)| collect_unknowns(value).map(|unknowns| (key, unknowns)))
+                .collect::<serde_yaml::Mapping>();
+            (!unknowns.is_empty()).then(|| serde_yaml::Value::Mapping(unknowns))
+        }
+        serde_yaml::Value::Sequence(sequence) => {
+            let unknowns = sequence
+                .into_iter()
+                .flat_map(collect_unknowns)
+                .collect::<Vec<_>>();
+            (!unknowns.is_empty()).then(|| serde_yaml::Value::Sequence(unknowns))
+        }
+        serde_yaml::Value::Tagged(_) => Some("← unknown".into()),
+        _ => None,
     }
+}
+
+fn handle_unknowns(project: &ir::Project) -> anyhow::Result<()> {
+    if let Some(unknowns) = &project.unknowns {
+        let pretty_unknowns = serde_yaml::to_string(&unknowns)?;
+        println!(
+            "Warning: Compose file has these unknown fields, \
+which are ignored:\n```\n{pretty_unknowns}```"
+        );
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -69,6 +106,7 @@ mod tests {
                     local_workbench: ".wheelsticks".into(),
                     remote_workbench: ".wheelsticks".into(),
                 },
+                unknowns: None,
             }
         );
         Ok(())
@@ -102,6 +140,7 @@ mod tests {
                     local_workbench: "my_local_workbench".into(),
                     remote_workbench: "my_remote_workbench".into(),
                 },
+                unknowns: Some(serde_yaml::from_str(include_str!("test_unknowns.yaml"))?),
             },
         );
         Ok(())

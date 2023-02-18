@@ -1,3 +1,4 @@
+pub use super::schema::SchemaMode;
 use std::collections;
 use std::path;
 
@@ -18,4 +19,5 @@ pub struct Service {
 pub struct Wheelsticks {
     pub local_workbench: path::PathBuf,
     pub remote_workbench: path::PathBuf,
+    pub schema_mode: SchemaMode,
 }

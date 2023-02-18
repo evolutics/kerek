@@ -42,6 +42,7 @@ fn promote(project: schema::Project) -> anyhow::Result<ir::Project> {
                 .x_wheelsticks
                 .remote_workbench
                 .unwrap_or_else(|| ".wheelsticks".into()),
+            schema_mode: project.x_wheelsticks.schema_mode,
         },
         unknowns: collect_unknowns(value),
     })
@@ -69,14 +70,29 @@ fn collect_unknowns(value: serde_yaml::Value) -> Option<serde_yaml::Value> {
 }
 
 fn handle_unknowns(project: &ir::Project) -> anyhow::Result<()> {
-    if let Some(unknowns) = &project.unknowns {
-        let pretty_unknowns = serde_yaml::to_string(&unknowns)?;
-        println!(
-            "Warning: Compose file has these unknown fields, \
-which are ignored:\n```\n{pretty_unknowns}```"
-        );
+    match &project.unknowns {
+        None => Ok(()),
+        Some(unknowns) => {
+            let pretty_unknowns = serde_yaml::to_string(&unknowns)?;
+            let pretty_unknowns = format!("```\n{pretty_unknowns}```");
+
+            match project.x_wheelsticks.schema_mode {
+                ir::SchemaMode::Default => {
+                    println!(
+                        "Warning: Compose file has these unknown fields, \
+                        which are ignored:\n\
+                        {pretty_unknowns}\n\
+                        Use strict mode to turn this into an error."
+                    );
+                    Ok(())
+                }
+                ir::SchemaMode::Loose => Ok(()),
+                ir::SchemaMode::Strict => Err(anyhow::anyhow!(
+                    "Compose file has these unknown fields:\n{pretty_unknowns}"
+                )),
+            }
+        }
     }
-    Ok(())
 }
 
 #[cfg(test)]
@@ -105,6 +121,7 @@ mod tests {
                 x_wheelsticks: ir::Wheelsticks {
                     local_workbench: ".wheelsticks".into(),
                     remote_workbench: ".wheelsticks".into(),
+                    schema_mode: schema::SchemaMode::Default,
                 },
                 unknowns: None,
             }
@@ -139,6 +156,7 @@ mod tests {
                 x_wheelsticks: ir::Wheelsticks {
                     local_workbench: "my_local_workbench".into(),
                     remote_workbench: "my_remote_workbench".into(),
+                    schema_mode: schema::SchemaMode::Loose,
                 },
                 unknowns: Some(serde_yaml::from_str(include_str!("test_unknowns.yaml"))?),
             },

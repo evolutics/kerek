@@ -25,8 +25,19 @@ pub struct Service {
 pub struct Wheelsticks {
     pub local_workbench: Option<path::PathBuf>,
     pub remote_workbench: Option<path::PathBuf>,
+    #[serde(default)]
+    pub schema_mode: SchemaMode,
     #[serde(flatten)]
     pub unknowns: Unknowns,
+}
+
+#[derive(Debug, Default, PartialEq, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SchemaMode {
+    #[default]
+    Default,
+    Loose,
+    Strict,
 }
 
 pub type Unknowns = collections::BTreeMap<String, Unknown>;

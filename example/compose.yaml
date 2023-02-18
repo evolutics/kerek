@@ -2,3 +2,5 @@ name: example
 services:
   web:
     build: "."
+x-wheelsticks:
+  schema_mode: strict

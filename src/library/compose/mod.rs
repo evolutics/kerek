@@ -1,3 +1,4 @@
+mod interpolate;
 mod ir;
 mod parse;
 mod schema;

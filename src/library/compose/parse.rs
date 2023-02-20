@@ -11,7 +11,7 @@ pub fn go(path: &path::Path) -> anyhow::Result<ir::Project> {
     let project = serde_yaml::from_reader(io::BufReader::new(file))
         .with_context(|| format!("Unable to deserialize Compose file {path:?}"))?;
     let project = promote(project)?;
-    handle_unknowns(&project)?;
+    handle_alien_fields(&project)?;
     Ok(project)
 }
 
@@ -44,54 +44,57 @@ fn promote(project: schema::Project) -> anyhow::Result<ir::Project> {
                 .unwrap_or_else(|| ".wheelsticks".into()),
             schema_mode: project.x_wheelsticks.schema_mode,
         },
-        unknowns: collect_unknowns(value),
+        alien_fields: collect_alien_fields(value),
     })
 }
 
-fn collect_unknowns(value: serde_yaml::Value) -> Option<serde_yaml::Value> {
+fn collect_alien_fields(value: serde_yaml::Value) -> Option<serde_yaml::Value> {
     match value {
         serde_yaml::Value::Mapping(mapping) => {
-            let unknowns = mapping
+            let alien_fields = mapping
                 .into_iter()
                 .flat_map(|(key, value)| match key {
                     serde_yaml::Value::String(key) if key.starts_with("x-") => None,
-                    _ => collect_unknowns(value).map(|unknowns| (key, unknowns)),
+                    _ => collect_alien_fields(value).map(|alien_fields| (key, alien_fields)),
                 })
                 .collect::<serde_yaml::Mapping>();
-            (!unknowns.is_empty()).then(|| serde_yaml::Value::Mapping(unknowns))
+            (!alien_fields.is_empty()).then(|| serde_yaml::Value::Mapping(alien_fields))
         }
         serde_yaml::Value::Sequence(sequence) => {
-            let unknowns = sequence
+            let alien_fields = sequence
                 .into_iter()
-                .flat_map(collect_unknowns)
+                .flat_map(collect_alien_fields)
                 .collect::<Vec<_>>();
-            (!unknowns.is_empty()).then(|| serde_yaml::Value::Sequence(unknowns))
+            (!alien_fields.is_empty()).then(|| serde_yaml::Value::Sequence(alien_fields))
         }
-        serde_yaml::Value::Tagged(_) => Some("← unknown".into()),
+        serde_yaml::Value::Tagged(tagged) if tagged.tag == "Unknown" => Some("← unknown".into()),
+        serde_yaml::Value::Tagged(tagged) if tagged.tag == "Unsupported" => {
+            Some("← unsupported".into())
+        }
         _ => None,
     }
 }
 
-fn handle_unknowns(project: &ir::Project) -> anyhow::Result<()> {
-    match &project.unknowns {
+fn handle_alien_fields(project: &ir::Project) -> anyhow::Result<()> {
+    match &project.alien_fields {
         None => Ok(()),
-        Some(unknowns) => {
-            let pretty_unknowns = serde_yaml::to_string(&unknowns)?;
-            let pretty_unknowns = format!("```\n{pretty_unknowns}```");
+        Some(alien_fields) => {
+            let pretty_aliens = serde_yaml::to_string(&alien_fields)?;
+            let pretty_aliens = format!("```\n{pretty_aliens}```");
 
             match project.x_wheelsticks.schema_mode {
                 ir::SchemaMode::Default => {
                     println!(
-                        "Warning: Compose file has these unknown fields, \
+                        "Warning: Compose file has these unrecognized fields, \
                         which are ignored:\n\
-                        {pretty_unknowns}\n\
+                        {pretty_aliens}\n\
                         Use strict mode to turn this into an error."
                     );
                     Ok(())
                 }
                 ir::SchemaMode::Loose => Ok(()),
                 ir::SchemaMode::Strict => Err(anyhow::anyhow!(
-                    "Compose file has these unknown fields:\n{pretty_unknowns}"
+                    "Compose file has these unrecognized fields:\n{pretty_aliens}"
                 )),
             }
         }
@@ -126,7 +129,7 @@ mod tests {
                     remote_workbench: ".wheelsticks".into(),
                     schema_mode: schema::SchemaMode::Default,
                 },
-                unknowns: None,
+                alien_fields: None,
             }
         );
         Ok(())
@@ -161,7 +164,9 @@ mod tests {
                     remote_workbench: "my_remote_workbench".into(),
                     schema_mode: schema::SchemaMode::Loose,
                 },
-                unknowns: Some(serde_yaml::from_str(include_str!("test_unknowns.yaml"))?),
+                alien_fields: Some(serde_yaml::from_str(include_str!(
+                    "test_alien_fields.yaml"
+                ))?),
             },
         );
         Ok(())

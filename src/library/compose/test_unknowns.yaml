@@ -1,5 +1,0 @@
-services:
-  my_service_0:
-    unknown: ← unknown
-  my_service_1:
-    unsupported: ← unknown

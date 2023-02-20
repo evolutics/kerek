@@ -11,14 +11,15 @@ pub struct Project {
     pub x_wheelsticks: Wheelsticks,
 
     #[serde(flatten)]
-    pub unknowns: Unknowns,
+    pub unknown_fields: UnknownFields,
 }
 
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct Service {
     pub build: path::PathBuf,
+    pub profiles: UnsupportedField,
     #[serde(flatten)]
-    pub unknowns: Unknowns,
+    pub unknown_fields: UnknownFields,
 }
 
 #[derive(Default, serde::Deserialize, serde::Serialize)]
@@ -28,7 +29,7 @@ pub struct Wheelsticks {
     #[serde(default)]
     pub schema_mode: SchemaMode,
     #[serde(flatten)]
-    pub unknowns: Unknowns,
+    pub unknown_fields: UnknownFields,
 }
 
 #[derive(Debug, Default, PartialEq, serde::Deserialize, serde::Serialize)]
@@ -40,16 +41,31 @@ pub enum SchemaMode {
     Strict,
 }
 
-pub type Unknowns = collections::BTreeMap<String, Unknown>;
+pub type UnknownFields = collections::BTreeMap<String, Unknown>;
 
-// This can be anything as long as it and only it is serialized with a YAML tag.
-#[derive(serde::Serialize)]
-pub enum Unknown {
-    Unknown(()),
+#[derive(serde::Deserialize)]
+pub struct Unknown(serde_yaml::Value);
+
+pub type UnsupportedField = Option<Unsupported>;
+
+#[derive(Default, serde::Deserialize)]
+pub struct Unsupported(serde_yaml::Value);
+
+impl serde::Serialize for Unknown {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        AlienField::Unknown(()).serialize(serializer)
+    }
 }
 
-impl<'d> serde::Deserialize<'d> for Unknown {
-    fn deserialize<D: serde::Deserializer<'d>>(_deserializer: D) -> Result<Unknown, D::Error> {
-        Ok(Unknown::Unknown(()))
+impl serde::Serialize for Unsupported {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        AlienField::Unsupported(()).serialize(serializer)
     }
+}
+
+// This can be anything as long as it and only it is serialized with YAML tags.
+#[derive(serde::Serialize)]
+pub enum AlienField {
+    Unknown(()),
+    Unsupported(()),
 }

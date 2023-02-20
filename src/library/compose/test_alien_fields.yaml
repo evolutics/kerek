@@ -1,0 +1,5 @@
+services:
+  my_service_0:
+    profiles: ← unsupported
+  my_service_1:
+    unknown: ← unknown

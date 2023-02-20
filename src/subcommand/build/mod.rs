@@ -16,8 +16,8 @@ pub fn go(compose_file: path::PathBuf) -> anyhow::Result<()> {
     let image_files = project
         .services
         .values()
-        .flat_map(|service| build_image_file(service, &local_workbench))
-        .collect::<collections::BTreeSet<_>>();
+        .map(|service| build_image_file(service, &local_workbench))
+        .collect::<Result<collections::BTreeSet<_>, _>>()?;
 
     let existing_files = fs::read_dir(local_workbench)?
         .into_iter()

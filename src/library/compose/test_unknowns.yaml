@@ -3,4 +3,3 @@ services:
     unknown: ← unknown
   my_service_1:
     unsupported: ← unknown
-x-extension: ← unknown

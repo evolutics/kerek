@@ -53,7 +53,10 @@ fn collect_unknowns(value: serde_yaml::Value) -> Option<serde_yaml::Value> {
         serde_yaml::Value::Mapping(mapping) => {
             let unknowns = mapping
                 .into_iter()
-                .flat_map(|(key, value)| collect_unknowns(value).map(|unknowns| (key, unknowns)))
+                .flat_map(|(key, value)| match key {
+                    serde_yaml::Value::String(key) if key.starts_with("x-") => None,
+                    _ => collect_unknowns(value).map(|unknowns| (key, unknowns)),
+                })
                 .collect::<serde_yaml::Mapping>();
             (!unknowns.is_empty()).then(|| serde_yaml::Value::Mapping(unknowns))
         }

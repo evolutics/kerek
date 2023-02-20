@@ -1,3 +1,4 @@
+use serde_yaml::value;
 use std::collections;
 use std::path;
 
@@ -53,19 +54,19 @@ pub struct Unsupported(serde_yaml::Value);
 
 impl serde::Serialize for Unknown {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        AlienField::Unknown(()).serialize(serializer)
+        value_with_arbitrary_tag("← unknown").serialize(serializer)
     }
 }
 
 impl serde::Serialize for Unsupported {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        AlienField::Unsupported(()).serialize(serializer)
+        value_with_arbitrary_tag("← unsupported").serialize(serializer)
     }
 }
 
-// This can be anything as long as it and only it is serialized with YAML tags.
-#[derive(serde::Serialize)]
-pub enum AlienField {
-    Unknown(()),
-    Unsupported(()),
+fn value_with_arbitrary_tag(value: &str) -> value::TaggedValue {
+    value::TaggedValue {
+        tag: value::Tag::new("Wheelsticks"),
+        value: value.into(),
+    }
 }

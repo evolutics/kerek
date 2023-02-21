@@ -10,7 +10,6 @@ use std::borrow;
 use std::env;
 use std::str;
 
-#[allow(dead_code)]
 pub fn go(input: &str) -> anyhow::Result<borrow::Cow<str>> {
     let (_, expression) = parse_top_level(input).map_err(|error| error.to_owned())?;
     evaluate(expression)

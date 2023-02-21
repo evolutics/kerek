@@ -3,6 +3,7 @@ use super::schema;
 use anyhow::Context;
 use std::fs;
 use std::io;
+use std::iter;
 use std::path;
 
 pub fn go(path: &path::Path) -> anyhow::Result<ir::Project> {
@@ -50,6 +51,11 @@ fn promote(project: schema::Project) -> anyhow::Result<ir::Project> {
 
 fn collect_alien_fields(value: serde_yaml::Value) -> Option<serde_yaml::Value> {
     match value {
+        serde_yaml::Value::Mapping(mapping)
+            if mapping.keys().eq(iter::once(schema::ALIEN_FIELD_MARK)) =>
+        {
+            mapping.into_values().next()
+        }
         serde_yaml::Value::Mapping(mapping) => {
             let alien_fields = mapping
                 .into_iter()
@@ -67,7 +73,6 @@ fn collect_alien_fields(value: serde_yaml::Value) -> Option<serde_yaml::Value> {
                 .collect::<Vec<_>>();
             (!alien_fields.is_empty()).then(|| serde_yaml::Value::Sequence(alien_fields))
         }
-        serde_yaml::Value::Tagged(tagged) => Some(tagged.value),
         _ => None,
     }
 }

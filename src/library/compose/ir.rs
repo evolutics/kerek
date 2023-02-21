@@ -1,6 +1,5 @@
 pub use super::schema::SchemaMode;
 use std::collections;
-use std::path;
 
 #[derive(Debug, PartialEq)]
 pub struct Project {
@@ -12,12 +11,12 @@ pub struct Project {
 
 #[derive(Debug, PartialEq)]
 pub struct Service {
-    pub build: path::PathBuf,
+    pub build: String,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Wheelsticks {
-    pub local_workbench: path::PathBuf,
-    pub remote_workbench: path::PathBuf,
+    pub local_workbench: String,
+    pub remote_workbench: String,
     pub schema_mode: SchemaMode,
 }

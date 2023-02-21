@@ -1,5 +1,4 @@
 use std::collections;
-use std::path;
 
 pub const ALIEN_FIELD_MARK: &str = "x-wheelsticks-alien";
 
@@ -18,7 +17,7 @@ pub struct Project {
 
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct Service {
-    pub build: path::PathBuf,
+    pub build: String,
     pub profiles: UnsupportedField,
     #[serde(flatten)]
     pub unknown_fields: UnknownFields,
@@ -26,8 +25,8 @@ pub struct Service {
 
 #[derive(Default, serde::Deserialize, serde::Serialize)]
 pub struct Wheelsticks {
-    pub local_workbench: Option<path::PathBuf>,
-    pub remote_workbench: Option<path::PathBuf>,
+    pub local_workbench: Option<String>,
+    pub remote_workbench: Option<String>,
     #[serde(default)]
     pub schema_mode: SchemaMode,
     #[serde(flatten)]

@@ -53,26 +53,24 @@ fn deploy_remotely(
 
 fn assemble_artifacts(compose_file: &path::Path, project: &compose::Project) -> anyhow::Result<()> {
     let source = compose_file;
-    let destination = project.x_wheelsticks.local_workbench.join("compose.yaml");
+    let destination = path::Path::new(&project.x_wheelsticks.local_workbench).join("compose.yaml");
     let _ = fs::copy(source, &destination)
         .with_context(|| format!("Unable to copy file {source:?} to {destination:?}"))?;
     Ok(())
 }
 
 fn synchronize_artifacts(project: &compose::Project, ssh: &Ssh) -> anyhow::Result<()> {
-    let mut source = ffi::OsString::from(&project.x_wheelsticks.local_workbench);
-    source.push("/");
-    let source = source;
+    let local_workbench = &project.x_wheelsticks.local_workbench;
+    let source = format!("{local_workbench}/");
 
-    let mut destination = ffi::OsString::new();
-    if let Some(user) = &ssh.user {
-        destination.push(user);
-        destination.push("@");
-    }
-    destination.push(&ssh.host);
-    destination.push(":");
-    destination.push(&project.x_wheelsticks.remote_workbench);
-    let destination = destination;
+    let optional_user = ssh
+        .user
+        .as_ref()
+        .map(|user| format!("{user}@"))
+        .unwrap_or_default();
+    let host = &ssh.host;
+    let remote_workbench = &project.x_wheelsticks.remote_workbench;
+    let destination = format!("{optional_user}{host}:{remote_workbench}");
 
     command::status_ok(
         process::Command::new("rsync")
@@ -97,6 +95,6 @@ fn run_deploy_on_remote(project: &compose::Project, ssh: &Ssh) -> anyhow::Result
             )
             .args(ssh.user.iter().flat_map(|user| ["-l", user]))
             .args([&ssh.host, "--", "wheelsticks", "deploy", "--compose-file"])
-            .arg(project.x_wheelsticks.remote_workbench.join("compose.yaml")),
+            .arg(path::Path::new(&project.x_wheelsticks.remote_workbench).join("compose.yaml")),
     )
 }

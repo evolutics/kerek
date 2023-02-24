@@ -21,7 +21,7 @@ fn promote(project: schema::Project) -> anyhow::Result<ir::Project> {
 
     Ok(ir::Project {
         // TODO: Follow Compose specification for project name.
-        name: project.name.unwrap_or_default(),
+        name: project.name.unwrap_or_default().into(),
         services: project
             .services
             .into_iter()
@@ -29,7 +29,7 @@ fn promote(project: schema::Project) -> anyhow::Result<ir::Project> {
                 (
                     key,
                     ir::Service {
-                        build: service.build,
+                        build: service.build.into(),
                     },
                 )
             })
@@ -38,11 +38,13 @@ fn promote(project: schema::Project) -> anyhow::Result<ir::Project> {
             local_workbench: project
                 .x_wheelsticks
                 .local_workbench
-                .unwrap_or_else(|| ".wheelsticks".into()),
+                .unwrap_or_else(|| ".wheelsticks".into())
+                .into(),
             remote_workbench: project
                 .x_wheelsticks
                 .remote_workbench
-                .unwrap_or_else(|| ".wheelsticks".into()),
+                .unwrap_or_else(|| ".wheelsticks".into())
+                .into(),
             schema_mode: project.x_wheelsticks.schema_mode,
         },
         alien_fields: collect_alien_fields(value),

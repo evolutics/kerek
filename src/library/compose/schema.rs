@@ -1,12 +1,14 @@
+use super::interpolated;
 use std::collections;
+use String as StrBuf;
 
 pub const ALIEN_FIELD_MARK: &str = "x-wheelsticks-alien";
 
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct Project {
-    pub name: Option<String>,
+    pub name: Option<interpolated::StrBuf>,
 
-    pub services: collections::BTreeMap<String, Service>,
+    pub services: collections::BTreeMap<StrBuf, Service>,
 
     #[serde(default, rename = "x-wheelsticks")]
     pub x_wheelsticks: Wheelsticks,
@@ -17,7 +19,7 @@ pub struct Project {
 
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct Service {
-    pub build: String,
+    pub build: interpolated::StrBuf,
     pub profiles: UnsupportedField,
     #[serde(flatten)]
     pub unknown_fields: UnknownFields,
@@ -25,8 +27,8 @@ pub struct Service {
 
 #[derive(Default, serde::Deserialize, serde::Serialize)]
 pub struct Wheelsticks {
-    pub local_workbench: Option<String>,
-    pub remote_workbench: Option<String>,
+    pub local_workbench: Option<interpolated::StrBuf>,
+    pub remote_workbench: Option<interpolated::StrBuf>,
     #[serde(default)]
     pub schema_mode: SchemaMode,
     #[serde(flatten)]
@@ -42,7 +44,7 @@ pub enum SchemaMode {
     Strict,
 }
 
-pub type UnknownFields = collections::BTreeMap<String, Unknown>;
+pub type UnknownFields = collections::BTreeMap<StrBuf, Unknown>;
 
 #[derive(serde::Deserialize)]
 pub struct Unknown(serde_yaml::Value);

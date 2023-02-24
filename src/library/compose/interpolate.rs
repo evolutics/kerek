@@ -162,9 +162,13 @@ fn evaluate(expression: Expression) -> anyhow::Result<borrow::Cow<str>> {
 
                         VariableRequirement::RequiredNotEmpty
                         | VariableRequirement::RequiredSet => {
-                            let error = argument.into_owned();
-                            Err(anyhow::anyhow!(error))
-                                .context(format!("Missing variable {identifier:?}"))
+                            let error = Err(anyhow::anyhow!("Missing variable {identifier:?}"));
+                            let context = argument.into_owned();
+                            if context.is_empty() {
+                                error
+                            } else {
+                                error.context(context)
+                            }
                         }
                     }
                 }
@@ -179,8 +183,7 @@ fn get_environment_variable(identifier: &str) -> anyhow::Result<Option<String>> 
     match env::var(identifier) {
         Err(env::VarError::NotPresent) => Ok(None),
         Err(env::VarError::NotUnicode(value)) => Err(anyhow::anyhow!(
-            "Unable to use value {value:?} of variable {identifier:?} \
-            as it is not valid Unicode."
+            "Variable {identifier:?} has non-Unicode value {value:?}"
         )),
         Ok(value) => Ok(Some(value)),
     }

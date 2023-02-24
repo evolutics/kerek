@@ -40,8 +40,7 @@ impl<'d> de::Visitor<'d> for StrBufVisitor {
 
     fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
         match interpolate::go(value) {
-            // TODO: Improve error reporting.
-            Err(_) => Err(de::Error::invalid_value(de::Unexpected::Str(value), &self)),
+            Err(error) => Err(E::custom(format!("{error:?}"))),
             Ok(value) => Ok(StrBuf(value.into())),
         }
     }

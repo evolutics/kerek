@@ -8,7 +8,7 @@ use std::iter;
 use std::path;
 
 pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
-    let file = &parameters.compose_file;
+    let file = parameters.compose_file;
     let contents = fs::read_to_string(file)
         .with_context(|| format!("Unable to read Compose file {file:?}"))?;
     let project_name = get_project_name::go(get_project_name::In {

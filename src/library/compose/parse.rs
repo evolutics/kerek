@@ -140,9 +140,9 @@ mod tests {
     }
 
     #[test]
-    fn handles_full() -> anyhow::Result<()> {
+    fn handles_maximal() -> anyhow::Result<()> {
         let file = tempfile::NamedTempFile::new()?;
-        fs::write(&file, include_str!("test_full_in.yaml"))?;
+        fs::write(&file, include_str!("test_maximal_in.yaml"))?;
 
         assert_eq!(
             go(file.as_ref())?,

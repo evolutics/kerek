@@ -41,7 +41,7 @@ mod tests {
     use std::fs;
 
     #[test_case::test_case(include_str!("test_minimal_in.yaml"), include_str!("test_minimal_out.yaml"); "minimal")]
-    #[test_case::test_case(include_str!("test_full_in.yaml"), include_str!("test_full_out.yaml"); "full")]
+    #[test_case::test_case(include_str!("test_maximal_in.yaml"), include_str!("test_maximal_out.yaml"); "maximal")]
     fn handles(input: &str, expected: &str) -> anyhow::Result<()> {
         let file = tempfile::NamedTempFile::new()?;
         fs::write(&file, input)?;

@@ -1,5 +1,5 @@
-use super::deserialize;
 use super::get_project_name;
+use super::interpolated;
 use super::ir;
 use super::schema;
 use anyhow::Context;
@@ -18,7 +18,8 @@ pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
         override_: parameters.project_name,
     });
     env::set_var("COMPOSE_PROJECT_NAME", &project_name);
-    let project = deserialize::go(file, &contents)?;
+    let project = interpolated::deserialize(file, &contents)
+        .with_context(|| format!("Unable to deserialize Compose file {file:?}"))?;
     let project = promote(project_name, project)?;
     handle_alien_fields(&project)?;
     Ok(project)
@@ -41,7 +42,7 @@ fn promote(project_name: String, project: schema::Project) -> anyhow::Result<ir:
                 (
                     key,
                     ir::Service {
-                        build: service.build.into(),
+                        build: service.build,
                     },
                 )
             })
@@ -50,13 +51,11 @@ fn promote(project_name: String, project: schema::Project) -> anyhow::Result<ir:
             local_workbench: project
                 .x_wheelsticks
                 .local_workbench
-                .unwrap_or_else(|| ".wheelsticks".into())
-                .into(),
+                .unwrap_or_else(|| ".wheelsticks".into()),
             remote_workbench: project
                 .x_wheelsticks
                 .remote_workbench
-                .unwrap_or_else(|| ".wheelsticks".into())
-                .into(),
+                .unwrap_or_else(|| ".wheelsticks".into()),
             schema_mode: project.x_wheelsticks.schema_mode,
         },
         alien_fields: collect_alien_fields(value),

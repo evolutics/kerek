@@ -1,4 +1,3 @@
-use super::deserialize;
 use super::interpolated;
 use std::path;
 
@@ -23,7 +22,7 @@ const LAST_RESORT_NAME: &str = "default";
 
 #[derive(serde::Deserialize)]
 struct Project {
-    name: interpolated::StrBuf,
+    name: String,
 }
 
 fn get_name_from_override(in_: &In) -> Option<String> {
@@ -31,8 +30,8 @@ fn get_name_from_override(in_: &In) -> Option<String> {
 }
 
 fn get_name_from_compose_contents(in_: &In) -> Option<String> {
-    deserialize::go::<Project>(in_.compose_file, in_.compose_contents)
-        .map(|project| project.name.into())
+    interpolated::deserialize::<Project>(in_.compose_file, in_.compose_contents)
+        .map(|project| project.name)
         .ok()
 }
 

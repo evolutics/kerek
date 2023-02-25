@@ -1,55 +1,51 @@
 use super::interpolate;
 use serde::de;
-use std::fmt;
+use std::path;
 
-#[derive(Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
-pub struct StrBuf(String);
+pub fn deserialize<T: de::DeserializeOwned>(
+    file: &path::Path,
+    contents: &str,
+) -> anyhow::Result<T> {
+    let value = match file.extension() {
+        Some(extension) if extension == "toml" => toml::from_str(contents)?,
+        _ => serde_yaml::from_str(contents)?,
+    };
 
-impl From<String> for StrBuf {
-    fn from(string: String) -> Self {
-        Self(string)
-    }
+    let value = map_string_values(value, |string| {
+        interpolate::go(&string).map(|string| string.into())
+    })?;
+
+    Ok(serde_yaml::from_value(value)?)
 }
 
-impl From<StrBuf> for String {
-    fn from(string: StrBuf) -> Self {
-        string.0
-    }
+pub fn serialize<T: serde::Serialize>(value: T) -> anyhow::Result<String> {
+    let value = serde_yaml::to_value(value)?;
+
+    let value = map_string_values(value, |string| Ok(string.replace('$', "$$")))?;
+
+    Ok(serde_yaml::to_string(&value)?)
 }
 
-impl From<&str> for StrBuf {
-    fn from(string: &str) -> Self {
-        Self(string.into())
-    }
-}
-
-impl<'d> serde::Deserialize<'d> for StrBuf {
-    fn deserialize<D: serde::Deserializer<'d>>(deserializer: D) -> Result<Self, D::Error> {
-        deserializer.deserialize_str(StrBufVisitor)
-    }
-}
-
-struct StrBufVisitor;
-
-impl<'d> de::Visitor<'d> for StrBufVisitor {
-    type Value = StrBuf;
-
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter.write_str("a string")
-    }
-
-    fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
-        match interpolate::go(value) {
-            Err(error) => Err(E::custom(format!("{error:?}"))),
-            Ok(value) => Ok(String::from(value).into()),
-        }
-    }
-}
-
-impl serde::Serialize for StrBuf {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_str(&self.0.replace('$', "$$"))
-    }
+fn map_string_values<F: Copy + Fn(String) -> anyhow::Result<String>>(
+    value: serde_yaml::Value,
+    function: F,
+) -> anyhow::Result<serde_yaml::Value> {
+    Ok(match value {
+        serde_yaml::Value::Mapping(mapping) => serde_yaml::Value::Mapping(
+            mapping
+                .into_iter()
+                .map(|(key, value)| map_string_values(value, function).map(|value| (key, value)))
+                .collect::<Result<_, _>>()?,
+        ),
+        serde_yaml::Value::Sequence(sequence) => serde_yaml::Value::Sequence(
+            sequence
+                .into_iter()
+                .map(|value| map_string_values(value, function))
+                .collect::<Result<_, _>>()?,
+        ),
+        serde_yaml::Value::String(string) => serde_yaml::Value::String(function(string)?),
+        value => value,
+    })
 }
 
 #[cfg(test)]
@@ -58,19 +54,31 @@ mod tests {
     use std::env;
 
     #[test]
-    fn deserializes_string() -> anyhow::Result<()> {
+    fn deserializes() -> anyhow::Result<()> {
         env::set_var("WHEELSTICKS_SOME", "X");
 
         assert_eq!(
-            serde_yaml::from_str::<StrBuf>("${WHEELSTICKS_SOME} days")?,
-            "X days".into(),
+            deserialize::<Container>(path::Path::new(""), "field: '${WHEELSTICKS_SOME} days'")?,
+            Container {
+                field: "X days".into(),
+            },
         );
         Ok(())
     }
 
     #[test]
-    fn serializes_string() -> anyhow::Result<()> {
-        assert_eq!(serde_yaml::to_string(&StrBuf::from("$5 $$"))?, "$$5 $$$$\n");
+    fn serializes() -> anyhow::Result<()> {
+        assert_eq!(
+            serialize(Container {
+                field: "$5 $$".into(),
+            })?,
+            "field: $$5 $$$$\n",
+        );
         Ok(())
+    }
+
+    #[derive(Debug, PartialEq, serde::Deserialize, serde::Serialize)]
+    struct Container {
+        field: String,
     }
 }

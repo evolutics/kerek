@@ -1,15 +1,16 @@
+use super::interpolated;
 use super::ir;
 use super::schema;
 use anyhow::Context;
 
 pub fn go(project: ir::Project) -> anyhow::Result<String> {
     let project = demote(project);
-    serde_yaml::to_string(&project).context("Unable to serialize Compose file")
+    interpolated::serialize(&project).context("Unable to serialize Compose file")
 }
 
 fn demote(project: ir::Project) -> schema::Project {
     schema::Project {
-        name: Some(project.name.into()),
+        name: Some(project.name),
         services: project
             .services
             .into_iter()
@@ -17,7 +18,7 @@ fn demote(project: ir::Project) -> schema::Project {
                 (
                     key,
                     schema::Service {
-                        build: service.build.into(),
+                        build: service.build,
                         profiles: None,
                         unknown_fields: [].into(),
                     },
@@ -25,8 +26,8 @@ fn demote(project: ir::Project) -> schema::Project {
             })
             .collect(),
         x_wheelsticks: schema::Wheelsticks {
-            local_workbench: Some(project.x_wheelsticks.local_workbench.into()),
-            remote_workbench: Some(project.x_wheelsticks.remote_workbench.into()),
+            local_workbench: Some(project.x_wheelsticks.local_workbench),
+            remote_workbench: Some(project.x_wheelsticks.remote_workbench),
             schema_mode: project.x_wheelsticks.schema_mode,
             unknown_fields: [].into(),
         },

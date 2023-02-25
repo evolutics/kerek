@@ -13,6 +13,7 @@ pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
         .with_context(|| format!("Unable to read Compose file {file:?}"))?;
     let project_name = get_project_name::go(get_project_name::In {
         compose_contents: &contents,
+        compose_file: file,
         override_: parameters.project_name,
     });
     env::set_var("COMPOSE_PROJECT_NAME", project_name);

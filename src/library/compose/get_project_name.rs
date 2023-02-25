@@ -1,12 +1,19 @@
+use std::path;
+
 pub fn go(in_: In) -> String {
-    [get_name_from_override, get_name_from_compose_contents]
-        .iter()
-        .find_map(|get| get(&in_))
-        .unwrap_or_else(|| LAST_RESORT_NAME.into())
+    [
+        get_name_from_override,
+        get_name_from_compose_contents,
+        get_name_from_folder,
+    ]
+    .iter()
+    .find_map(|get| get(&in_))
+    .unwrap_or_else(|| LAST_RESORT_NAME.into())
 }
 
 pub struct In<'a> {
     pub compose_contents: &'a str,
+    pub compose_file: &'a path::Path,
     pub override_: Option<String>,
 }
 
@@ -27,6 +34,14 @@ fn get_name_from_compose_contents(in_: &In) -> Option<String> {
         .ok()
 }
 
+fn get_name_from_folder(in_: &In) -> Option<String> {
+    in_.compose_file
+        .parent()
+        .and_then(|parent| parent.file_name())
+        .and_then(|name| name.to_str())
+        .map(|name| name.into())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -36,9 +51,10 @@ mod tests {
         assert_eq!(
             go(In {
                 compose_contents: "name: a",
-                override_: Some("b".into()),
+                compose_file: path::Path::new("b/compose.yaml"),
+                override_: Some("c".into()),
             }),
-            "b",
+            "c",
         )
     }
 
@@ -47,6 +63,7 @@ mod tests {
         assert_eq!(
             go(In {
                 compose_contents: "name: a",
+                compose_file: path::Path::new("b/compose.yaml"),
                 override_: None,
             }),
             "a",
@@ -54,10 +71,23 @@ mod tests {
     }
 
     #[test]
-    fn priority_2_is_last_resort() {
+    fn priority_2_is_compose_file() {
         assert_eq!(
             go(In {
                 compose_contents: "",
+                compose_file: path::Path::new("b/compose.yaml"),
+                override_: None,
+            }),
+            "b",
+        )
+    }
+
+    #[test]
+    fn priority_3_is_last_resort() {
+        assert_eq!(
+            go(In {
+                compose_contents: "",
+                compose_file: path::Path::new("/compose.yaml"),
                 override_: None,
             }),
             "default",

@@ -81,7 +81,7 @@ fn load_target_images(project: &compose::Project) -> anyhow::Result<collections:
         .filter(|path| path.extension() == Some("tar".as_ref()))
         .collect::<collections::BTreeSet<_>>();
     for image_file in image_files.iter() {
-        println!("Loading image file {image_file:?}.");
+        eprintln!("Loading image file {image_file:?}.");
         command::status_ok(
             process::Command::new("podman")
                 .args(["load", "--input"])
@@ -195,15 +195,15 @@ fn apply_change(change: &ContainerChange) -> anyhow::Result<()> {
 
     match change.operator {
         Operator::Add => {
-            println!("Adding {operand}.");
+            eprintln!("Adding {operand}.");
             add_container(change)
         }
         Operator::Keep => {
-            println!("Keeping {operand}.");
+            eprintln!("Keeping {operand}.");
             Ok(())
         }
         Operator::Remove => {
-            println!("Removing {operand}.");
+            eprintln!("Removing {operand}.");
             remove_container(change)
         }
     }
@@ -285,7 +285,7 @@ fn create_network_if_not_exists(network: &str) -> anyhow::Result<()> {
     if command::status_bit(
         process::Command::new("podman").args(["network", "exists", "--", network]),
     )? {
-        println!("Creating network {network:?}.");
+        eprintln!("Creating network {network:?}.");
         command::status_ok(
             process::Command::new("podman").args(["network", "create", "--", network]),
         )?;
@@ -306,7 +306,7 @@ fn remove_container(change: &ContainerChange) -> anyhow::Result<()> {
 }
 
 fn collect_garbage() -> anyhow::Result<()> {
-    println!("Collecting garbage.");
+    eprintln!("Collecting garbage.");
     command::status_ok(process::Command::new("podman").args([
         "system",
         "prune",

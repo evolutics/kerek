@@ -42,11 +42,11 @@ struct Ssh {
 }
 
 fn deploy_remotely(project: &compose::Project, ssh: &Ssh) -> anyhow::Result<()> {
-    println!("Assembling artifacts.");
+    eprintln!("Assembling artifacts.");
     assemble_artifacts(project)?;
-    println!("Synchronizing artifacts.");
+    eprintln!("Synchronizing artifacts.");
     synchronize_artifacts(project, ssh)?;
-    println!("Deploying on remote.");
+    eprintln!("Deploying on remote.");
     run_deploy_on_remote(project, ssh)
 }
 

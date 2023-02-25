@@ -100,7 +100,7 @@ fn handle_alien_fields(project: &ir::Project) -> anyhow::Result<()> {
 
             match project.x_wheelsticks.schema_mode {
                 ir::SchemaMode::Default => {
-                    println!(
+                    eprintln!(
                         "Warning: Compose file has these unrecognized fields, \
                         which are ignored:\n\
                         {pretty_aliens}\n\

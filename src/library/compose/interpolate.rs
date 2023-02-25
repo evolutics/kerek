@@ -153,7 +153,7 @@ fn evaluate(expression: Expression) -> anyhow::Result<borrow::Cow<str>> {
                         | VariableRequirement::OptionalSet => Ok(argument),
 
                         VariableRequirement::Recommended => {
-                            println!(
+                            eprintln!(
                                 "Warning: missing variable {identifier:?}, \
                                 substituting it with empty string."
                             );

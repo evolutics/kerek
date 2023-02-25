@@ -29,7 +29,7 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 
     let obsolete_files = existing_files.difference(&image_files);
     for obsolete_file in obsolete_files {
-        println!("Removing obsolete file {obsolete_file:?}.");
+        eprintln!("Removing obsolete file {obsolete_file:?}.");
         fs::remove_file(obsolete_file)?;
     }
 
@@ -46,13 +46,13 @@ fn build_image_file(
     local_workbench: &path::Path,
 ) -> anyhow::Result<path::PathBuf> {
     let build_context = path::Path::new(&service.build);
-    println!("Building image for context {build_context:?}.");
+    eprintln!("Building image for context {build_context:?}.");
     let image_id = build_image(build_context)?;
 
     let image_file = local_workbench.join(format!("{image_id}.tar"));
 
     if !image_file.try_exists()? {
-        println!("Saving image {image_id:?} to {image_file:?}.");
+        eprintln!("Saving image {image_id:?} to {image_file:?}.");
         save_image(&image_id, &image_file)?;
     }
 

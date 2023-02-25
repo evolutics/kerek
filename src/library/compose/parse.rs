@@ -127,7 +127,7 @@ mod tests {
             go(file.as_ref())?,
             ir::Project {
                 name: "".into(),
-                services: Default::default(),
+                services: [].into(),
                 x_wheelsticks: ir::Wheelsticks {
                     local_workbench: ".wheelsticks".into(),
                     remote_workbench: ".wheelsticks".into(),

@@ -19,7 +19,7 @@ fn demote(project: ir::Project) -> schema::Project {
                     schema::Service {
                         build: service.build.into(),
                         profiles: None,
-                        unknown_fields: Default::default(),
+                        unknown_fields: [].into(),
                     },
                 )
             })
@@ -28,9 +28,9 @@ fn demote(project: ir::Project) -> schema::Project {
             local_workbench: Some(project.x_wheelsticks.local_workbench.into()),
             remote_workbench: Some(project.x_wheelsticks.remote_workbench.into()),
             schema_mode: project.x_wheelsticks.schema_mode,
-            unknown_fields: Default::default(),
+            unknown_fields: [].into(),
         },
-        unknown_fields: Default::default(),
+        unknown_fields: [].into(),
     }
 }
 

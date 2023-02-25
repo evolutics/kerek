@@ -1,3 +1,4 @@
+use super::deserialize;
 use super::get_project_name;
 use super::ir;
 use super::schema;
@@ -17,8 +18,7 @@ pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
         override_: parameters.project_name,
     });
     env::set_var("COMPOSE_PROJECT_NAME", &project_name);
-    let project = serde_yaml::from_str(&contents)
-        .with_context(|| format!("Unable to deserialize Compose file {file:?}"))?;
+    let project = deserialize::go(file, &contents)?;
     let project = promote(project_name, project)?;
     handle_alien_fields(&project)?;
     Ok(project)
@@ -134,10 +134,11 @@ mod tests {
         Ok(())
     }
 
-    #[test]
-    fn handles_maximal() -> anyhow::Result<()> {
-        let file = tempfile::NamedTempFile::new()?;
-        fs::write(&file, include_str!("test_maximal_in.yaml"))?;
+    #[test_case::test_case(include_str!("test_maximal_in.toml"), ".toml"; "TOML")]
+    #[test_case::test_case(include_str!("test_maximal_in.yaml"), ".yaml"; "YAML")]
+    fn handles_maximal(contents: &str, suffix: &str) -> anyhow::Result<()> {
+        let file = tempfile::Builder::new().suffix(suffix).tempfile()?;
+        fs::write(&file, contents)?;
 
         assert_eq!(
             go(Parameters {
@@ -174,10 +175,11 @@ mod tests {
         Ok(())
     }
 
-    #[test]
-    fn handles_minimal() -> anyhow::Result<()> {
-        let file = tempfile::NamedTempFile::new()?;
-        fs::write(&file, include_str!("test_minimal_in.yaml"))?;
+    #[test_case::test_case(include_str!("test_minimal_in.toml"), ".toml"; "TOML")]
+    #[test_case::test_case(include_str!("test_minimal_in.yaml"), ".yaml"; "YAML")]
+    fn handles_minimal(contents: &str, suffix: &str) -> anyhow::Result<()> {
+        let file = tempfile::Builder::new().suffix(suffix).tempfile()?;
+        fs::write(&file, contents)?;
 
         assert_eq!(
             go(Parameters {

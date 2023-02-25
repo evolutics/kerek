@@ -1,3 +1,4 @@
+mod deserialize;
 mod get_project_name;
 mod interpolate;
 mod interpolated;

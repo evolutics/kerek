@@ -1,3 +1,4 @@
+use super::deserialize;
 use super::interpolated;
 use std::path;
 
@@ -30,7 +31,7 @@ fn get_name_from_override(in_: &In) -> Option<String> {
 }
 
 fn get_name_from_compose_contents(in_: &In) -> Option<String> {
-    serde_yaml::from_str::<Project>(in_.compose_contents)
+    deserialize::go::<Project>(in_.compose_file, in_.compose_contents)
         .map(|project| project.name.into())
         .ok()
 }

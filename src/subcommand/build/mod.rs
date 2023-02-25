@@ -5,8 +5,11 @@ use std::fs;
 use std::path;
 use std::process;
 
-pub fn go(compose_file: path::PathBuf) -> anyhow::Result<()> {
-    let project = compose::parse(&compose_file)?;
+pub fn go(in_: In) -> anyhow::Result<()> {
+    let project = compose::parse(compose::Parameters {
+        compose_file: &in_.compose_file,
+        project_name: in_.project_name,
+    })?;
 
     // TODO: Short-circuit if building to deploy on same machine without SSH.
 
@@ -31,6 +34,11 @@ pub fn go(compose_file: path::PathBuf) -> anyhow::Result<()> {
     }
 
     Ok(())
+}
+
+pub struct In {
+    pub compose_file: path::PathBuf,
+    pub project_name: Option<String>,
 }
 
 fn build_image_file(

@@ -1,3 +1,4 @@
+mod get_project_name;
 mod interpolate;
 mod interpolated;
 mod ir;
@@ -7,4 +8,5 @@ mod schema;
 
 pub use ir::*;
 pub use parse::go as parse;
+pub use parse::Parameters;
 pub use print::go as print;

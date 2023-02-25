@@ -45,7 +45,10 @@ mod tests {
     fn handles(input: &str, expected: &str) -> anyhow::Result<()> {
         let file = tempfile::NamedTempFile::new()?;
         fs::write(&file, input)?;
-        let project = parse::go(file.as_ref())?;
+        let project = parse::go(parse::Parameters {
+            compose_file: file.as_ref(),
+            project_name: None,
+        })?;
         let expected =
             serde_yaml::to_string(&serde_yaml::from_str::<serde_yaml::Value>(expected)?)?;
 

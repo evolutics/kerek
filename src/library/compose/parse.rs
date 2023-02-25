@@ -1,19 +1,31 @@
+use super::get_project_name;
 use super::ir;
 use super::schema;
 use anyhow::Context;
+use std::env;
 use std::fs;
-use std::io;
 use std::iter;
 use std::path;
 
-pub fn go(path: &path::Path) -> anyhow::Result<ir::Project> {
-    let file =
-        fs::File::open(path).with_context(|| format!("Unable to open Compose file {path:?}"))?;
-    let project = serde_yaml::from_reader(io::BufReader::new(file))
-        .with_context(|| format!("Unable to deserialize Compose file {path:?}"))?;
+pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
+    let file = &parameters.compose_file;
+    let contents = fs::read_to_string(file)
+        .with_context(|| format!("Unable to read Compose file {file:?}"))?;
+    let project_name = get_project_name::go(get_project_name::In {
+        compose_contents: &contents,
+        override_: parameters.project_name,
+    });
+    env::set_var("COMPOSE_PROJECT_NAME", project_name);
+    let project = serde_yaml::from_str(&contents)
+        .with_context(|| format!("Unable to deserialize Compose file {file:?}"))?;
     let project = promote(project)?;
     handle_alien_fields(&project)?;
     Ok(project)
+}
+
+pub struct Parameters<'a> {
+    pub compose_file: &'a path::Path,
+    pub project_name: Option<String>,
 }
 
 fn promote(project: schema::Project) -> anyhow::Result<ir::Project> {
@@ -114,7 +126,11 @@ mod tests {
         let file = tempfile::NamedTempFile::new()?;
         fs::write(&file, "")?;
 
-        assert!(go(file.as_ref()).is_err());
+        assert!(go(Parameters {
+            compose_file: file.as_ref(),
+            project_name: None,
+        })
+        .is_err());
         Ok(())
     }
 
@@ -124,7 +140,10 @@ mod tests {
         fs::write(&file, include_str!("test_maximal_in.yaml"))?;
 
         assert_eq!(
-            go(file.as_ref())?,
+            go(Parameters {
+                compose_file: file.as_ref(),
+                project_name: None,
+            })?,
             ir::Project {
                 name: "my_project".into(),
                 services: [
@@ -161,7 +180,10 @@ mod tests {
         fs::write(&file, include_str!("test_minimal_in.yaml"))?;
 
         assert_eq!(
-            go(file.as_ref())?,
+            go(Parameters {
+                compose_file: file.as_ref(),
+                project_name: None,
+            })?,
             ir::Project {
                 name: "".into(),
                 services: [].into(),

@@ -12,11 +12,22 @@ fn main() -> anyhow::Result<()> {
 
     match cli.subcommand {
         Subcommand::Build {
-            compose: Compose { compose_file },
-        } => build::go(compose_file),
+            compose:
+                Compose {
+                    compose_file,
+                    project_name,
+                },
+        } => build::go(build::In {
+            compose_file,
+            project_name,
+        }),
 
         Subcommand::Deploy {
-            compose: Compose { compose_file },
+            compose:
+                Compose {
+                    compose_file,
+                    project_name,
+                },
             ssh: Ssh {
                 ssh_configuration,
                 ssh_user,
@@ -24,6 +35,7 @@ fn main() -> anyhow::Result<()> {
             ssh_host,
         } => deploy::go(deploy::In {
             compose_file,
+            project_name,
             ssh_configuration,
             ssh_host,
             ssh_user,
@@ -87,6 +99,8 @@ enum Subcommand {
 struct Compose {
     #[arg(default_value = "compose.yaml", long, short = 'f')]
     compose_file: path::PathBuf,
+    #[arg(long, short = 'p')]
+    project_name: Option<String>,
 }
 
 #[derive(clap::Args)]

@@ -9,7 +9,10 @@ use std::path;
 use std::process;
 
 pub fn go(in_: In) -> anyhow::Result<()> {
-    let project = compose::parse(&in_.compose_file)?;
+    let project = compose::parse(compose::Parameters {
+        compose_file: &in_.compose_file,
+        project_name: in_.project_name,
+    })?;
 
     match in_.ssh_host {
         None => deploy_locally::go(&project),
@@ -26,6 +29,7 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 
 pub struct In {
     pub compose_file: path::PathBuf,
+    pub project_name: Option<String>,
     pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: Option<String>,
     pub ssh_user: Option<String>,

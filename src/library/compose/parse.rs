@@ -119,27 +119,6 @@ mod tests {
     }
 
     #[test]
-    fn handles_minimal() -> anyhow::Result<()> {
-        let file = tempfile::NamedTempFile::new()?;
-        fs::write(&file, include_str!("test_minimal_in.yaml"))?;
-
-        assert_eq!(
-            go(file.as_ref())?,
-            ir::Project {
-                name: "".into(),
-                services: [].into(),
-                x_wheelsticks: ir::Wheelsticks {
-                    local_workbench: ".wheelsticks".into(),
-                    remote_workbench: ".wheelsticks".into(),
-                    schema_mode: schema::SchemaMode::Default,
-                },
-                alien_fields: None,
-            }
-        );
-        Ok(())
-    }
-
-    #[test]
     fn handles_maximal() -> anyhow::Result<()> {
         let file = tempfile::NamedTempFile::new()?;
         fs::write(&file, include_str!("test_maximal_in.yaml"))?;
@@ -172,6 +151,27 @@ mod tests {
                     "test_alien_fields.yaml"
                 ))?),
             },
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn handles_minimal() -> anyhow::Result<()> {
+        let file = tempfile::NamedTempFile::new()?;
+        fs::write(&file, include_str!("test_minimal_in.yaml"))?;
+
+        assert_eq!(
+            go(file.as_ref())?,
+            ir::Project {
+                name: "".into(),
+                services: [].into(),
+                x_wheelsticks: ir::Wheelsticks {
+                    local_workbench: ".wheelsticks".into(),
+                    remote_workbench: ".wheelsticks".into(),
+                    schema_mode: schema::SchemaMode::Default,
+                },
+                alien_fields: None,
+            }
         );
         Ok(())
     }

@@ -31,7 +31,7 @@ pub struct Wheelsticks {
     pub local_workbench: Option<interpolated::StrBuf>,
     pub remote_workbench: Option<interpolated::StrBuf>,
     #[serde(default)]
-    pub schema_mode: SchemaMode,
+    pub schema_mode: SchemaMode, // TODO: Support interpolation.
     #[serde(flatten)]
     pub unknown_fields: UnknownFields,
 }

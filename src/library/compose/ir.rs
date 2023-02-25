@@ -1,7 +1,7 @@
 pub use super::schema::SchemaMode;
 use std::collections;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Project {
     pub name: String,
     pub services: collections::BTreeMap<String, Service>,
@@ -9,12 +9,12 @@ pub struct Project {
     pub alien_fields: Option<serde_yaml::Value>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Service {
     pub build: String,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Wheelsticks {
     pub local_workbench: String,
     pub remote_workbench: String,

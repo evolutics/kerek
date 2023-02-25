@@ -20,6 +20,7 @@ pub struct Project {
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct Service {
     pub build: interpolated::StrBuf,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub profiles: UnsupportedField,
     #[serde(flatten)]
     pub unknown_fields: UnknownFields,
@@ -35,7 +36,7 @@ pub struct Wheelsticks {
     pub unknown_fields: UnknownFields,
 }
 
-#[derive(Debug, Default, PartialEq, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SchemaMode {
     #[default]

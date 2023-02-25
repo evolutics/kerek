@@ -1,0 +1,6 @@
+name: ""
+services: {}
+x-wheelsticks:
+  local_workbench: .wheelsticks
+  remote_workbench: .wheelsticks
+  schema_mode: default

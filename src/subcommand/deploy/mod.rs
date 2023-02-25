@@ -14,7 +14,6 @@ pub fn go(in_: In) -> anyhow::Result<()> {
     match in_.ssh_host {
         None => deploy_locally::go(&project),
         Some(ssh_host) => deploy_remotely(
-            &in_.compose_file,
             &project,
             &Ssh {
                 configuration: in_.ssh_configuration,
@@ -38,25 +37,19 @@ struct Ssh {
     user: Option<String>,
 }
 
-fn deploy_remotely(
-    compose_file: &path::Path,
-    project: &compose::Project,
-    ssh: &Ssh,
-) -> anyhow::Result<()> {
+fn deploy_remotely(project: &compose::Project, ssh: &Ssh) -> anyhow::Result<()> {
     println!("Assembling artifacts.");
-    assemble_artifacts(compose_file, project)?;
+    assemble_artifacts(project)?;
     println!("Synchronizing artifacts.");
     synchronize_artifacts(project, ssh)?;
     println!("Deploying on remote.");
     run_deploy_on_remote(project, ssh)
 }
 
-fn assemble_artifacts(compose_file: &path::Path, project: &compose::Project) -> anyhow::Result<()> {
-    let source = compose_file;
-    let destination = path::Path::new(&project.x_wheelsticks.local_workbench).join("compose.yaml");
-    let _ = fs::copy(source, &destination)
-        .with_context(|| format!("Unable to copy file {source:?} to {destination:?}"))?;
-    Ok(())
+fn assemble_artifacts(project: &compose::Project) -> anyhow::Result<()> {
+    let contents = compose::print(project.clone()).context("Unable to print Compose file")?;
+    let path = path::Path::new(&project.x_wheelsticks.local_workbench).join("compose.yaml");
+    fs::write(&path, contents).with_context(|| format!("Unable to write Compose file to {path:?}"))
 }
 
 fn synchronize_artifacts(project: &compose::Project, ssh: &Ssh) -> anyhow::Result<()> {

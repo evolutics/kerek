@@ -6,6 +6,7 @@ use std::path;
 use subcommand::build;
 use subcommand::deploy;
 use subcommand::provision;
+use subcommand::render;
 
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
@@ -56,6 +57,17 @@ fn main() -> anyhow::Result<()> {
             ssh_user,
             upgrade_packages,
         }),
+
+        Subcommand::Render {
+            compose:
+                Compose {
+                    compose_file,
+                    project_name,
+                },
+        } => render::go(render::In {
+            compose_file,
+            project_name,
+        }),
     }
 }
 
@@ -92,6 +104,10 @@ enum Subcommand {
         upgrade_packages: bool,
 
         ssh_host: String,
+    },
+    Render {
+        #[command(flatten)]
+        compose: Compose,
     },
 }
 

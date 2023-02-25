@@ -48,8 +48,8 @@ fn deploy_remotely(project: &compose::Project, ssh: &Ssh) -> anyhow::Result<()> 
 
 fn assemble_artifacts(project: &compose::Project) -> anyhow::Result<()> {
     let contents = compose::print(project.clone()).context("Unable to print Compose file")?;
-    let path = path::Path::new(&project.x_wheelsticks.local_workbench).join("compose.yaml");
-    fs::write(&path, contents).with_context(|| format!("Unable to write Compose file to {path:?}"))
+    let file = path::Path::new(&project.x_wheelsticks.local_workbench).join("compose.yaml");
+    fs::write(&file, contents).with_context(|| format!("Unable to write Compose file to {file:?}"))
 }
 
 fn synchronize_artifacts(project: &compose::Project, ssh: &Ssh) -> anyhow::Result<()> {

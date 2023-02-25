@@ -1,3 +1,4 @@
+use super::interpolated;
 use std::path;
 
 pub fn go(in_: In) -> String {
@@ -21,7 +22,7 @@ const LAST_RESORT_NAME: &str = "default";
 
 #[derive(serde::Deserialize)]
 struct Project {
-    name: String,
+    name: interpolated::StrBuf,
 }
 
 fn get_name_from_override(in_: &In) -> Option<String> {
@@ -30,7 +31,7 @@ fn get_name_from_override(in_: &In) -> Option<String> {
 
 fn get_name_from_compose_contents(in_: &In) -> Option<String> {
     serde_yaml::from_str::<Project>(in_.compose_contents)
-        .map(|project| project.name)
+        .map(|project| project.name.into())
         .ok()
 }
 

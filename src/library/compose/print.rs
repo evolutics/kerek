@@ -47,10 +47,8 @@ mod tests {
         fs::write(&file, input)?;
         let project = parse::go(parse::Parameters {
             compose_file: file.as_ref(),
-            project_name: None,
+            project_name: Some("my_project".into()),
         })?;
-        let expected =
-            serde_yaml::to_string(&serde_yaml::from_str::<serde_yaml::Value>(expected)?)?;
 
         assert_eq!(go(project)?, expected);
         Ok(())

@@ -16,10 +16,10 @@ pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
         compose_file: file,
         override_: parameters.project_name,
     });
-    env::set_var("COMPOSE_PROJECT_NAME", project_name);
+    env::set_var("COMPOSE_PROJECT_NAME", &project_name);
     let project = serde_yaml::from_str(&contents)
         .with_context(|| format!("Unable to deserialize Compose file {file:?}"))?;
-    let project = promote(project)?;
+    let project = promote(project_name, project)?;
     handle_alien_fields(&project)?;
     Ok(project)
 }
@@ -29,12 +29,11 @@ pub struct Parameters<'a> {
     pub project_name: Option<String>,
 }
 
-fn promote(project: schema::Project) -> anyhow::Result<ir::Project> {
+fn promote(project_name: String, project: schema::Project) -> anyhow::Result<ir::Project> {
     let value = serde_yaml::to_value(&project)?;
 
     Ok(ir::Project {
-        // TODO: Follow Compose specification for project name.
-        name: project.name.unwrap_or_default().into(),
+        name: project_name,
         services: project
             .services
             .into_iter()
@@ -183,10 +182,10 @@ mod tests {
         assert_eq!(
             go(Parameters {
                 compose_file: file.as_ref(),
-                project_name: None,
+                project_name: Some("my_project".into()),
             })?,
             ir::Project {
-                name: "".into(),
+                name: "my_project".into(),
                 services: [].into(),
                 x_wheelsticks: ir::Wheelsticks {
                     local_workbench: ".wheelsticks".into(),

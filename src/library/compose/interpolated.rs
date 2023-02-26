@@ -15,7 +15,7 @@ pub fn deserialize<T: de::DeserializeOwned>(
         interpolate::go(&string).map(|string| string.into())
     })?;
 
-    Ok(serde_yaml::from_value(value)?)
+    serde_path_to_error::deserialize(value).map_err(|error| anyhow::anyhow!("{error}"))
 }
 
 pub fn serialize<T: serde::Serialize>(value: T) -> anyhow::Result<String> {

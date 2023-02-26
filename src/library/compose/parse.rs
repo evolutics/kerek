@@ -148,7 +148,7 @@ mod tests {
     fn handles_maximal(contents: &str, suffix: &str) -> anyhow::Result<()> {
         let file = tempfile::Builder::new().suffix(suffix).tempfile()?;
         fs::write(&file, contents)?;
-        env::set_var("HOME", "/home/me"); // TODO: Replace by environment file.
+        let home = env::var("HOME")?;
 
         assert_eq!(
             go(Parameters {
@@ -176,7 +176,7 @@ mod tests {
                     local_workbench: "my_local_workbench".into(),
                     remote_workbench: "my_remote_workbench".into(),
                     schema_mode: schema::SchemaMode::Loose,
-                    user_systemd_folder_absolute: "/home/me/my_user_systemd_folder".into(),
+                    user_systemd_folder_absolute: format!("{home}/my_user_systemd_folder").into(),
                     user_systemd_folder_original: "my_user_systemd_folder".into(),
                 },
                 alien_fields: Some(serde_yaml::from_str(include_str!(
@@ -192,7 +192,7 @@ mod tests {
     fn handles_minimal(contents: &str, suffix: &str) -> anyhow::Result<()> {
         let file = tempfile::Builder::new().suffix(suffix).tempfile()?;
         fs::write(&file, contents)?;
-        env::set_var("HOME", "/home/me"); // TODO: Replace by environment file.
+        let home = env::var("HOME")?;
 
         assert_eq!(
             go(Parameters {
@@ -206,7 +206,7 @@ mod tests {
                     local_workbench: ".wheelsticks".into(),
                     remote_workbench: ".wheelsticks".into(),
                     schema_mode: schema::SchemaMode::Default,
-                    user_systemd_folder_absolute: "/home/me/.config/systemd/user".into(),
+                    user_systemd_folder_absolute: format!("{home}/.config/systemd/user").into(),
                     user_systemd_folder_original: ".config/systemd/user".into(),
                 },
                 alien_fields: None,

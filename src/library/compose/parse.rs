@@ -1,10 +1,12 @@
 use super::get_project_name;
 use super::interpolated;
 use super::ir;
+use super::parse_environment_variables;
 use super::schema;
 use anyhow::Context;
 use std::env;
 use std::fs;
+use std::io;
 use std::iter;
 use std::path;
 
@@ -12,21 +14,36 @@ pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
     let file = parameters.compose_file;
     let contents = fs::read_to_string(file)
         .with_context(|| format!("Unable to read Compose file {file:?}"))?;
+
+    let mut variable_overrides = match parameters.environment_file {
+        None => [].into(),
+        Some(environment_file) => {
+            let contents =
+                io::read_to_string(environment_file).context("Unable to read environment file")?;
+            parse_environment_variables::go(&contents)
+        }
+    };
+
     let project_name = get_project_name::go(get_project_name::In {
         compose_contents: &contents,
         compose_file: file,
         override_: parameters.project_name,
+        variable_overrides: &variable_overrides,
     });
-    let variable_overrides = [("COMPOSE_PROJECT_NAME".into(), Some(project_name.clone()))].into();
+    variable_overrides.insert("COMPOSE_PROJECT_NAME".into(), Some(project_name.clone()));
+
     let project = interpolated::deserialize(file, &contents, &variable_overrides)
         .with_context(|| format!("Unable to deserialize Compose file {file:?}"))?;
+
     let project = promote(project_name, project)?;
     handle_alien_fields(&project)?;
+
     Ok(project)
 }
 
 pub struct Parameters<'a> {
     pub compose_file: &'a path::Path,
+    pub environment_file: Option<Box<dyn io::BufRead>>,
     pub project_name: Option<String>,
 }
 
@@ -137,6 +154,7 @@ mod tests {
 
         assert!(go(Parameters {
             compose_file: file.as_ref(),
+            environment_file: None,
             project_name: None,
         })
         .is_err());
@@ -153,6 +171,7 @@ mod tests {
         assert_eq!(
             go(Parameters {
                 compose_file: file.as_ref(),
+                environment_file: None,
                 project_name: None,
             })?,
             ir::Project {
@@ -197,6 +216,7 @@ mod tests {
         assert_eq!(
             go(Parameters {
                 compose_file: file.as_ref(),
+                environment_file: None,
                 project_name: Some("my_project".into()),
             })?,
             ir::Project {

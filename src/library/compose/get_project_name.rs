@@ -1,4 +1,5 @@
 use super::interpolated;
+use std::collections;
 use std::path;
 
 pub fn go(in_: In) -> String {
@@ -16,6 +17,7 @@ pub struct In<'a> {
     pub compose_contents: &'a str,
     pub compose_file: &'a path::Path,
     pub override_: Option<String>,
+    pub variable_overrides: &'a collections::HashMap<String, Option<String>>,
 }
 
 const LAST_RESORT_NAME: &str = "default";
@@ -30,9 +32,13 @@ fn get_name_from_override(in_: &In) -> Option<String> {
 }
 
 fn get_name_from_compose_contents(in_: &In) -> Option<String> {
-    interpolated::deserialize::<Project>(in_.compose_file, in_.compose_contents, &[].into())
-        .map(|project| project.name)
-        .ok()
+    interpolated::deserialize::<Project>(
+        in_.compose_file,
+        in_.compose_contents,
+        in_.variable_overrides,
+    )
+    .map(|project| project.name)
+    .ok()
 }
 
 fn get_name_from_folder(in_: &In) -> Option<String> {
@@ -54,6 +60,7 @@ mod tests {
                 compose_contents: "name: a",
                 compose_file: path::Path::new("b/compose.yaml"),
                 override_: Some("c".into()),
+                variable_overrides: &[].into(),
             }),
             "c",
         )
@@ -66,6 +73,7 @@ mod tests {
                 compose_contents: "name: a",
                 compose_file: path::Path::new("b/compose.yaml"),
                 override_: None,
+                variable_overrides: &[].into(),
             }),
             "a",
         )
@@ -78,6 +86,7 @@ mod tests {
                 compose_contents: "",
                 compose_file: path::Path::new("b/compose.yaml"),
                 override_: None,
+                variable_overrides: &[].into(),
             }),
             "b",
         )
@@ -90,6 +99,7 @@ mod tests {
                 compose_contents: "",
                 compose_file: path::Path::new("/compose.yaml"),
                 override_: None,
+                variable_overrides: &[].into(),
             }),
             "default",
         )

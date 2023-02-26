@@ -58,14 +58,6 @@
     - name: Provision container platform
       become: true
       block:
-        - name: Create user systemd folder
-          ansible.builtin.file:
-            group: "{{ deploy_user }}"
-            mode: ug=rwx,o=rx
-            owner: "{{ deploy_user }}"
-            path: "/home/{{ deploy_user }}/.config/systemd/user"
-            state: directory
-
         - name: Enable user lingering # noqa no-changed-when
           ansible.builtin.command:
             argv:

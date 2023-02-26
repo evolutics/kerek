@@ -1,5 +1,6 @@
 use crate::library::command;
 use crate::library::compose;
+use anyhow::Context;
 use std::collections;
 use std::fs;
 use std::path;
@@ -244,6 +245,8 @@ fn add_container(change: &ContainerChange) -> anyhow::Result<()> {
             )
             .args(["--", &change.image_id]),
     )?;
+    fs::create_dir_all(USER_SYSTEMD_FOLDER)
+        .with_context(|| format!("Unable to create user systemd folder {USER_SYSTEMD_FOLDER:?}"))?;
     command::status_ok(
         process::Command::new("podman")
             .args([

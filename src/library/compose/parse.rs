@@ -210,7 +210,7 @@ mod tests {
                     user_systemd_folder_original: ".config/systemd/user".into(),
                 },
                 alien_fields: None,
-            }
+            },
         );
         Ok(())
     }

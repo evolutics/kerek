@@ -302,12 +302,12 @@ fn remove_container(project: &compose::Project, change: &ContainerChange) -> any
         "disable",
         &change.systemd_unit,
     ]))?;
-    fs::remove_file(
-        project
-            .x_wheelsticks
-            .user_systemd_folder_absolute
-            .join(&change.systemd_unit),
-    )?;
+    let systemd_unit_file = &project
+        .x_wheelsticks
+        .user_systemd_folder_absolute
+        .join(&change.systemd_unit);
+    fs::remove_file(systemd_unit_file)
+        .with_context(|| format!("Unable to remove systemd unit file {systemd_unit_file:?}"))?;
     command::status_ok(process::Command::new("podman").args(["rm", "--", &change.container_name]))
 }
 

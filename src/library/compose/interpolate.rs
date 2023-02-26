@@ -7,12 +7,16 @@ use nom::multi;
 use nom::sequence;
 use nom::Parser;
 use std::borrow;
+use std::collections;
 use std::env;
 use std::str;
 
-pub fn go(input: &str) -> anyhow::Result<borrow::Cow<str>> {
+pub fn go<'a>(
+    input: &'a str,
+    extra_variables: &'a collections::HashMap<String, Option<String>>,
+) -> anyhow::Result<borrow::Cow<'a, str>> {
     let (_, expression) = parse_top_level(input).map_err(|error| error.to_owned())?;
-    evaluate(expression)
+    evaluate(expression, extra_variables)
 }
 
 enum Expression<'a> {
@@ -113,12 +117,15 @@ fn parse_any_1_character(input: &str) -> nom::IResult<&str, Expression> {
     Ok((input, Expression::Literal(character)))
 }
 
-fn evaluate(expression: Expression) -> anyhow::Result<borrow::Cow<str>> {
+fn evaluate<'a>(
+    expression: Expression<'a>,
+    extra_variables: &'a collections::HashMap<String, Option<String>>,
+) -> anyhow::Result<borrow::Cow<'a, str>> {
     match expression {
         Expression::Expressions(expressions) => {
             let values = expressions
                 .into_iter()
-                .map(evaluate)
+                .map(|expression| evaluate(expression, extra_variables))
                 .collect::<Result<Vec<_>, _>>()?;
             Ok(values.concat().into())
         }
@@ -130,7 +137,7 @@ fn evaluate(expression: Expression) -> anyhow::Result<borrow::Cow<str>> {
             identifier,
             requirement,
         } => {
-            let value = get_environment_variable(identifier)?;
+            let value = look_up_variable(identifier, extra_variables)?;
             let value = match (&requirement, value) {
                 (VariableRequirement::OptionalNotEmpty, Some(value))
                 | (VariableRequirement::RequiredNotEmpty, Some(value))
@@ -145,7 +152,7 @@ fn evaluate(expression: Expression) -> anyhow::Result<borrow::Cow<str>> {
                 None => {
                     let argument = match argument {
                         None => "".into(),
-                        Some(argument) => evaluate(*argument)?,
+                        Some(argument) => evaluate(*argument, extra_variables)?,
                     };
 
                     match requirement {
@@ -173,19 +180,25 @@ fn evaluate(expression: Expression) -> anyhow::Result<borrow::Cow<str>> {
                     }
                 }
 
-                Some(value) => Ok(value.into()),
+                Some(value) => Ok(value),
             }
         }
     }
 }
 
-fn get_environment_variable(identifier: &str) -> anyhow::Result<Option<String>> {
-    match env::var(identifier) {
-        Err(env::VarError::NotPresent) => Ok(None),
-        Err(env::VarError::NotUnicode(value)) => Err(anyhow::anyhow!(
-            "Variable {identifier:?} has non-Unicode value {value:?}"
-        )),
-        Ok(value) => Ok(Some(value)),
+fn look_up_variable<'a>(
+    identifier: &str,
+    extra_variables: &'a collections::HashMap<String, Option<String>>,
+) -> anyhow::Result<Option<borrow::Cow<'a, str>>> {
+    match extra_variables.get(identifier) {
+        None => match env::var(identifier) {
+            Err(env::VarError::NotPresent) => Ok(None),
+            Err(env::VarError::NotUnicode(value)) => Err(anyhow::anyhow!(
+                "Variable {identifier:?} has non-Unicode value {value:?}"
+            )),
+            Ok(value) => Ok(Some(value.into())),
+        },
+        Some(value) => Ok(value.as_ref().map(|value| value.into())),
     }
 }
 
@@ -193,44 +206,44 @@ fn get_environment_variable(identifier: &str) -> anyhow::Result<Option<String>> 
 mod tests {
     use super::*;
 
-    #[test_case::test_case("$WHEELSTICKS_SOME", Some("X"); "0a")]
-    #[test_case::test_case("$WHEELSTICKS_THING", Some("YZ"); "0b")]
-    #[test_case::test_case("${WHEELSTICKS_SOME}", Some("X"); "1a")]
-    #[test_case::test_case("${WHEELSTICKS_THING}", Some("YZ"); "1b")]
-    #[test_case::test_case("${WHEELSTICKS_SOME:-default}", Some("X"); "2a")]
-    #[test_case::test_case("${WHEELSTICKS_UNSET:-default}", Some("default"); "2b")]
-    #[test_case::test_case("${WHEELSTICKS_EMPTY:-default}", Some("default"); "2c")]
-    #[test_case::test_case("${WHEELSTICKS_SOME-default}", Some("X"); "2d")]
-    #[test_case::test_case("${WHEELSTICKS_UNSET-default}", Some("default"); "2e")]
-    #[test_case::test_case("${WHEELSTICKS_EMPTY-default}", Some(""); "2f")]
-    #[test_case::test_case("${WHEELSTICKS_UNSET-}", Some(""); "2g")]
-    #[test_case::test_case("${WHEELSTICKS_SOME:?error}", Some("X"); "3a")]
-    #[test_case::test_case("${WHEELSTICKS_UNSET:?error}", None; "3b")]
-    #[test_case::test_case("${WHEELSTICKS_EMPTY:?error}", None; "3c")]
-    #[test_case::test_case("${WHEELSTICKS_SOME?error}", Some("X"); "3d")]
-    #[test_case::test_case("${WHEELSTICKS_UNSET?error}", None; "3e")]
-    #[test_case::test_case("${WHEELSTICKS_EMPTY?error}", Some(""); "3f")]
-    #[test_case::test_case("${WHEELSTICKS_UNSET?}", None; "3g")]
-    #[test_case::test_case("${WHEELSTICKS_SOME:-${WHEELSTICKS_THING}}", Some("X"); "4a")]
-    #[test_case::test_case("${WHEELSTICKS_UNSET:-${WHEELSTICKS_THING}}", Some("YZ"); "4b")]
-    #[test_case::test_case("${WHEELSTICKS_SOME?$WHEELSTICKS_THING}", Some("X"); "4c")]
-    #[test_case::test_case("${WHEELSTICKS_UNSET?$WHEELSTICKS_THING}", None; "4d")]
-    #[test_case::test_case("${WHEELSTICKS_SOME:-${WHEELSTICKS_UNSET:-default}}", Some("X"); "4e")]
-    #[test_case::test_case("${WHEELSTICKS_UNSET:-${WHEELSTICKS_SOME:-default}}", Some("X"); "4f")]
-    #[test_case::test_case("${WHEELSTICKS_UNSET:-${WHEELSTICKS_EMPTY:-default}}", Some("default"); "4g")]
-    #[test_case::test_case("$$WHEELSTICKS_SOME", Some("$WHEELSTICKS_SOME"); "5")]
-    #[test_case::test_case("${WHEELSTICKS_UNSET}", Some(""); "6")]
-    #[test_case::test_case("} { ${WHEELSTICKS_SOME} } {", Some("} { X } {"); "7")]
+    #[test_case::test_case("$SOME", Some("X"); "0a")]
+    #[test_case::test_case("$THING", Some("YZ"); "0b")]
+    #[test_case::test_case("${SOME}", Some("X"); "1a")]
+    #[test_case::test_case("${THING}", Some("YZ"); "1b")]
+    #[test_case::test_case("${SOME:-default}", Some("X"); "2a")]
+    #[test_case::test_case("${UNSET:-default}", Some("default"); "2b")]
+    #[test_case::test_case("${EMPTY:-default}", Some("default"); "2c")]
+    #[test_case::test_case("${SOME-default}", Some("X"); "2d")]
+    #[test_case::test_case("${UNSET-default}", Some("default"); "2e")]
+    #[test_case::test_case("${EMPTY-default}", Some(""); "2f")]
+    #[test_case::test_case("${UNSET-}", Some(""); "2g")]
+    #[test_case::test_case("${SOME:?error}", Some("X"); "3a")]
+    #[test_case::test_case("${UNSET:?error}", None; "3b")]
+    #[test_case::test_case("${EMPTY:?error}", None; "3c")]
+    #[test_case::test_case("${SOME?error}", Some("X"); "3d")]
+    #[test_case::test_case("${UNSET?error}", None; "3e")]
+    #[test_case::test_case("${EMPTY?error}", Some(""); "3f")]
+    #[test_case::test_case("${UNSET?}", None; "3g")]
+    #[test_case::test_case("${SOME:-${THING}}", Some("X"); "4a")]
+    #[test_case::test_case("${UNSET:-${THING}}", Some("YZ"); "4b")]
+    #[test_case::test_case("${SOME?$THING}", Some("X"); "4c")]
+    #[test_case::test_case("${UNSET?$THING}", None; "4d")]
+    #[test_case::test_case("${SOME:-${UNSET:-default}}", Some("X"); "4e")]
+    #[test_case::test_case("${UNSET:-${SOME:-default}}", Some("X"); "4f")]
+    #[test_case::test_case("${UNSET:-${EMPTY:-default}}", Some("default"); "4g")]
+    #[test_case::test_case("$$SOME", Some("$SOME"); "5")]
+    #[test_case::test_case("${UNSET}", Some(""); "6")]
+    #[test_case::test_case("} { ${SOME} } {", Some("} { X } {"); "7")]
     #[test_case::test_case("0. $$.
-1. $WHEELSTICKS_SOME.
-2. ${WHEELSTICKS_SOME}.
-3. ${WHEELSTICKS_UNSET:-default 0}.
-4. ${WHEELSTICKS_UNSET-default 1}.
-5. ${WHEELSTICKS_SOME:?error 0}.
-6. ${WHEELSTICKS_SOME?error 1}.
-7. ${WHEELSTICKS_UNSET:-${WHEELSTICKS_SOME:-default}}.
-8. $$WHEELSTICKS_SOME.
-9. ${WHEELSTICKS_UNSET}.
+1. $SOME.
+2. ${SOME}.
+3. ${UNSET:-default 0}.
+4. ${UNSET-default 1}.
+5. ${SOME:?error 0}.
+6. ${SOME?error 1}.
+7. ${UNSET:-${SOME:-default}}.
+8. $$SOME.
+9. ${UNSET}.
 ---", Some("0. $.
 1. X.
 2. X.
@@ -239,16 +252,24 @@ mod tests {
 5. X.
 6. X.
 7. X.
-8. $WHEELSTICKS_SOME.
+8. $SOME.
 9. .
 ---"); "8")]
     fn handles_substitution(input: &str, expected: Option<&str>) -> anyhow::Result<()> {
-        env::remove_var("WHEELSTICKS_UNSET");
-        env::set_var("WHEELSTICKS_EMPTY", "");
-        env::set_var("WHEELSTICKS_SOME", "X");
-        env::set_var("WHEELSTICKS_THING", "YZ");
-
-        assert_eq!(go(input).ok(), expected.map(|expected| expected.into()));
+        assert_eq!(
+            go(
+                input,
+                &[
+                    ("EMPTY".into(), Some("".into())),
+                    ("SOME".into(), Some("X".into())),
+                    ("THING".into(), Some("YZ".into())),
+                    ("UNSET".into(), None),
+                ]
+                .into(),
+            )
+            .ok(),
+            expected.map(|expected| expected.into()),
+        );
         Ok(())
     }
 
@@ -268,7 +289,7 @@ mod tests {
     #[test_case::test_case("${ VARIABLE}"; "4c")]
     #[test_case::test_case("${VARIABLE/foo/bar}"; "5")]
     fn handles_unchanged(input: &str) -> anyhow::Result<()> {
-        assert_eq!(go(input)?, input);
+        assert_eq!(go(input, &[].into())?, input);
         Ok(())
     }
 }

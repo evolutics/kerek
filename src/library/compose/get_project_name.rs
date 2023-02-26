@@ -30,7 +30,7 @@ fn get_name_from_override(in_: &In) -> Option<String> {
 }
 
 fn get_name_from_compose_contents(in_: &In) -> Option<String> {
-    interpolated::deserialize::<Project>(in_.compose_file, in_.compose_contents)
+    interpolated::deserialize::<Project>(in_.compose_file, in_.compose_contents, &[].into())
         .map(|project| project.name)
         .ok()
 }

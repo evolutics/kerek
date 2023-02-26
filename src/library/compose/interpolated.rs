@@ -1,10 +1,12 @@
 use super::interpolate;
 use serde::de;
+use std::collections;
 use std::path;
 
 pub fn deserialize<T: de::DeserializeOwned>(
     file: &path::Path,
     contents: &str,
+    extra_variables: &collections::HashMap<String, Option<String>>,
 ) -> anyhow::Result<T> {
     let value = match file.extension() {
         Some(extension) if extension == "toml" => toml::from_str(contents)?,
@@ -12,7 +14,7 @@ pub fn deserialize<T: de::DeserializeOwned>(
     };
 
     let value = map_string_values(value, |string| {
-        interpolate::go(&string).map(|string| string.into())
+        interpolate::go(&string, extra_variables).map(|string| string.into())
     })?;
 
     serde_path_to_error::deserialize(value).map_err(|error| anyhow::anyhow!("{error}"))
@@ -51,14 +53,15 @@ fn map_string_values<F: Copy + Fn(String) -> anyhow::Result<String>>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::env;
 
     #[test]
     fn deserializes() -> anyhow::Result<()> {
-        env::set_var("WHEELSTICKS_SOME", "X");
-
         assert_eq!(
-            deserialize::<Container>(path::Path::new(""), "field: '${WHEELSTICKS_SOME} days'")?,
+            deserialize::<Container>(
+                path::Path::new(""),
+                "field: '${SOME} days'",
+                &[("SOME".into(), Some("X".into()))].into(),
+            )?,
             Container {
                 field: "X days".into(),
             },

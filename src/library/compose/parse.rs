@@ -17,8 +17,8 @@ pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
         compose_file: file,
         override_: parameters.project_name,
     });
-    let extra_variables = [("COMPOSE_PROJECT_NAME".into(), Some(project_name.clone()))].into();
-    let project = interpolated::deserialize(file, &contents, &extra_variables)
+    let variable_overrides = [("COMPOSE_PROJECT_NAME".into(), Some(project_name.clone()))].into();
+    let project = interpolated::deserialize(file, &contents, &variable_overrides)
         .with_context(|| format!("Unable to deserialize Compose file {file:?}"))?;
     let project = promote(project_name, project)?;
     handle_alien_fields(&project)?;

@@ -13,10 +13,10 @@ use std::str;
 
 pub fn go<'a>(
     input: &'a str,
-    extra_variables: &'a collections::HashMap<String, Option<String>>,
+    variable_overrides: &'a collections::HashMap<String, Option<String>>,
 ) -> anyhow::Result<borrow::Cow<'a, str>> {
     let (_, expression) = parse_top_level(input).map_err(|error| error.to_owned())?;
-    evaluate(expression, extra_variables)
+    evaluate(expression, variable_overrides)
 }
 
 enum Expression<'a> {
@@ -119,13 +119,13 @@ fn parse_any_1_character(input: &str) -> nom::IResult<&str, Expression> {
 
 fn evaluate<'a>(
     expression: Expression<'a>,
-    extra_variables: &'a collections::HashMap<String, Option<String>>,
+    variable_overrides: &'a collections::HashMap<String, Option<String>>,
 ) -> anyhow::Result<borrow::Cow<'a, str>> {
     match expression {
         Expression::Expressions(expressions) => {
             let values = expressions
                 .into_iter()
-                .map(|expression| evaluate(expression, extra_variables))
+                .map(|expression| evaluate(expression, variable_overrides))
                 .collect::<Result<Vec<_>, _>>()?;
             Ok(values.concat().into())
         }
@@ -137,7 +137,7 @@ fn evaluate<'a>(
             identifier,
             requirement,
         } => {
-            let value = look_up_variable(identifier, extra_variables)?;
+            let value = look_up_variable(identifier, variable_overrides)?;
             let value = match (&requirement, value) {
                 (VariableRequirement::OptionalNotEmpty, Some(value))
                 | (VariableRequirement::RequiredNotEmpty, Some(value))
@@ -152,7 +152,7 @@ fn evaluate<'a>(
                 None => {
                     let argument = match argument {
                         None => "".into(),
-                        Some(argument) => evaluate(*argument, extra_variables)?,
+                        Some(argument) => evaluate(*argument, variable_overrides)?,
                     };
 
                     match requirement {
@@ -188,9 +188,9 @@ fn evaluate<'a>(
 
 fn look_up_variable<'a>(
     identifier: &str,
-    extra_variables: &'a collections::HashMap<String, Option<String>>,
+    variable_overrides: &'a collections::HashMap<String, Option<String>>,
 ) -> anyhow::Result<Option<borrow::Cow<'a, str>>> {
-    match extra_variables.get(identifier) {
+    match variable_overrides.get(identifier) {
         None => match env::var(identifier) {
             Err(env::VarError::NotPresent) => Ok(None),
             Err(env::VarError::NotUnicode(value)) => Err(anyhow::anyhow!(

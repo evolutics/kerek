@@ -3,7 +3,6 @@ use crate::library::compose;
 use anyhow::Context;
 use std::collections;
 use std::fs;
-use std::path;
 use std::process;
 use std::thread;
 use std::time;
@@ -24,12 +23,10 @@ pub fn go(project: &compose::Project) -> anyhow::Result<()> {
     let changes = plan_changes(actual_images, target_images);
 
     for change in changes {
-        apply_change(&change)?;
+        apply_change(project, &change)?;
     }
     collect_garbage()
 }
-
-const USER_SYSTEMD_FOLDER: &str = ".config/systemd/user";
 
 #[derive(Eq, Hash, PartialEq)]
 struct Image {
@@ -189,7 +186,7 @@ fn plan_changes(
     previous_changes
 }
 
-fn apply_change(change: &ContainerChange) -> anyhow::Result<()> {
+fn apply_change(project: &compose::Project, change: &ContainerChange) -> anyhow::Result<()> {
     let container_name = &change.container_name;
     let image_digest = &change.image_digest;
     let operand = format!("container {container_name:?} of image {image_digest:?}");
@@ -197,7 +194,7 @@ fn apply_change(change: &ContainerChange) -> anyhow::Result<()> {
     match change.operator {
         Operator::Add => {
             eprintln!("Adding {operand}.");
-            add_container(change)
+            add_container(project, change)
         }
         Operator::Keep => {
             eprintln!("Keeping {operand}.");
@@ -205,12 +202,12 @@ fn apply_change(change: &ContainerChange) -> anyhow::Result<()> {
         }
         Operator::Remove => {
             eprintln!("Removing {operand}.");
-            remove_container(change)
+            remove_container(project, change)
         }
     }
 }
 
-fn add_container(change: &ContainerChange) -> anyhow::Result<()> {
+fn add_container(project: &compose::Project, change: &ContainerChange) -> anyhow::Result<()> {
     for network in &change.networks {
         create_network_if_not_exists(network)?;
     }
@@ -245,8 +242,9 @@ fn add_container(change: &ContainerChange) -> anyhow::Result<()> {
             )
             .args(["--", &change.image_id]),
     )?;
-    fs::create_dir_all(USER_SYSTEMD_FOLDER)
-        .with_context(|| format!("Unable to create user systemd folder {USER_SYSTEMD_FOLDER:?}"))?;
+    let user_systemd_folder = &project.x_wheelsticks.user_systemd_folder_absolute;
+    fs::create_dir_all(user_systemd_folder)
+        .with_context(|| format!("Unable to create user systemd folder {user_systemd_folder:?}"))?;
     command::status_ok(
         process::Command::new("podman")
             .args([
@@ -259,7 +257,7 @@ fn add_container(change: &ContainerChange) -> anyhow::Result<()> {
                 "--",
                 &change.container_name,
             ])
-            .current_dir(USER_SYSTEMD_FOLDER),
+            .current_dir(user_systemd_folder),
     )?;
     command::status_ok(process::Command::new("systemctl").args([
         "--now",
@@ -297,14 +295,19 @@ fn create_network_if_not_exists(network: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn remove_container(change: &ContainerChange) -> anyhow::Result<()> {
+fn remove_container(project: &compose::Project, change: &ContainerChange) -> anyhow::Result<()> {
     command::status_ok(process::Command::new("systemctl").args([
         "--now",
         "--user",
         "disable",
         &change.systemd_unit,
     ]))?;
-    fs::remove_file(path::Path::new(USER_SYSTEMD_FOLDER).join(&change.systemd_unit))?;
+    fs::remove_file(
+        project
+            .x_wheelsticks
+            .user_systemd_folder_absolute
+            .join(&change.systemd_unit),
+    )?;
     command::status_ok(process::Command::new("podman").args(["rm", "--", &change.container_name]))
 }
 

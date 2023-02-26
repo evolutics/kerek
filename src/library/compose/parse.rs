@@ -32,6 +32,10 @@ pub struct Parameters<'a> {
 
 fn promote(project_name: String, project: schema::Project) -> anyhow::Result<ir::Project> {
     let value = serde_yaml::to_value(&project)?;
+    let user_systemd_folder_original = project
+        .x_wheelsticks
+        .user_systemd_folder
+        .unwrap_or_else(|| ".config/systemd/user".into());
 
     Ok(ir::Project {
         name: project_name,
@@ -57,6 +61,12 @@ fn promote(project_name: String, project: schema::Project) -> anyhow::Result<ir:
                 .remote_workbench
                 .unwrap_or_else(|| ".wheelsticks".into()),
             schema_mode: project.x_wheelsticks.schema_mode,
+            user_systemd_folder_absolute: {
+                let home =
+                    env::var("HOME").context("Unable to fetch `HOME` environment variable")?;
+                path::PathBuf::from(home).join(&user_systemd_folder_original)
+            },
+            user_systemd_folder_original,
         },
         alien_fields: collect_alien_fields(value),
     })
@@ -138,6 +148,7 @@ mod tests {
     fn handles_maximal(contents: &str, suffix: &str) -> anyhow::Result<()> {
         let file = tempfile::Builder::new().suffix(suffix).tempfile()?;
         fs::write(&file, contents)?;
+        env::set_var("HOME", "/home/me"); // TODO: Replace by environment file.
 
         assert_eq!(
             go(Parameters {
@@ -165,6 +176,8 @@ mod tests {
                     local_workbench: "my_local_workbench".into(),
                     remote_workbench: "my_remote_workbench".into(),
                     schema_mode: schema::SchemaMode::Loose,
+                    user_systemd_folder_absolute: "/home/me/my_user_systemd_folder".into(),
+                    user_systemd_folder_original: "my_user_systemd_folder".into(),
                 },
                 alien_fields: Some(serde_yaml::from_str(include_str!(
                     "test_alien_fields.yaml"
@@ -179,6 +192,7 @@ mod tests {
     fn handles_minimal(contents: &str, suffix: &str) -> anyhow::Result<()> {
         let file = tempfile::Builder::new().suffix(suffix).tempfile()?;
         fs::write(&file, contents)?;
+        env::set_var("HOME", "/home/me"); // TODO: Replace by environment file.
 
         assert_eq!(
             go(Parameters {
@@ -192,6 +206,8 @@ mod tests {
                     local_workbench: ".wheelsticks".into(),
                     remote_workbench: ".wheelsticks".into(),
                     schema_mode: schema::SchemaMode::Default,
+                    user_systemd_folder_absolute: "/home/me/.config/systemd/user".into(),
+                    user_systemd_folder_original: ".config/systemd/user".into(),
                 },
                 alien_fields: None,
             }

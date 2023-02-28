@@ -4,4 +4,4 @@ x-wheelsticks:
   local_workbench: .wheelsticks
   remote_workbench: .wheelsticks
   schema_mode: default
-  user_systemd_folder: .config/systemd/user
+  systemd_unit_folder: .config/systemd/user

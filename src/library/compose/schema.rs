@@ -30,7 +30,7 @@ pub struct Wheelsticks {
     pub remote_workbench: Option<String>,
     #[serde(default)]
     pub schema_mode: SchemaMode,
-    pub user_systemd_folder: Option<String>,
+    pub systemd_unit_folder: Option<String>,
     #[serde(flatten)]
     pub unknown_fields: UnknownFields,
 }

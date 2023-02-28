@@ -5,7 +5,6 @@ use super::parse_environment_variables;
 use super::schema;
 use anyhow::Context;
 use std::collections;
-use std::env;
 use std::fs;
 use std::io;
 use std::iter;
@@ -88,10 +87,6 @@ fn get_variable_overrides(
 
 fn promote(project_name: String, project: schema::Project) -> anyhow::Result<ir::Project> {
     let value = serde_yaml::to_value(&project)?;
-    let user_systemd_folder_original = project
-        .x_wheelsticks
-        .user_systemd_folder
-        .unwrap_or_else(|| ".config/systemd/user".into());
 
     Ok(ir::Project {
         name: project_name,
@@ -117,12 +112,10 @@ fn promote(project_name: String, project: schema::Project) -> anyhow::Result<ir:
                 .remote_workbench
                 .unwrap_or_else(|| ".wheelsticks".into()),
             schema_mode: project.x_wheelsticks.schema_mode,
-            user_systemd_folder_absolute: {
-                let home =
-                    env::var("HOME").context("Unable to fetch `HOME` environment variable")?;
-                path::PathBuf::from(home).join(&user_systemd_folder_original)
-            },
-            user_systemd_folder_original,
+            systemd_unit_folder: project
+                .x_wheelsticks
+                .systemd_unit_folder
+                .unwrap_or_else(|| ".config/systemd/user".into()),
         },
         alien_fields: collect_alien_fields(value),
     })
@@ -205,7 +198,6 @@ mod tests {
     fn handles_maximal(contents: &str, suffix: &str) -> anyhow::Result<()> {
         let file = tempfile::Builder::new().suffix(suffix).tempfile()?;
         fs::write(&file, contents)?;
-        let home = env::var("HOME")?;
 
         assert_eq!(
             go(Parameters {
@@ -234,8 +226,7 @@ mod tests {
                     local_workbench: "my_local_workbench".into(),
                     remote_workbench: "my_remote_workbench".into(),
                     schema_mode: schema::SchemaMode::Loose,
-                    user_systemd_folder_absolute: format!("{home}/my_user_systemd_folder").into(),
-                    user_systemd_folder_original: "my_user_systemd_folder".into(),
+                    systemd_unit_folder: "my_systemd_unit_folder".into(),
                 },
                 alien_fields: Some(serde_yaml::from_str(include_str!(
                     "test_alien_fields.yaml"
@@ -250,7 +241,6 @@ mod tests {
     fn handles_minimal(contents: &str, suffix: &str) -> anyhow::Result<()> {
         let file = tempfile::Builder::new().suffix(suffix).tempfile()?;
         fs::write(&file, contents)?;
-        let home = env::var("HOME")?;
 
         assert_eq!(
             go(Parameters {
@@ -265,8 +255,7 @@ mod tests {
                     local_workbench: ".wheelsticks".into(),
                     remote_workbench: ".wheelsticks".into(),
                     schema_mode: schema::SchemaMode::Default,
-                    user_systemd_folder_absolute: format!("{home}/.config/systemd/user").into(),
-                    user_systemd_folder_original: ".config/systemd/user".into(),
+                    systemd_unit_folder: ".config/systemd/user".into(),
                 },
                 alien_fields: None,
             },

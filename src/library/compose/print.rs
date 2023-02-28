@@ -29,7 +29,7 @@ fn demote(project: ir::Project) -> schema::Project {
             local_workbench: Some(project.x_wheelsticks.local_workbench),
             remote_workbench: Some(project.x_wheelsticks.remote_workbench),
             schema_mode: project.x_wheelsticks.schema_mode,
-            user_systemd_folder: Some(project.x_wheelsticks.user_systemd_folder_original),
+            systemd_unit_folder: Some(project.x_wheelsticks.systemd_unit_folder),
             unknown_fields: [].into(),
         },
         unknown_fields: [].into(),

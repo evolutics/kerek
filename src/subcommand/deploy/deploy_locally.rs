@@ -1,8 +1,11 @@
 use crate::library::command;
 use crate::library::compose;
 use anyhow::Context;
+use std::borrow;
 use std::collections;
+use std::env;
 use std::fs;
+use std::path;
 use std::process;
 use std::thread;
 use std::time;
@@ -242,9 +245,9 @@ fn add_container(project: &compose::Project, change: &ContainerChange) -> anyhow
             )
             .args(["--", &change.image_id]),
     )?;
-    let user_systemd_folder = &project.x_wheelsticks.user_systemd_folder_absolute;
-    fs::create_dir_all(user_systemd_folder)
-        .with_context(|| format!("Unable to create user systemd folder {user_systemd_folder:?}"))?;
+    let systemd_unit_folder = resolve_systemd_unit_folder(project)?;
+    fs::create_dir_all(&systemd_unit_folder)
+        .with_context(|| format!("Unable to create systemd unit folder {systemd_unit_folder:?}"))?;
     command::status_ok(
         process::Command::new("podman")
             .args([
@@ -257,7 +260,7 @@ fn add_container(project: &compose::Project, change: &ContainerChange) -> anyhow
                 "--",
                 &change.container_name,
             ])
-            .current_dir(user_systemd_folder),
+            .current_dir(systemd_unit_folder),
     )?;
     command::status_ok(process::Command::new("systemctl").args([
         "--now",
@@ -295,6 +298,19 @@ fn create_network_if_not_exists(network: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
+fn resolve_systemd_unit_folder(
+    project: &compose::Project,
+) -> anyhow::Result<borrow::Cow<path::Path>> {
+    let folder = path::Path::new(&project.x_wheelsticks.systemd_unit_folder);
+
+    Ok(if folder.is_absolute() {
+        folder.into()
+    } else {
+        let home = env::var("HOME").context("Unable to fetch `HOME` environment variable")?;
+        path::Path::new(&home).join(folder).into()
+    })
+}
+
 fn remove_container(project: &compose::Project, change: &ContainerChange) -> anyhow::Result<()> {
     command::status_ok(process::Command::new("systemctl").args([
         "--now",
@@ -302,11 +318,8 @@ fn remove_container(project: &compose::Project, change: &ContainerChange) -> any
         "disable",
         &change.systemd_unit,
     ]))?;
-    let systemd_unit_file = &project
-        .x_wheelsticks
-        .user_systemd_folder_absolute
-        .join(&change.systemd_unit);
-    fs::remove_file(systemd_unit_file)
+    let systemd_unit_file = resolve_systemd_unit_folder(project)?.join(&change.systemd_unit);
+    fs::remove_file(&systemd_unit_file)
         .with_context(|| format!("Unable to remove systemd unit file {systemd_unit_file:?}"))?;
     command::status_ok(process::Command::new("podman").args(["rm", "--", &change.container_name]))
 }

@@ -18,4 +18,4 @@ foo = ["bar"]
 local_workbench = "my_local_workbench"
 remote_workbench = "my_remote_workbench"
 schema_mode = "loose"
-user_systemd_folder = "my_user_systemd_folder"
+systemd_unit_folder = "my_systemd_unit_folder"

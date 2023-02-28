@@ -11,7 +11,7 @@ use std::process;
 pub fn go(in_: In) -> anyhow::Result<()> {
     let project = compose::parse(compose::Parameters {
         compose_file: &in_.compose_file,
-        environment_file: None,
+        environment_files: in_.environment_files,
         project_name: in_.project_name,
     })?;
 
@@ -30,6 +30,7 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 
 pub struct In {
     pub compose_file: path::PathBuf,
+    pub environment_files: Option<Vec<String>>,
     pub project_name: Option<String>,
     pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: Option<String>,
@@ -93,6 +94,7 @@ fn run_deploy_on_remote(project: &compose::Project, ssh: &Ssh) -> anyhow::Result
             )
             .args(ssh.user.iter().flat_map(|user| ["-l", user]))
             .args([&ssh.host, "--", "wheelsticks", "deploy", "--compose-file"])
-            .arg(path::Path::new(&project.x_wheelsticks.remote_workbench).join("compose.yaml")),
+            .arg(path::Path::new(&project.x_wheelsticks.remote_workbench).join("compose.yaml"))
+            .arg("--env-file"),
     )
 }

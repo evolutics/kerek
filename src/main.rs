@@ -16,10 +16,12 @@ fn main() -> anyhow::Result<()> {
             compose:
                 Compose {
                     compose_file,
+                    environment_files,
                     project_name,
                 },
         } => build::go(build::In {
             compose_file,
+            environment_files,
             project_name,
         }),
 
@@ -27,6 +29,7 @@ fn main() -> anyhow::Result<()> {
             compose:
                 Compose {
                     compose_file,
+                    environment_files,
                     project_name,
                 },
             ssh: Ssh {
@@ -36,6 +39,7 @@ fn main() -> anyhow::Result<()> {
             ssh_host,
         } => deploy::go(deploy::In {
             compose_file,
+            environment_files,
             project_name,
             ssh_configuration,
             ssh_host,
@@ -62,10 +66,12 @@ fn main() -> anyhow::Result<()> {
             compose:
                 Compose {
                     compose_file,
+                    environment_files,
                     project_name,
                 },
         } => render::go(render::In {
             compose_file,
+            environment_files,
             project_name,
         }),
     }
@@ -115,6 +121,8 @@ enum Subcommand {
 struct Compose {
     #[arg(default_value = "compose.yaml", long, short = 'f')]
     compose_file: path::PathBuf,
+    #[arg(long = "env-file", num_args = 0..)]
+    environment_files: Option<Vec<String>>,
     #[arg(long, short = 'p')]
     project_name: Option<String>,
 }

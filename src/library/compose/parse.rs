@@ -4,6 +4,7 @@ use super::ir;
 use super::parse_environment_variables;
 use super::schema;
 use anyhow::Context;
+use std::collections;
 use std::env;
 use std::fs;
 use std::io;
@@ -15,14 +16,7 @@ pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
     let contents = fs::read_to_string(file)
         .with_context(|| format!("Unable to read Compose file {file:?}"))?;
 
-    let mut variable_overrides = match parameters.environment_file {
-        None => [].into(),
-        Some(environment_file) => {
-            let contents =
-                io::read_to_string(environment_file).context("Unable to read environment file")?;
-            parse_environment_variables::go(&contents)
-        }
-    };
+    let mut variable_overrides = get_variable_overrides(&parameters)?;
 
     let project_name = get_project_name::go(get_project_name::In {
         compose_contents: &contents,
@@ -43,8 +37,53 @@ pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
 
 pub struct Parameters<'a> {
     pub compose_file: &'a path::Path,
-    pub environment_file: Option<Box<dyn io::BufRead>>,
+    pub environment_files: Option<Vec<String>>,
     pub project_name: Option<String>,
+}
+
+const DEFAULT_ENVIRONMENT_FILE: &str = ".env";
+
+const SYMBOLIC_STDIN_PATH: &str = "-";
+
+fn get_variable_overrides(
+    parameters: &Parameters,
+) -> anyhow::Result<collections::HashMap<String, Option<String>>> {
+    let folder = parameters
+        .compose_file
+        .parent()
+        .unwrap_or_else(|| path::Path::new(""));
+
+    let files = match &parameters.environment_files {
+        None => [
+            atty::isnt(atty::Stream::Stdin).then_some(SYMBOLIC_STDIN_PATH),
+            folder
+                .join(DEFAULT_ENVIRONMENT_FILE)
+                .is_file()
+                .then_some(DEFAULT_ENVIRONMENT_FILE),
+        ]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>(),
+        Some(files) => files.iter().map(|file| file.as_ref()).collect(),
+    };
+
+    let mut variable_overrides = collections::HashMap::new();
+
+    for file in files {
+        let contents = match file {
+            SYMBOLIC_STDIN_PATH => io::read_to_string(io::stdin().lock())
+                .context("Unable to read stdin as environment file")?,
+            _ => {
+                let file = folder.join(file);
+                fs::read_to_string(&file)
+                    .with_context(|| format!("Unable to read environment file {file:?}"))?
+            }
+        };
+
+        variable_overrides.extend(parse_environment_variables::go(&contents));
+    }
+
+    Ok(variable_overrides)
 }
 
 fn promote(project_name: String, project: schema::Project) -> anyhow::Result<ir::Project> {
@@ -154,7 +193,7 @@ mod tests {
 
         assert!(go(Parameters {
             compose_file: file.as_ref(),
-            environment_file: None,
+            environment_files: Some(vec![]),
             project_name: None,
         })
         .is_err());
@@ -171,7 +210,7 @@ mod tests {
         assert_eq!(
             go(Parameters {
                 compose_file: file.as_ref(),
-                environment_file: None,
+                environment_files: Some(vec![]),
                 project_name: None,
             })?,
             ir::Project {
@@ -216,7 +255,7 @@ mod tests {
         assert_eq!(
             go(Parameters {
                 compose_file: file.as_ref(),
-                environment_file: None,
+                environment_files: Some(vec![]),
                 project_name: Some("my_project".into()),
             })?,
             ir::Project {

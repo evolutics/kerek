@@ -17,11 +17,13 @@ fn main() -> anyhow::Result<()> {
                 Compose {
                     compose_file,
                     environment_files,
+                    project_folder,
                     project_name,
                 },
         } => build::go(build::In {
             compose_file,
             environment_files,
+            project_folder,
             project_name,
         }),
 
@@ -30,6 +32,7 @@ fn main() -> anyhow::Result<()> {
                 Compose {
                     compose_file,
                     environment_files,
+                    project_folder,
                     project_name,
                 },
             ssh: Ssh {
@@ -40,6 +43,7 @@ fn main() -> anyhow::Result<()> {
         } => deploy::go(deploy::In {
             compose_file,
             environment_files,
+            project_folder,
             project_name,
             ssh_configuration,
             ssh_host,
@@ -67,11 +71,13 @@ fn main() -> anyhow::Result<()> {
                 Compose {
                     compose_file,
                     environment_files,
+                    project_folder,
                     project_name,
                 },
         } => render::go(render::In {
             compose_file,
             environment_files,
+            project_folder,
             project_name,
         }),
     }
@@ -123,6 +129,8 @@ struct Compose {
     compose_file: path::PathBuf,
     #[arg(long = "env-file", num_args = 0..)]
     environment_files: Option<Vec<String>>,
+    #[arg(long)]
+    project_folder: Option<path::PathBuf>,
     #[arg(long, short = 'p')]
     project_name: Option<String>,
 }

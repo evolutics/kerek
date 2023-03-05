@@ -39,6 +39,7 @@ pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
 pub struct Parameters<'a> {
     pub compose_file: &'a path::Path,
     pub environment_files: Option<Vec<String>>,
+    pub project_folder: Option<path::PathBuf>,
     pub project_name: Option<String>,
 }
 
@@ -174,6 +175,7 @@ mod tests {
         assert!(go(Parameters {
             compose_file: file.as_ref(),
             environment_files: Some(vec![]),
+            project_folder: None,
             project_name: None,
         })
         .is_err());
@@ -190,6 +192,7 @@ mod tests {
             go(Parameters {
                 compose_file: file.as_ref(),
                 environment_files: Some(vec![]),
+                project_folder: None,
                 project_name: None,
             })?,
             ir::Project {
@@ -233,6 +236,7 @@ mod tests {
             go(Parameters {
                 compose_file: file.as_ref(),
                 environment_files: Some(vec![]),
+                project_folder: None,
                 project_name: Some("my_project".into()),
             })?,
             ir::Project {

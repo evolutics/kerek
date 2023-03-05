@@ -4,9 +4,9 @@ use super::ir;
 use super::parse_environment_variables;
 use super::schema;
 use anyhow::Context;
+use std::borrow;
 use std::collections;
 use std::fs;
-use std::io;
 use std::iter;
 use std::path;
 
@@ -42,8 +42,6 @@ pub struct Parameters<'a> {
 
 const DEFAULT_ENVIRONMENT_FILE: &str = ".env";
 
-const SYMBOLIC_STDIN_PATH: &str = "-";
-
 fn get_variable_overrides(
     parameters: &Parameters,
 ) -> anyhow::Result<collections::HashMap<String, Option<String>>> {
@@ -53,31 +51,22 @@ fn get_variable_overrides(
         .unwrap_or_else(|| path::Path::new(""));
 
     let files = match &parameters.environment_files {
-        None => [
-            atty::isnt(atty::Stream::Stdin).then_some(SYMBOLIC_STDIN_PATH),
-            folder
-                .join(DEFAULT_ENVIRONMENT_FILE)
-                .is_file()
-                .then_some(DEFAULT_ENVIRONMENT_FILE),
-        ]
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>(),
-        Some(files) => files.iter().map(|file| file.as_ref()).collect(),
+        None => {
+            if folder.join(DEFAULT_ENVIRONMENT_FILE).is_file() {
+                borrow::Cow::from(vec![DEFAULT_ENVIRONMENT_FILE.into()])
+            } else {
+                vec![].into()
+            }
+        }
+        Some(files) => files.into(),
     };
 
     let mut variable_overrides = collections::HashMap::new();
 
-    for file in files {
-        let contents = match file {
-            SYMBOLIC_STDIN_PATH => io::read_to_string(io::stdin().lock())
-                .context("Unable to read stdin as environment file")?,
-            _ => {
-                let file = folder.join(file);
-                fs::read_to_string(&file)
-                    .with_context(|| format!("Unable to read environment file {file:?}"))?
-            }
-        };
+    for file in files.iter() {
+        let file = folder.join(file);
+        let contents = fs::read_to_string(&file)
+            .with_context(|| format!("Unable to read environment file {file:?}"))?;
 
         variable_overrides.extend(parse_environment_variables::go(&contents));
     }

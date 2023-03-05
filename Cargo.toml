@@ -5,7 +5,6 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0"
-atty = "0.2"
 clap = { version = "4.1", features = [
   "color",
   "derive",

@@ -1,5 +1,4 @@
 use super::interpolated;
-use std::collections;
 use std::path;
 
 pub fn go(in_: In) -> String {
@@ -14,11 +13,9 @@ pub fn go(in_: In) -> String {
 }
 
 pub struct In<'a> {
-    pub compose_contents: &'a str,
-    pub compose_file: &'a path::Path,
+    pub compose_source: &'a interpolated::Source,
     pub override_: Option<String>,
     pub project_folder: &'a path::Path,
-    pub variable_overrides: &'a collections::HashMap<String, Option<String>>,
 }
 
 const LAST_RESORT_NAME: &str = "default";
@@ -33,13 +30,9 @@ fn get_name_from_override(in_: &In) -> Option<String> {
 }
 
 fn get_name_from_compose_contents(in_: &In) -> Option<String> {
-    interpolated::deserialize::<Project>(
-        in_.compose_file,
-        in_.compose_contents,
-        in_.variable_overrides,
-    )
-    .map(|project| project.name)
-    .ok()
+    interpolated::deserialize::<Project>(in_.compose_source)
+        .map(|project| project.name)
+        .ok()
 }
 
 fn get_name_from_project_folder(in_: &In) -> Option<String> {
@@ -57,11 +50,13 @@ mod tests {
     fn priority_0_is_override() {
         assert_eq!(
             go(In {
-                compose_contents: "name: a",
-                compose_file: path::Path::new("compose.yaml"),
+                compose_source: &interpolated::Source {
+                    contents: "name: a".into(),
+                    format: interpolated::Format::Yaml,
+                    variable_overrides: [].into(),
+                },
                 override_: Some("b".into()),
                 project_folder: path::Path::new("c"),
-                variable_overrides: &[].into(),
             }),
             "b",
         )
@@ -71,11 +66,13 @@ mod tests {
     fn priority_1_is_compose_contents() {
         assert_eq!(
             go(In {
-                compose_contents: "name: a",
-                compose_file: path::Path::new("compose.yaml"),
+                compose_source: &interpolated::Source {
+                    contents: "name: a".into(),
+                    format: interpolated::Format::Yaml,
+                    variable_overrides: [].into(),
+                },
                 override_: None,
                 project_folder: path::Path::new("c"),
-                variable_overrides: &[].into(),
             }),
             "a",
         )
@@ -85,11 +82,13 @@ mod tests {
     fn priority_2_is_project_folder() {
         assert_eq!(
             go(In {
-                compose_contents: "",
-                compose_file: path::Path::new("compose.yaml"),
+                compose_source: &interpolated::Source {
+                    contents: "".into(),
+                    format: interpolated::Format::Yaml,
+                    variable_overrides: [].into(),
+                },
                 override_: None,
                 project_folder: path::Path::new("c"),
-                variable_overrides: &[].into(),
             }),
             "c",
         )
@@ -99,11 +98,13 @@ mod tests {
     fn priority_3_is_last_resort() {
         assert_eq!(
             go(In {
-                compose_contents: "",
-                compose_file: path::Path::new("compose.yaml"),
+                compose_source: &interpolated::Source {
+                    contents: "".into(),
+                    format: interpolated::Format::Yaml,
+                    variable_overrides: [].into(),
+                },
                 override_: None,
                 project_folder: path::Path::new(""),
-                variable_overrides: &[].into(),
             }),
             "default",
         )

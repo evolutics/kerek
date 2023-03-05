@@ -12,22 +12,25 @@ use std::path;
 
 pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
     let file = parameters.compose_file;
-    let contents = fs::read_to_string(file)
-        .with_context(|| format!("Unable to read Compose file {file:?}"))?;
     let folder = file.parent().unwrap_or_else(|| path::Path::new(""));
 
-    let mut variable_overrides = get_variable_overrides(&parameters, folder)?;
+    let mut source = interpolated::Source {
+        contents: fs::read_to_string(file)
+            .with_context(|| format!("Unable to read Compose file {file:?}"))?,
+        format: get_format(file),
+        variable_overrides: get_variable_overrides(&parameters, folder)?,
+    };
 
     let project_name = get_project_name::go(get_project_name::In {
-        compose_contents: &contents,
-        compose_file: file,
+        compose_source: &source,
         override_: parameters.project_name,
         project_folder: folder,
-        variable_overrides: &variable_overrides,
     });
-    variable_overrides.insert("COMPOSE_PROJECT_NAME".into(), Some(project_name.clone()));
+    source
+        .variable_overrides
+        .insert("COMPOSE_PROJECT_NAME".into(), Some(project_name.clone()));
 
-    let project = interpolated::deserialize(file, &contents, &variable_overrides)
+    let project = interpolated::deserialize(&source)
         .with_context(|| format!("Unable to deserialize Compose file {file:?}"))?;
 
     let project = promote(project_name, project)?;
@@ -44,6 +47,13 @@ pub struct Parameters<'a> {
 }
 
 const DEFAULT_ENVIRONMENT_FILE: &str = ".env";
+
+fn get_format(file: &path::Path) -> interpolated::Format {
+    match file.extension() {
+        Some(extension) if extension == "toml" => interpolated::Format::Toml,
+        _ => interpolated::Format::Yaml,
+    }
+}
 
 fn get_variable_overrides(
     parameters: &Parameters,

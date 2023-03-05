@@ -14,13 +14,15 @@ pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
     let file = parameters.compose_file;
     let contents = fs::read_to_string(file)
         .with_context(|| format!("Unable to read Compose file {file:?}"))?;
+    let folder = file.parent().unwrap_or_else(|| path::Path::new(""));
 
-    let mut variable_overrides = get_variable_overrides(&parameters)?;
+    let mut variable_overrides = get_variable_overrides(&parameters, folder)?;
 
     let project_name = get_project_name::go(get_project_name::In {
         compose_contents: &contents,
         compose_file: file,
         override_: parameters.project_name,
+        project_folder: folder,
         variable_overrides: &variable_overrides,
     });
     variable_overrides.insert("COMPOSE_PROJECT_NAME".into(), Some(project_name.clone()));
@@ -44,12 +46,8 @@ const DEFAULT_ENVIRONMENT_FILE: &str = ".env";
 
 fn get_variable_overrides(
     parameters: &Parameters,
+    folder: &path::Path,
 ) -> anyhow::Result<collections::HashMap<String, Option<String>>> {
-    let folder = parameters
-        .compose_file
-        .parent()
-        .unwrap_or_else(|| path::Path::new(""));
-
     let files = match &parameters.environment_files {
         None => {
             if folder.join(DEFAULT_ENVIRONMENT_FILE).is_file() {

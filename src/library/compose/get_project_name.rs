@@ -6,7 +6,7 @@ pub fn go(in_: In) -> String {
     [
         get_name_from_override,
         get_name_from_compose_contents,
-        get_name_from_folder,
+        get_name_from_project_folder,
     ]
     .iter()
     .find_map(|get| get(&in_))
@@ -17,6 +17,7 @@ pub struct In<'a> {
     pub compose_contents: &'a str,
     pub compose_file: &'a path::Path,
     pub override_: Option<String>,
+    pub project_folder: &'a path::Path,
     pub variable_overrides: &'a collections::HashMap<String, Option<String>>,
 }
 
@@ -41,10 +42,9 @@ fn get_name_from_compose_contents(in_: &In) -> Option<String> {
     .ok()
 }
 
-fn get_name_from_folder(in_: &In) -> Option<String> {
-    in_.compose_file
-        .parent()
-        .and_then(|parent| parent.file_name())
+fn get_name_from_project_folder(in_: &In) -> Option<String> {
+    in_.project_folder
+        .file_name()
         .and_then(|name| name.to_str())
         .map(|name| name.into())
 }
@@ -58,11 +58,12 @@ mod tests {
         assert_eq!(
             go(In {
                 compose_contents: "name: a",
-                compose_file: path::Path::new("b/compose.yaml"),
-                override_: Some("c".into()),
+                compose_file: path::Path::new("compose.yaml"),
+                override_: Some("b".into()),
+                project_folder: path::Path::new("c"),
                 variable_overrides: &[].into(),
             }),
-            "c",
+            "b",
         )
     }
 
@@ -71,8 +72,9 @@ mod tests {
         assert_eq!(
             go(In {
                 compose_contents: "name: a",
-                compose_file: path::Path::new("b/compose.yaml"),
+                compose_file: path::Path::new("compose.yaml"),
                 override_: None,
+                project_folder: path::Path::new("c"),
                 variable_overrides: &[].into(),
             }),
             "a",
@@ -80,15 +82,16 @@ mod tests {
     }
 
     #[test]
-    fn priority_2_is_compose_file() {
+    fn priority_2_is_project_folder() {
         assert_eq!(
             go(In {
                 compose_contents: "",
-                compose_file: path::Path::new("b/compose.yaml"),
+                compose_file: path::Path::new("compose.yaml"),
                 override_: None,
+                project_folder: path::Path::new("c"),
                 variable_overrides: &[].into(),
             }),
-            "b",
+            "c",
         )
     }
 
@@ -97,8 +100,9 @@ mod tests {
         assert_eq!(
             go(In {
                 compose_contents: "",
-                compose_file: path::Path::new("/compose.yaml"),
+                compose_file: path::Path::new("compose.yaml"),
                 override_: None,
+                project_folder: path::Path::new(""),
                 variable_overrides: &[].into(),
             }),
             "default",

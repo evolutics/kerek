@@ -12,7 +12,13 @@ use std::path;
 
 pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
     let file = parameters.compose_file;
-    let folder = file.parent().unwrap_or_else(|| path::Path::new(""));
+    let folder = match &parameters.project_folder {
+        None => parameters
+            .compose_file
+            .parent()
+            .unwrap_or_else(|| path::Path::new("")),
+        Some(folder) => folder,
+    };
 
     let mut source = interpolated::Source {
         contents: fs::read_to_string(file)

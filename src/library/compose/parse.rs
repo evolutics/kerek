@@ -24,7 +24,7 @@ pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
         contents: fs::read_to_string(file)
             .with_context(|| format!("Unable to read Compose file {file:?}"))?,
         format: get_format(file),
-        variable_overrides: get_variable_overrides(&parameters, folder)?,
+        variable_overrides: get_variable_overrides(&parameters.environment_files, folder)?,
     };
 
     let project_name = get_project_name::go(get_project_name::In {
@@ -62,10 +62,10 @@ fn get_format(file: &path::Path) -> interpolated::Format {
 }
 
 fn get_variable_overrides(
-    parameters: &Parameters,
+    environment_files: &Option<Vec<String>>,
     folder: &path::Path,
 ) -> anyhow::Result<collections::HashMap<String, Option<String>>> {
-    let files = match &parameters.environment_files {
+    let files = match environment_files {
         None => {
             if folder.join(DEFAULT_ENVIRONMENT_FILE).is_file() {
                 borrow::Cow::from(vec![DEFAULT_ENVIRONMENT_FILE.into()])

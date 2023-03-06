@@ -4,7 +4,6 @@ use super::ir;
 use super::parse_environment_variables;
 use super::schema;
 use anyhow::Context;
-use std::borrow;
 use std::collections;
 use std::fs;
 use std::iter;
@@ -13,12 +12,13 @@ use std::path;
 pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
     let file = parameters.compose_file;
     let folder = resolve_folder(&parameters.project_folder, file);
+    let environment_files = resolve_environment_files(parameters.environment_files, &folder);
 
     let mut source = interpolated::Source {
         contents: fs::read_to_string(file)
             .with_context(|| format!("Unable to read Compose file {file:?}"))?,
         format: get_format(file),
-        variable_overrides: get_variable_overrides(&parameters.environment_files, &folder)?,
+        variable_overrides: get_variable_overrides(&environment_files)?,
     };
 
     let project_name = get_project_name::go(get_project_name::In {
@@ -54,6 +54,23 @@ fn resolve_folder(folder: &Option<path::PathBuf>, file: &path::Path) -> path::Pa
     }
 }
 
+fn resolve_environment_files(
+    environment_files: Option<Vec<path::PathBuf>>,
+    folder: &path::Path,
+) -> Vec<path::PathBuf> {
+    match environment_files {
+        None => {
+            let file = folder.join(".env");
+            if file.is_file() {
+                vec![file]
+            } else {
+                vec![]
+            }
+        }
+        Some(files) => files.iter().map(|file| folder.join(file)).collect(),
+    }
+}
+
 fn get_format(file: &path::Path) -> interpolated::Format {
     match file.extension() {
         Some(extension) if extension == "toml" => interpolated::Format::Toml,
@@ -62,26 +79,12 @@ fn get_format(file: &path::Path) -> interpolated::Format {
 }
 
 fn get_variable_overrides(
-    environment_files: &Option<Vec<path::PathBuf>>,
-    folder: &path::Path,
+    environment_files: &[path::PathBuf],
 ) -> anyhow::Result<collections::HashMap<String, Option<String>>> {
-    let files = match environment_files {
-        None => {
-            let default_environment_file = ".env";
-            if folder.join(default_environment_file).is_file() {
-                borrow::Cow::from(vec![default_environment_file.into()])
-            } else {
-                vec![].into()
-            }
-        }
-        Some(files) => files.into(),
-    };
-
     let mut variable_overrides = collections::HashMap::new();
 
-    for file in files.iter() {
-        let file = folder.join(file);
-        let contents = fs::read_to_string(&file)
+    for file in environment_files {
+        let contents = fs::read_to_string(file)
             .with_context(|| format!("Unable to read environment file {file:?}"))?;
 
         variable_overrides.extend(parse_environment_variables::go(&contents));

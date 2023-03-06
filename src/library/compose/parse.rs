@@ -52,8 +52,6 @@ pub struct Parameters<'a> {
     pub project_name: Option<String>,
 }
 
-const DEFAULT_ENVIRONMENT_FILE: &str = ".env";
-
 fn get_format(file: &path::Path) -> interpolated::Format {
     match file.extension() {
         Some(extension) if extension == "toml" => interpolated::Format::Toml,
@@ -67,8 +65,9 @@ fn get_variable_overrides(
 ) -> anyhow::Result<collections::HashMap<String, Option<String>>> {
     let files = match environment_files {
         None => {
-            if folder.join(DEFAULT_ENVIRONMENT_FILE).is_file() {
-                borrow::Cow::from(vec![DEFAULT_ENVIRONMENT_FILE.into()])
+            let default_environment_file = ".env";
+            if folder.join(default_environment_file).is_file() {
+                borrow::Cow::from(vec![default_environment_file.into()])
             } else {
                 vec![].into()
             }

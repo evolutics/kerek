@@ -12,25 +12,19 @@ use std::path;
 
 pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
     let file = parameters.compose_file;
-    let folder = match &parameters.project_folder {
-        None => parameters
-            .compose_file
-            .parent()
-            .unwrap_or_else(|| path::Path::new("")),
-        Some(folder) => folder,
-    };
+    let folder = resolve_folder(&parameters.project_folder, file);
 
     let mut source = interpolated::Source {
         contents: fs::read_to_string(file)
             .with_context(|| format!("Unable to read Compose file {file:?}"))?,
         format: get_format(file),
-        variable_overrides: get_variable_overrides(&parameters.environment_files, folder)?,
+        variable_overrides: get_variable_overrides(&parameters.environment_files, &folder)?,
     };
 
     let project_name = get_project_name::go(get_project_name::In {
         compose_source: &source,
         override_: parameters.project_name,
-        project_folder: folder,
+        project_folder: &folder,
     });
     source
         .variable_overrides
@@ -50,6 +44,14 @@ pub struct Parameters<'a> {
     pub environment_files: Option<Vec<path::PathBuf>>,
     pub project_folder: Option<path::PathBuf>,
     pub project_name: Option<String>,
+}
+
+fn resolve_folder(folder: &Option<path::PathBuf>, file: &path::Path) -> path::PathBuf {
+    match (folder, file.parent()) {
+        (None, None) => "".into(),
+        (None, Some(parent)) => parent.into(),
+        (Some(folder), _) => folder.clone(),
+    }
 }
 
 fn get_format(file: &path::Path) -> interpolated::Format {

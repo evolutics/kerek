@@ -129,7 +129,7 @@ struct Compose {
     compose_file: path::PathBuf,
     #[arg(long = "env-file", num_args = 0..)]
     environment_files: Option<Vec<path::PathBuf>>,
-    #[arg(long)]
+    #[arg(long = "project-directory")]
     project_folder: Option<path::PathBuf>,
     #[arg(long, short = 'p')]
     project_name: Option<String>,

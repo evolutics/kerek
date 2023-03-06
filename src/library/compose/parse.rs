@@ -47,7 +47,7 @@ pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
 
 pub struct Parameters<'a> {
     pub compose_file: &'a path::Path,
-    pub environment_files: Option<Vec<String>>,
+    pub environment_files: Option<Vec<path::PathBuf>>,
     pub project_folder: Option<path::PathBuf>,
     pub project_name: Option<String>,
 }
@@ -62,7 +62,7 @@ fn get_format(file: &path::Path) -> interpolated::Format {
 }
 
 fn get_variable_overrides(
-    environment_files: &Option<Vec<String>>,
+    environment_files: &Option<Vec<path::PathBuf>>,
     folder: &path::Path,
 ) -> anyhow::Result<collections::HashMap<String, Option<String>>> {
     let files = match environment_files {

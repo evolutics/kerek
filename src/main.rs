@@ -128,7 +128,7 @@ struct Compose {
     #[arg(default_value = "compose.yaml", long, short = 'f')]
     compose_file: path::PathBuf,
     #[arg(long = "env-file", num_args = 0..)]
-    environment_files: Option<Vec<String>>,
+    environment_files: Option<Vec<path::PathBuf>>,
     #[arg(long)]
     project_folder: Option<path::PathBuf>,
     #[arg(long, short = 'p')]

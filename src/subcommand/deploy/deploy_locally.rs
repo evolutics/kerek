@@ -75,7 +75,6 @@ enum Operator {
 fn load_target_images(project: &compose::Project) -> anyhow::Result<collections::HashSet<String>> {
     let remote_workbench = &project.x_wheelsticks.remote_workbench;
     let image_files = fs::read_dir(remote_workbench)?
-        .into_iter()
         .map(|result| result.map(|entry| entry.path()))
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()

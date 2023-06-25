@@ -25,7 +25,6 @@ pub fn go(in_: In) -> anyhow::Result<()> {
         .collect::<Result<collections::BTreeSet<_>, _>>()?;
 
     let existing_files = fs::read_dir(local_workbench)?
-        .into_iter()
         .map(|result| result.map(|entry| entry.path()))
         .collect::<Result<collections::BTreeSet<_>, _>>()?;
 

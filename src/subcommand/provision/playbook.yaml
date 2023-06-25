@@ -59,11 +59,11 @@
       block:
         - name: Manage Podman APT key
           ansible.builtin.apt_key:
-            url: https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/xUbuntu_22.04/Release.key
+            url: "https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/xUbuntu_{{ ansible_distribution_version }}/Release.key"
 
         - name: Manage Podman APT repository
           ansible.builtin.apt_repository:
-            repo: "deb https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/xUbuntu_22.04/ /"
+            repo: "deb https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/xUbuntu_{{ ansible_distribution_version }}/ /"
 
         - name: Manage Podman APT package
           ansible.builtin.apt:

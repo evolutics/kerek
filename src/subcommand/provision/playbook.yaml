@@ -12,7 +12,6 @@
         - name: Manage packages
           ansible.builtin.apt:
             pkg:
-              - podman
               - ufw
               - unattended-upgrades
             update_cache: true
@@ -54,6 +53,21 @@
             path: /etc/ssh/sshd_config
             regexp: '\bPermitRootLogin\b'
           notify: Restart OpenSSH daemon
+
+    - name: Provision Podman
+      become: true
+      block:
+        - name: Manage Podman APT key
+          ansible.builtin.apt_key:
+            url: https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/xUbuntu_22.04/Release.key
+
+        - name: Manage Podman APT repository
+          ansible.builtin.apt_repository:
+            repo: "deb https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/xUbuntu_22.04/ /"
+
+        - name: Manage Podman APT package
+          ansible.builtin.apt:
+            pkg: podman
 
     - name: Provision container platform
       become: true

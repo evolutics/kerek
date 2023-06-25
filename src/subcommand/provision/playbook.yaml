@@ -54,21 +54,6 @@
             regexp: '\bPermitRootLogin\b'
           notify: Restart OpenSSH daemon
 
-    - name: Provision Docker CLI
-      become: true
-      block:
-        - name: Manage Docker APT key
-          ansible.builtin.apt_key:
-            url: https://download.docker.com/linux/ubuntu/gpg
-
-        - name: Manage Docker APT repository
-          ansible.builtin.apt_repository:
-            repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-
-        - name: Manage Docker CLI APT package
-          ansible.builtin.apt:
-            pkg: docker-ce-cli
-
     - name: Provision Podman
       become: true
       block:

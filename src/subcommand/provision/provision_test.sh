@@ -7,7 +7,6 @@ set -o pipefail
 set -o xtrace
 
 test_container_platform() {
-  podman --version
   [[ "$(loginctl --property Linger --value show-user "${WHEELSTICKS_DEPLOY_USER}")" == "yes" ]]
   [[ "$(sysctl --values net.ipv4.ip_unprivileged_port_start)" == 80 ]]
   wheelsticks --version
@@ -36,6 +35,12 @@ test_package_management() {
   systemctl is-active unattended-upgrades.service
 }
 
+test_podman() {
+  podman --version
+  sudo systemctl --machine "${WHEELSTICKS_DEPLOY_USER}@" --user is-active podman.socket
+  docker --version
+}
+
 test_user_management() {
   sudo sshd -T | grep '^passwordauthentication no$'
   sudo sshd -T | grep '^permitrootlogin no$'
@@ -48,6 +53,7 @@ main() {
   test_container_platform
   test_firewall
   test_package_management
+  test_podman
   test_user_management
 }
 

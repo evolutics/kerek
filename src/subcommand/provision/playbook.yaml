@@ -69,6 +69,19 @@
           ansible.builtin.apt:
             pkg: podman
 
+        - name: Manage socket activation of Podman API service
+          ansible.builtin.service:
+            arguments: "--machine {{ deploy_user }}@ --user"
+            name: podman.socket
+            state: started
+            use: systemctl # noqa: args[module]
+
+        - name: Link Docker to Podman
+          ansible.builtin.file:
+            dest: /usr/local/bin/docker
+            src: /usr/bin/podman
+            state: link
+
     - name: Provision container platform
       become: true
       block:

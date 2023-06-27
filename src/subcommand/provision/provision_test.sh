@@ -38,6 +38,7 @@ test_package_management() {
 test_podman() {
   podman --version
   sudo systemctl --machine "${WHEELSTICKS_DEPLOY_USER}@" --user is-active podman.socket
+  sudo systemctl --machine "${WHEELSTICKS_DEPLOY_USER}@" --user is-enabled podman.socket
   docker --version
 }
 

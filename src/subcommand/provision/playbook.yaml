@@ -93,6 +93,7 @@
 
         - name: Manage socket activation of Podman API service
           ansible.builtin.systemd:
+            enabled: true
             name: podman.socket
             scope: user
             state: started

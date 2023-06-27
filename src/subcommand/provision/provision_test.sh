@@ -7,7 +7,7 @@ set -o pipefail
 set -o xtrace
 
 test_container_platform() {
-  [[ "$(loginctl --property Linger --value show-user "${WHEELSTICKS_DEPLOY_USER}")" == "yes" ]]
+  [[ "$(loginctl -P Linger show-user "${WHEELSTICKS_DEPLOY_USER}")" == "yes" ]]
   [[ "$(sysctl --values net.ipv4.ip_unprivileged_port_start)" == 80 ]]
   wheelsticks --version
 }

@@ -12,6 +12,7 @@
         - name: Manage packages
           ansible.builtin.apt:
             pkg:
+              - acl
               - ufw
               - unattended-upgrades
             update_cache: true
@@ -54,34 +55,6 @@
             regexp: '\bPermitRootLogin\b'
           notify: Restart OpenSSH daemon
 
-    - name: Provision Podman
-      become: true
-      block:
-        - name: Manage Podman APT key
-          ansible.builtin.apt_key:
-            url: "https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/xUbuntu_{{ ansible_distribution_version }}/Release.key"
-
-        - name: Manage Podman APT repository
-          ansible.builtin.apt_repository:
-            repo: "deb https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/xUbuntu_{{ ansible_distribution_version }}/ /"
-
-        - name: Manage Podman APT package
-          ansible.builtin.apt:
-            pkg: podman
-
-        - name: Manage socket activation of Podman API service
-          ansible.builtin.service:
-            arguments: "--machine {{ deploy_user }}@ --user"
-            name: podman.socket
-            state: started
-            use: systemctl # noqa: args[module]
-
-        - name: Link Docker to Podman
-          ansible.builtin.file:
-            dest: /usr/local/bin/docker
-            src: /usr/bin/podman
-            state: link
-
     - name: Provision container platform
       become: true
       block:
@@ -102,6 +75,34 @@
             dest: /usr/local/bin/wheelsticks
             mode: u=rwx,go=rx
             src: "{{ own_executable }}"
+
+    - name: Provision Podman
+      become: true
+      block:
+        - name: Manage Podman APT key
+          ansible.builtin.apt_key:
+            url: "https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/xUbuntu_{{ ansible_distribution_version }}/Release.key"
+
+        - name: Manage Podman APT repository
+          ansible.builtin.apt_repository:
+            repo: "deb https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/xUbuntu_{{ ansible_distribution_version }}/ /"
+
+        - name: Manage Podman APT package
+          ansible.builtin.apt:
+            pkg: podman
+
+        - name: Manage socket activation of Podman API service
+          ansible.builtin.systemd:
+            name: podman.socket
+            scope: user
+            state: started
+          become_user: "{{ deploy_user }}"
+
+        - name: Link Docker to Podman
+          ansible.builtin.file:
+            dest: /usr/local/bin/docker
+            src: /usr/bin/podman
+            state: link
 
     - name: Provision firewall
       become: true

@@ -48,13 +48,11 @@ fn main() -> anyhow::Result<()> {
 
         Subcommand::Provision {
             deploy_user,
-            ssh: Ssh { ssh_user },
             ssh_host,
             upgrade_packages,
         } => provision::go(provision::In {
             deploy_user,
             ssh_host,
-            ssh_user,
             upgrade_packages,
         }),
 
@@ -100,9 +98,6 @@ enum Subcommand {
     Provision {
         #[arg(default_value = "wheelsticks", long)]
         deploy_user: String,
-
-        #[command(flatten)]
-        ssh: Ssh,
 
         #[arg(long)]
         upgrade_packages: bool,

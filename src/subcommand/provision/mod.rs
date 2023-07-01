@@ -29,11 +29,6 @@ pub fn go(in_: In) -> anyhow::Result<()> {
                 "--inventory",
                 &format!(",{ssh_host}"),
             ])
-            .args(
-                in_.ssh_user
-                    .iter()
-                    .flat_map(|ssh_user| ["--user", ssh_user]),
-            )
             .arg("--")
             .arg(playbook.as_ref()),
     )
@@ -42,7 +37,6 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 pub struct In {
     pub deploy_user: String,
     pub ssh_host: String,
-    pub ssh_user: Option<String>,
     pub upgrade_packages: bool,
 }
 

@@ -35,32 +35,24 @@ fn main() -> anyhow::Result<()> {
                     project_folder,
                     project_name,
                 },
-            ssh: Ssh {
-                ssh_configuration,
-                ssh_user,
-            },
+            ssh: Ssh { ssh_user },
             ssh_host,
         } => deploy::go(deploy::In {
             compose_file,
             environment_files,
             project_folder,
             project_name,
-            ssh_configuration,
             ssh_host,
             ssh_user,
         }),
 
         Subcommand::Provision {
             deploy_user,
-            ssh: Ssh {
-                ssh_configuration,
-                ssh_user,
-            },
+            ssh: Ssh { ssh_user },
             ssh_host,
             upgrade_packages,
         } => provision::go(provision::In {
             deploy_user,
-            ssh_configuration,
             ssh_host,
             ssh_user,
             upgrade_packages,
@@ -137,9 +129,6 @@ struct Compose {
 
 #[derive(clap::Args)]
 struct Ssh {
-    #[arg(long, short = 'F')]
-    ssh_configuration: Option<path::PathBuf>,
-
     #[arg(long)]
     ssh_user: Option<String>,
 }

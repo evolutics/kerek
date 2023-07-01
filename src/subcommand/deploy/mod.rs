@@ -3,7 +3,6 @@ mod deploy_locally;
 use crate::library::command;
 use crate::library::compose;
 use anyhow::Context;
-use std::ffi;
 use std::fs;
 use std::path;
 use std::process;
@@ -21,7 +20,6 @@ pub fn go(in_: In) -> anyhow::Result<()> {
         Some(ssh_host) => deploy_remotely(
             &project,
             &Ssh {
-                configuration: in_.ssh_configuration,
                 host: ssh_host,
                 user: in_.ssh_user,
             },
@@ -34,13 +32,11 @@ pub struct In {
     pub environment_files: Option<Vec<path::PathBuf>>,
     pub project_folder: Option<path::PathBuf>,
     pub project_name: Option<String>,
-    pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: Option<String>,
     pub ssh_user: Option<String>,
 }
 
 struct Ssh {
-    configuration: Option<path::PathBuf>,
     host: String,
     user: Option<String>,
 }
@@ -76,11 +72,6 @@ fn synchronize_artifacts(project: &compose::Project, ssh: &Ssh) -> anyhow::Resul
     command::status_ok(
         process::Command::new("rsync")
             .args(["--archive", "--delete"])
-            .args(
-                ssh.configuration.iter().flat_map(|configuration| {
-                    ["--rsh".into(), format!("ssh -F {configuration:?}")]
-                }),
-            )
             .arg("--")
             .args([source, destination]),
     )
@@ -89,11 +80,6 @@ fn synchronize_artifacts(project: &compose::Project, ssh: &Ssh) -> anyhow::Resul
 fn run_deploy_on_remote(project: &compose::Project, ssh: &Ssh) -> anyhow::Result<()> {
     command::status_ok(
         process::Command::new("ssh")
-            .args(
-                ssh.configuration
-                    .iter()
-                    .flat_map(|configuration| [ffi::OsStr::new("-F"), configuration.as_os_str()]),
-            )
             .args(ssh.user.iter().flat_map(|user| ["-l", user]))
             .args([&ssh.host, "--", "wheelsticks", "deploy", "--compose-file"])
             .arg(path::Path::new(&project.x_wheelsticks.remote_workbench).join("compose.yaml"))

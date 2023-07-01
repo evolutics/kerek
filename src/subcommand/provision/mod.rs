@@ -29,12 +29,6 @@ pub fn go(in_: In) -> anyhow::Result<()> {
                 "--inventory",
                 &format!(",{ssh_host}"),
             ])
-            .args(in_.ssh_configuration.iter().flat_map(|ssh_configuration| {
-                [
-                    "--ssh-common-args".into(),
-                    format!("-F {ssh_configuration:?}"),
-                ]
-            }))
             .args(
                 in_.ssh_user
                     .iter()
@@ -47,7 +41,6 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 
 pub struct In {
     pub deploy_user: String,
-    pub ssh_configuration: Option<path::PathBuf>,
     pub ssh_host: String,
     pub ssh_user: Option<String>,
     pub upgrade_packages: bool,

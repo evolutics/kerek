@@ -1,4 +1,6 @@
+use std::env;
 use std::fs;
+use std::iter;
 use std::path;
 use std::process;
 
@@ -18,16 +20,12 @@ fn go() -> anyhow::Result<()> {
         "provision",
         "--deploy-user",
         DEPLOY_USER,
-        "--ssh-configuration",
-        SSH_CONFIGURATION_FILE,
         "--",
         SSH_HOST,
     ]))?;
     assert_command_in_context(process::Command::new(EXECUTABLE).arg("build"))?;
     assert_command_in_context(process::Command::new(EXECUTABLE).args([
         "deploy",
-        "--ssh-configuration",
-        SSH_CONFIGURATION_FILE,
         "--ssh-user",
         DEPLOY_USER,
         "--",
@@ -62,8 +60,13 @@ const SSH_HOST: &str = "example";
 const VM_IP_ADDRESS: &str = "192.168.60.97";
 
 fn assert_command_in_context(command: &mut process::Command) -> anyhow::Result<()> {
+    let original_path = env::var("PATH")?;
+    let custom_path =
+        env::join_paths(iter::once("custom_bin".into()).chain(env::split_paths(&original_path)))?;
+
     assert!(command
         .current_dir(FOLDER)
+        .env("PATH", custom_path)
         .env("VM_IP_ADDRESS", VM_IP_ADDRESS)
         .status()?
         .success());

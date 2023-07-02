@@ -35,15 +35,13 @@ fn main() -> anyhow::Result<()> {
                     project_folder,
                     project_name,
                 },
-            ssh: Ssh { ssh_user },
-            ssh_host,
+            docker_host,
         } => deploy::go(deploy::In {
             compose_file,
+            docker_host: docker_host.host,
             environment_files,
             project_folder,
             project_name,
-            ssh_host,
-            ssh_user,
         }),
 
         Subcommand::Provision {
@@ -91,9 +89,7 @@ enum Subcommand {
         compose: Compose,
 
         #[command(flatten)]
-        ssh: Ssh,
-
-        ssh_host: Option<String>,
+        docker_host: DockerHost,
     },
     Provision {
         #[arg(default_value = "wheelsticks", long)]
@@ -123,9 +119,9 @@ struct Compose {
 }
 
 #[derive(clap::Args)]
-struct Ssh {
-    #[arg(long)]
-    ssh_user: Option<String>,
+struct DockerHost {
+    #[arg(long, short = 'H')]
+    host: Option<String>,
 }
 
 #[cfg(test)]

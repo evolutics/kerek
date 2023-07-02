@@ -26,10 +26,8 @@ fn go() -> anyhow::Result<()> {
     assert_command_in_context(process::Command::new(EXECUTABLE).arg("build"))?;
     assert_command_in_context(process::Command::new(EXECUTABLE).args([
         "deploy",
-        "--ssh-user",
-        DEPLOY_USER,
-        "--",
-        SSH_HOST,
+        "--host",
+        &format!("ssh://{DEPLOY_USER}@{SSH_HOST}"),
     ]))?;
 
     assert_command_in_context(process::Command::new("curl").args([

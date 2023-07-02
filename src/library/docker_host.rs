@@ -1,4 +1,5 @@
 use anyhow::Context;
+use std::env;
 
 #[derive(Debug, PartialEq)]
 pub struct Host {
@@ -14,7 +15,7 @@ pub struct Ssh {
 }
 
 pub fn get(url_override: Option<String>) -> anyhow::Result<Host> {
-    let effective_url = get_effective_url(url_override);
+    let effective_url = get_effective_url(url_override)?;
 
     let url = url::Url::parse(&effective_url)
         .with_context(|| format!("Unable to parse Docker host URL {effective_url:?}"))?;
@@ -32,9 +33,19 @@ pub fn get(url_override: Option<String>) -> anyhow::Result<Host> {
     })
 }
 
-fn get_effective_url(url_override: Option<String>) -> String {
-    // TODO: Fall back to `$DOCKER_HOST`, then Docker context.
-    url_override.unwrap_or_else(|| "unix:///var/run/docker.sock".into())
+const ENVIRONMENT_VARIABLE: &str = "DOCKER_HOST";
+
+fn get_effective_url(url_override: Option<String>) -> anyhow::Result<String> {
+    match url_override {
+        None => match env::var(ENVIRONMENT_VARIABLE) {
+            Err(env::VarError::NotPresent) => Ok("unix:///var/run/docker.sock".into()), // TODO: Fall back to Docker context.
+            Err(env::VarError::NotUnicode(url)) => Err(anyhow::anyhow!(
+                "Environment variable {ENVIRONMENT_VARIABLE:?} should be Unicode but is {url:?}"
+            )),
+            Ok(url) => Ok(url),
+        },
+        Some(url) => Ok(url),
+    }
 }
 
 #[cfg(test)]
@@ -43,18 +54,6 @@ mod tests {
 
     mod get {
         use super::*;
-
-        #[test]
-        fn handles_default() -> anyhow::Result<()> {
-            assert_eq!(
-                get(None)?,
-                Host {
-                    ssh: None,
-                    url: "unix:///var/run/docker.sock".into(),
-                },
-            );
-            Ok(())
-        }
 
         #[test]
         fn handles_invalid_url() {

@@ -1,4 +1,5 @@
 use anyhow::Context;
+use serde::de;
 use std::io;
 use std::process;
 use std::time;
@@ -59,6 +60,37 @@ pub enum StatusWithinTime {
     Failure,
     Success,
     Timeout,
+}
+
+#[allow(dead_code)]
+pub fn stdout_json<T: de::DeserializeOwned>(command: &mut process::Command) -> anyhow::Result<T> {
+    go(command, process::Command::output, |output| {
+        if output.status.success() {
+            serde_json::from_slice(&output.stdout).context("Unable to deserialize JSON from stdout")
+        } else {
+            status_error(output.status)
+        }
+    })
+}
+
+#[allow(dead_code)]
+pub fn stdout_jsons<T: de::DeserializeOwned>(
+    command: &mut process::Command,
+) -> anyhow::Result<Vec<T>> {
+    go(command, process::Command::output, |output| {
+        if output.status.success() {
+            let stream = serde_json::Deserializer::from_slice(&output.stdout).into_iter();
+            let mut values = vec![];
+            for (index, value) in stream.enumerate() {
+                let value = value
+                    .with_context(|| format!("Unable to deserialize JSON #{index} from stdout"))?;
+                values.push(value);
+            }
+            Ok(values)
+        } else {
+            status_error(output.status)
+        }
+    })
 }
 
 pub fn stdout_raw(command: &mut process::Command) -> anyhow::Result<Vec<u8>> {
@@ -133,6 +165,20 @@ mod tests {
             status_within_time(&mut command, time::Duration::from_secs_f32(0.01)).ok(),
             expected,
         )
+    }
+
+    #[test_case::test_case(invalid_program_(), None; "invalid program")]
+    #[test_case::test_case(shell("exit 1"), None; "failure")]
+    #[test_case::test_case(shell("printf '\"Hi\"'"), Some("Hi".into()); "success")]
+    fn stdout_json_handles(mut command: process::Command, expected: Option<String>) {
+        assert_eq!(stdout_json(&mut command).ok(), expected)
+    }
+
+    #[test_case::test_case(invalid_program_(), None; "invalid program")]
+    #[test_case::test_case(shell("exit 1"), None; "failure")]
+    #[test_case::test_case(shell("printf '3 5'"), Some(vec![3, 5]); "success")]
+    fn stdout_jsons_handles(mut command: process::Command, expected: Option<Vec<i8>>) {
+        assert_eq!(stdout_jsons(&mut command).ok(), expected)
     }
 
     #[test_case::test_case(invalid_program_(), None; "invalid program")]

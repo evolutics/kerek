@@ -35,8 +35,6 @@ pub fn get(url_override: Option<String>) -> anyhow::Result<Host> {
     })
 }
 
-const ENVIRONMENT_VARIABLE: &str = "DOCKER_HOST";
-
 fn get_effective_url(url_override: Option<String>) -> anyhow::Result<String> {
     match url_override {
         None => match env::var(ENVIRONMENT_VARIABLE) {
@@ -58,6 +56,8 @@ fn get_effective_url(url_override: Option<String>) -> anyhow::Result<String> {
         Some(url) => Ok(url),
     }
 }
+
+const ENVIRONMENT_VARIABLE: &str = "DOCKER_HOST";
 
 fn get_current_context() -> anyhow::Result<DockerContext> {
     command::stdout_json(process::Command::new("docker").args([

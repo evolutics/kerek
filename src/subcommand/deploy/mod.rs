@@ -92,6 +92,6 @@ fn run_deploy_on_remote(project: &compose::Project, ssh: &docker_host::Ssh) -> a
                 "--compose-file",
             ])
             .arg(path::Path::new(&project.x_wheelsticks.remote_workbench).join("compose.yaml"))
-            .arg("--env-file"),
+            .args(["--env-file", "--host", "unix:///tmp/todo.sock"]),
     )
 }

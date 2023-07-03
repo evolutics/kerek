@@ -1,5 +1,7 @@
+use super::command;
 use anyhow::Context;
 use std::env;
+use std::process;
 
 #[derive(Debug, PartialEq)]
 pub struct Host {
@@ -38,7 +40,15 @@ const ENVIRONMENT_VARIABLE: &str = "DOCKER_HOST";
 fn get_effective_url(url_override: Option<String>) -> anyhow::Result<String> {
     match url_override {
         None => match env::var(ENVIRONMENT_VARIABLE) {
-            Err(env::VarError::NotPresent) => Ok("unix:///var/run/docker.sock".into()), // TODO: Fall back to Docker context.
+            Err(env::VarError::NotPresent) => {
+                let context = get_current_context().with_context(|| {
+                    format!(
+                        "Unable to get current Docker context, \
+                        try using {ENVIRONMENT_VARIABLE:?} instead"
+                    )
+                })?;
+                Ok(context.endpoints.docker.host)
+            }
             Err(env::VarError::NotUnicode(url)) => Err(anyhow::anyhow!(
                 "Environment variable {ENVIRONMENT_VARIABLE:?} should be Unicode but is {url:?}"
             )),
@@ -46,6 +56,32 @@ fn get_effective_url(url_override: Option<String>) -> anyhow::Result<String> {
         },
         Some(url) => Ok(url),
     }
+}
+
+fn get_current_context() -> anyhow::Result<DockerContext> {
+    command::stdout_json(process::Command::new("docker").args([
+        "context",
+        "inspect",
+        "--format",
+        "{{json .}}",
+    ]))
+}
+
+#[derive(serde::Deserialize)]
+struct DockerContext {
+    #[serde(rename = "Endpoints")]
+    endpoints: Endpoints,
+}
+
+#[derive(serde::Deserialize)]
+struct Endpoints {
+    docker: Endpoint,
+}
+
+#[derive(serde::Deserialize)]
+struct Endpoint {
+    #[serde(rename = "Host")]
+    host: String,
 }
 
 #[cfg(test)]

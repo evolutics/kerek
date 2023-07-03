@@ -62,7 +62,6 @@ pub enum StatusWithinTime {
     Timeout,
 }
 
-#[allow(dead_code)]
 pub fn stdout_json<T: de::DeserializeOwned>(command: &mut process::Command) -> anyhow::Result<T> {
     go(command, process::Command::output, |output| {
         if output.status.success() {

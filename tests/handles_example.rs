@@ -65,7 +65,7 @@ fn assert_command_in_context(command: &mut process::Command) -> anyhow::Result<(
     assert!(command
         .current_dir(FOLDER)
         .env("PATH", custom_path)
-        .env("VM_IP_ADDRESS", VM_IP_ADDRESS)
+        .env("WHEELSTICKS_VM_IP_ADDRESS", VM_IP_ADDRESS)
         .status()?
         .success());
     Ok(())

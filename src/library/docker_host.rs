@@ -50,7 +50,8 @@ fn get_effective_url(url_override: Option<String>) -> anyhow::Result<String> {
                 Ok(context.endpoints.docker.host)
             }
             Err(env::VarError::NotUnicode(url)) => Err(anyhow::anyhow!(
-                "Environment variable {ENVIRONMENT_VARIABLE:?} should be Unicode but is {url:?}"
+                "Environment variable {ENVIRONMENT_VARIABLE:?} \
+                should be Unicode but is {url:?}"
             )),
             Ok(url) => Ok(url),
         },

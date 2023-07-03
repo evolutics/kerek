@@ -20,8 +20,8 @@ fn go() -> anyhow::Result<()> {
         "provision",
         "--deploy-user",
         DEPLOY_USER,
-        "--",
-        SSH_HOST,
+        "--host",
+        &format!("ssh://{SSH_HOST}"),
     ]))?;
     assert_command_in_context(process::Command::new(EXECUTABLE).arg("build"))?;
     assert_command_in_context(process::Command::new(EXECUTABLE).args([

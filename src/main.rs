@@ -6,7 +6,6 @@ use std::path;
 use subcommand::build;
 use subcommand::deploy;
 use subcommand::provision;
-use subcommand::render;
 
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
@@ -49,19 +48,6 @@ fn main() -> anyhow::Result<()> {
             docker_host: docker_host.host,
             upgrade_packages,
         }),
-
-        Subcommand::Render {
-            compose:
-                Compose {
-                    compose_file,
-                    project_folder,
-                    project_name,
-                },
-        } => render::go(render::In {
-            compose_file,
-            project_folder,
-            project_name,
-        }),
     }
 }
 
@@ -94,10 +80,6 @@ enum Subcommand {
 
         #[arg(long)]
         upgrade_packages: bool,
-    },
-    Render {
-        #[command(flatten)]
-        compose: Compose,
     },
 }
 

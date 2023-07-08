@@ -15,7 +15,6 @@ fn go() -> anyhow::Result<()> {
         ".wheelsticks",
     ]))?;
 
-    assert_command_in_context(process::Command::new(EXECUTABLE).arg("render"))?;
     assert_command_in_context(process::Command::new(EXECUTABLE).args([
         "provision",
         "--deploy-user",

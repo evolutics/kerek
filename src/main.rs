@@ -16,13 +16,11 @@ fn main() -> anyhow::Result<()> {
             compose:
                 Compose {
                     compose_file,
-                    environment_files,
                     project_folder,
                     project_name,
                 },
         } => build::go(build::In {
             compose_file,
-            environment_files,
             project_folder,
             project_name,
         }),
@@ -31,7 +29,6 @@ fn main() -> anyhow::Result<()> {
             compose:
                 Compose {
                     compose_file,
-                    environment_files,
                     project_folder,
                     project_name,
                 },
@@ -39,7 +36,6 @@ fn main() -> anyhow::Result<()> {
         } => deploy::go(deploy::In {
             compose_file,
             docker_host: docker_host.host,
-            environment_files,
             project_folder,
             project_name,
         }),
@@ -58,13 +54,11 @@ fn main() -> anyhow::Result<()> {
             compose:
                 Compose {
                     compose_file,
-                    environment_files,
                     project_folder,
                     project_name,
                 },
         } => render::go(render::In {
             compose_file,
-            environment_files,
             project_folder,
             project_name,
         }),
@@ -111,8 +105,6 @@ enum Subcommand {
 struct Compose {
     #[arg(default_value = "compose.yaml", long, short = 'f')]
     compose_file: path::PathBuf,
-    #[arg(long = "env-file", num_args = 0..)]
-    environment_files: Option<Vec<path::PathBuf>>,
     #[arg(long = "project-directory")]
     project_folder: Option<path::PathBuf>,
     #[arg(long, short = 'p')]

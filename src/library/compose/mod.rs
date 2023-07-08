@@ -3,7 +3,6 @@ mod interpolate;
 mod interpolated;
 mod ir;
 mod parse;
-mod parse_environment_variables;
 mod print;
 mod schema;
 

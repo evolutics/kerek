@@ -1,10 +1,8 @@
 use super::get_project_name;
 use super::interpolated;
 use super::ir;
-use super::parse_environment_variables;
 use super::schema;
 use anyhow::Context;
-use std::collections;
 use std::fs;
 use std::iter;
 use std::path;
@@ -12,13 +10,12 @@ use std::path;
 pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
     let file = parameters.compose_file;
     let folder = resolve_folder(&parameters.project_folder, file);
-    let environment_files = resolve_environment_files(parameters.environment_files, &folder);
 
     let mut source = interpolated::Source {
         contents: fs::read_to_string(file)
             .with_context(|| format!("Unable to read Compose file {file:?}"))?,
         format: get_format(file),
-        variable_overrides: get_variable_overrides(&environment_files)?,
+        variable_overrides: [].into(),
     };
 
     let project_name = get_project_name::go(get_project_name::In {
@@ -41,7 +38,6 @@ pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
 
 pub struct Parameters<'a> {
     pub compose_file: &'a path::Path,
-    pub environment_files: Option<Vec<path::PathBuf>>,
     pub project_folder: Option<path::PathBuf>,
     pub project_name: Option<String>,
 }
@@ -54,43 +50,11 @@ fn resolve_folder(folder: &Option<path::PathBuf>, file: &path::Path) -> path::Pa
     }
 }
 
-fn resolve_environment_files(
-    environment_files: Option<Vec<path::PathBuf>>,
-    folder: &path::Path,
-) -> Vec<path::PathBuf> {
-    match environment_files {
-        None => {
-            let file = folder.join(".env");
-            if file.is_file() {
-                vec![file]
-            } else {
-                vec![]
-            }
-        }
-        Some(files) => files.iter().map(|file| folder.join(file)).collect(),
-    }
-}
-
 fn get_format(file: &path::Path) -> interpolated::Format {
     match file.extension() {
         Some(extension) if extension == "toml" => interpolated::Format::Toml,
         _ => interpolated::Format::Yaml,
     }
-}
-
-fn get_variable_overrides(
-    environment_files: &[path::PathBuf],
-) -> anyhow::Result<collections::HashMap<String, Option<String>>> {
-    let mut variable_overrides = collections::HashMap::new();
-
-    for file in environment_files {
-        let contents = fs::read_to_string(file)
-            .with_context(|| format!("Unable to read environment file {file:?}"))?;
-
-        variable_overrides.extend(parse_environment_variables::go(&contents));
-    }
-
-    Ok(variable_overrides)
 }
 
 fn promote(project_name: String, project: schema::Project) -> anyhow::Result<ir::Project> {
@@ -194,7 +158,6 @@ mod tests {
 
         assert!(go(Parameters {
             compose_file: file.as_ref(),
-            environment_files: Some(vec![]),
             project_folder: None,
             project_name: None,
         })
@@ -211,7 +174,6 @@ mod tests {
         assert_eq!(
             go(Parameters {
                 compose_file: file.as_ref(),
-                environment_files: Some(vec![]),
                 project_folder: None,
                 project_name: None,
             })?,
@@ -255,7 +217,6 @@ mod tests {
         assert_eq!(
             go(Parameters {
                 compose_file: file.as_ref(),
-                environment_files: Some(vec![]),
                 project_folder: None,
                 project_name: Some("my_project".into()),
             })?,

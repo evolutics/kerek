@@ -2,7 +2,6 @@ mod library;
 mod subcommand;
 
 use clap::Parser;
-use std::path;
 use subcommand::build;
 use subcommand::deploy;
 use subcommand::provision;
@@ -86,9 +85,9 @@ enum Subcommand {
 #[derive(clap::Args)]
 struct Compose {
     #[arg(default_value = "compose.yaml", long, short = 'f')]
-    compose_file: path::PathBuf,
+    compose_file: String,
     #[arg(long = "project-directory")]
-    project_folder: Option<path::PathBuf>,
+    project_folder: Option<String>,
     #[arg(long, short = 'p')]
     project_name: Option<String>,
 }

@@ -48,7 +48,7 @@ mod tests {
         let file = tempfile::NamedTempFile::new()?;
         fs::write(&file, input)?;
         let project = parse::go(parse::Parameters {
-            compose_file: file.as_ref(),
+            compose_file: &file.as_ref().to_string_lossy(),
             project_folder: None,
             project_name: Some("my_project".into()),
         })?;

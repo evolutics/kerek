@@ -23,9 +23,9 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 }
 
 pub struct In {
-    pub compose_file: path::PathBuf,
+    pub compose_file: String,
     pub docker_host: Option<String>,
-    pub project_folder: Option<path::PathBuf>,
+    pub project_folder: Option<String>,
     pub project_name: Option<String>,
 }
 

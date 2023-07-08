@@ -8,8 +8,9 @@ use std::iter;
 use std::path;
 
 pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
-    let file = parameters.compose_file;
-    let folder = resolve_folder(&parameters.project_folder, file);
+    let project_folder = parameters.project_folder.map(|folder| folder.into());
+    let file = path::Path::new(parameters.compose_file);
+    let folder = resolve_folder(&project_folder, file);
 
     let mut source = interpolated::Source {
         contents: fs::read_to_string(file)
@@ -37,8 +38,8 @@ pub fn go(parameters: Parameters) -> anyhow::Result<ir::Project> {
 }
 
 pub struct Parameters<'a> {
-    pub compose_file: &'a path::Path,
-    pub project_folder: Option<path::PathBuf>,
+    pub compose_file: &'a str,
+    pub project_folder: Option<String>,
     pub project_name: Option<String>,
 }
 
@@ -157,7 +158,7 @@ mod tests {
         fs::write(&file, "")?;
 
         assert!(go(Parameters {
-            compose_file: file.as_ref(),
+            compose_file: &file.as_ref().to_string_lossy(),
             project_folder: None,
             project_name: None,
         })
@@ -173,7 +174,7 @@ mod tests {
 
         assert_eq!(
             go(Parameters {
-                compose_file: file.as_ref(),
+                compose_file: &file.as_ref().to_string_lossy(),
                 project_folder: None,
                 project_name: None,
             })?,
@@ -216,7 +217,7 @@ mod tests {
 
         assert_eq!(
             go(Parameters {
-                compose_file: file.as_ref(),
+                compose_file: &file.as_ref().to_string_lossy(),
                 project_folder: None,
                 project_name: Some("my_project".into()),
             })?,

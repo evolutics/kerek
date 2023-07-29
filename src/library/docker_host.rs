@@ -16,6 +16,7 @@ pub struct Host {
 pub enum Scheme {
     Other,
     Ssh,
+    Unix,
 }
 
 pub fn get(url_override: Option<String>) -> anyhow::Result<Host> {
@@ -27,10 +28,10 @@ pub fn get(url_override: Option<String>) -> anyhow::Result<Host> {
     Ok(Host {
         hostname: url.host_str().unwrap_or("").into(),
         port: url.port(),
-        scheme: if url.scheme() == "ssh" {
-            Scheme::Ssh
-        } else {
-            Scheme::Other
+        scheme: match url.scheme() {
+            "ssh" => Scheme::Ssh,
+            "unix" => Scheme::Unix,
+            _ => Scheme::Other,
         },
         url: effective_url,
         user: (!url.username().is_empty()).then(|| url.username().into()),
@@ -115,14 +116,29 @@ mod tests {
         }
 
         #[test]
-        fn handles_other_url() -> anyhow::Result<()> {
+        fn handles_unix_url() -> anyhow::Result<()> {
             assert_eq!(
                 get(Some("unix:///tmp/a.sock".into()))?,
                 Host {
                     hostname: "".into(),
                     port: None,
-                    scheme: Scheme::Other,
+                    scheme: Scheme::Unix,
                     url: "unix:///tmp/a.sock".into(),
+                    user: None,
+                },
+            );
+            Ok(())
+        }
+
+        #[test]
+        fn handles_other_url() -> anyhow::Result<()> {
+            assert_eq!(
+                get(Some("tcp://example.com".into()))?,
+                Host {
+                    hostname: "example.com".into(),
+                    port: None,
+                    scheme: Scheme::Other,
+                    url: "tcp://example.com".into(),
                     user: None,
                 },
             );

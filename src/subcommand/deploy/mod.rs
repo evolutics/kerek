@@ -17,8 +17,8 @@ pub fn go(in_: In) -> anyhow::Result<()> {
     })?;
 
     match docker_host.scheme {
-        docker_host::Scheme::Other => deploy_locally::go(&project),
         docker_host::Scheme::Ssh => deploy_remotely(&project, &docker_host),
+        _ => deploy_locally::go(&project),
     }
 }
 

@@ -23,13 +23,10 @@ pub fn get(url_override: Option<String>) -> anyhow::Result<Host> {
         .with_context(|| format!("Unable to parse Docker host URL {effective_url:?}"))?;
 
     Ok(Host {
-        ssh: (url.scheme() == "ssh").then(|| {
-            let username = url.username();
-            Ssh {
-                hostname: url.host_str().unwrap_or("").into(),
-                port: url.port(),
-                user: (!username.is_empty()).then(|| username.into()),
-            }
+        ssh: (url.scheme() == "ssh").then(|| Ssh {
+            hostname: url.host_str().unwrap_or("").into(),
+            port: url.port(),
+            user: (!url.username().is_empty()).then(|| url.username().into()),
         }),
         url: effective_url,
     })

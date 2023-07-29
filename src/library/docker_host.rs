@@ -5,15 +5,17 @@ use std::process;
 
 #[derive(Debug, PartialEq)]
 pub struct Host {
-    pub ssh: Option<Ssh>,
+    pub hostname: String,
+    pub port: Option<u16>,
+    pub scheme: Scheme,
     pub url: String,
+    pub user: Option<String>,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Ssh {
-    pub hostname: String,
-    pub port: Option<u16>,
-    pub user: Option<String>,
+pub enum Scheme {
+    Other,
+    Ssh,
 }
 
 pub fn get(url_override: Option<String>) -> anyhow::Result<Host> {
@@ -23,12 +25,15 @@ pub fn get(url_override: Option<String>) -> anyhow::Result<Host> {
         .with_context(|| format!("Unable to parse Docker host URL {effective_url:?}"))?;
 
     Ok(Host {
-        ssh: (url.scheme() == "ssh").then(|| Ssh {
-            hostname: url.host_str().unwrap_or("").into(),
-            port: url.port(),
-            user: (!url.username().is_empty()).then(|| url.username().into()),
-        }),
+        hostname: url.host_str().unwrap_or("").into(),
+        port: url.port(),
+        scheme: if url.scheme() == "ssh" {
+            Scheme::Ssh
+        } else {
+            Scheme::Other
+        },
         url: effective_url,
+        user: (!url.username().is_empty()).then(|| url.username().into()),
     })
 }
 
@@ -99,12 +104,11 @@ mod tests {
             assert_eq!(
                 get(Some("ssh://abc@example.com:123".into()))?,
                 Host {
-                    ssh: Some(Ssh {
-                        hostname: "example.com".into(),
-                        port: Some(123),
-                        user: Some("abc".into()),
-                    }),
+                    hostname: "example.com".into(),
+                    port: Some(123),
+                    scheme: Scheme::Ssh,
                     url: "ssh://abc@example.com:123".into(),
+                    user: Some("abc".into()),
                 },
             );
             Ok(())
@@ -115,8 +119,11 @@ mod tests {
             assert_eq!(
                 get(Some("unix:///tmp/a.sock".into()))?,
                 Host {
-                    ssh: None,
+                    hostname: "".into(),
+                    port: None,
+                    scheme: Scheme::Other,
                     url: "unix:///tmp/a.sock".into(),
+                    user: None,
                 },
             );
             Ok(())

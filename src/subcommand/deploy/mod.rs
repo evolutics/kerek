@@ -16,9 +16,9 @@ pub fn go(in_: In) -> anyhow::Result<()> {
         project_name: in_.project_name,
     })?;
 
-    match docker_host.ssh {
-        None => deploy_locally::go(&project),
-        Some(ssh) => deploy_remotely(&project, &ssh),
+    match docker_host.scheme {
+        docker_host::Scheme::Other => deploy_locally::go(&project),
+        docker_host::Scheme::Ssh => deploy_remotely(&project, &docker_host),
     }
 }
 
@@ -29,13 +29,16 @@ pub struct In {
     pub project_name: Option<String>,
 }
 
-fn deploy_remotely(project: &compose::Project, ssh: &docker_host::Ssh) -> anyhow::Result<()> {
+fn deploy_remotely(
+    project: &compose::Project,
+    docker_host: &docker_host::Host,
+) -> anyhow::Result<()> {
     eprintln!("Assembling artifacts.");
     assemble_artifacts(project)?;
     eprintln!("Synchronizing artifacts.");
-    synchronize_artifacts(project, ssh)?;
+    synchronize_artifacts(project, docker_host)?;
     eprintln!("Deploying on remote.");
-    run_deploy_on_remote(project, ssh)
+    run_deploy_on_remote(project, docker_host)
 }
 
 fn assemble_artifacts(project: &compose::Project) -> anyhow::Result<()> {
@@ -44,16 +47,19 @@ fn assemble_artifacts(project: &compose::Project) -> anyhow::Result<()> {
     fs::write(&file, contents).with_context(|| format!("Unable to write Compose file to {file:?}"))
 }
 
-fn synchronize_artifacts(project: &compose::Project, ssh: &docker_host::Ssh) -> anyhow::Result<()> {
+fn synchronize_artifacts(
+    project: &compose::Project,
+    docker_host: &docker_host::Host,
+) -> anyhow::Result<()> {
     let local_workbench = &project.x_wheelsticks.local_workbench;
     let source = format!("{local_workbench}/");
 
-    let optional_user = ssh
+    let optional_user = docker_host
         .user
         .as_ref()
         .map(|user| format!("{user}@"))
         .unwrap_or_default();
-    let host = &ssh.hostname;
+    let host = &docker_host.hostname;
     let remote_workbench = &project.x_wheelsticks.remote_workbench;
     let destination = format!("{optional_user}{host}:{remote_workbench}");
 
@@ -61,7 +67,8 @@ fn synchronize_artifacts(project: &compose::Project, ssh: &docker_host::Ssh) -> 
         process::Command::new("rsync")
             .args(["--archive", "--delete"])
             .args(
-                ssh.port
+                docker_host
+                    .port
                     .iter()
                     .flat_map(|port| ["--rsh".into(), format!("ssh -p {port:?}")]),
             )
@@ -70,14 +77,20 @@ fn synchronize_artifacts(project: &compose::Project, ssh: &docker_host::Ssh) -> 
     )
 }
 
-fn run_deploy_on_remote(project: &compose::Project, ssh: &docker_host::Ssh) -> anyhow::Result<()> {
-    let optional_user = ssh
+fn run_deploy_on_remote(
+    project: &compose::Project,
+    docker_host: &docker_host::Host,
+) -> anyhow::Result<()> {
+    let optional_user = docker_host
         .user
         .as_ref()
         .map(|user| format!("{user}@"))
         .unwrap_or_default();
-    let host = &ssh.hostname;
-    let optional_port = ssh.port.map(|port| format!(":{port}")).unwrap_or_default();
+    let host = &docker_host.hostname;
+    let optional_port = docker_host
+        .port
+        .map(|port| format!(":{port}"))
+        .unwrap_or_default();
     let destination = format!("ssh://{optional_user}{host}{optional_port}");
 
     command::status_ok(

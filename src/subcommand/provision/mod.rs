@@ -8,13 +8,13 @@ use std::process;
 
 pub fn go(in_: In) -> anyhow::Result<()> {
     let docker_host = docker_host::get(in_.docker_host)?;
-    let ssh = docker_host.ssh.ok_or_else(|| {
+    if docker_host.scheme != docker_host::Scheme::Ssh {
         let url = docker_host.url;
-        anyhow::anyhow!(
+        anyhow::bail!(
             "Docker host can only be provisioned via SSH \
             but URL is {url:?}"
         )
-    })?;
+    }
 
     let playbook = tempfile::NamedTempFile::new()?;
     fs::write(&playbook, include_str!("playbook.yaml"))
@@ -23,7 +23,7 @@ pub fn go(in_: In) -> anyhow::Result<()> {
     fs::write(&provision_test, include_str!("provision_test.sh"))
         .context("Unable to write file \"provision_test.sh\"")?;
 
-    let ssh_host = &ssh.hostname;
+    let ssh_host = &docker_host.hostname;
 
     command::status_ok(
         process::Command::new("ansible-playbook")
@@ -39,11 +39,12 @@ pub fn go(in_: In) -> anyhow::Result<()> {
                 "--inventory",
                 &format!(",{ssh_host}"),
             ])
-            .args(ssh.user.iter().flat_map(|user| ["--user", user]))
+            .args(docker_host.user.iter().flat_map(|user| ["--user", user]))
             .arg("--")
             .arg(playbook.as_ref())
             .envs(
-                ssh.port
+                docker_host
+                    .port
                     .iter()
                     .flat_map(|port| [("ANSIBLE_REMOTE_PORT", port.to_string())]),
             ),

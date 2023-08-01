@@ -11,7 +11,7 @@ reset_vm() {
 }
 
 main() {
-  export PATH="custom_bin:${PATH}"
+  export PATH="${PWD}/example/custom_bin:${PATH}"
   export WHEELSTICKS_VM_IP_ADDRESS='192.168.60.97'
   local -r deploy_user='wheelsticks'
   local -r ssh_host='example'

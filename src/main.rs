@@ -30,21 +30,21 @@ fn main() -> anyhow::Result<()> {
                     project_folder,
                     project_name,
                 },
-            docker_host,
+            docker_host: DockerHost { host },
         } => deploy::go(deploy::In {
             compose_file,
-            docker_host: docker_host.host,
+            docker_host: host,
             project_folder,
             project_name,
         }),
 
         Subcommand::Provision {
             deploy_user,
-            docker_host,
+            docker_host: DockerHost { host },
             upgrade_packages,
         } => provision::go(provision::In {
             deploy_user,
-            docker_host: docker_host.host,
+            docker_host: host,
             upgrade_packages,
         }),
     }

@@ -31,9 +31,11 @@ fn main() -> anyhow::Result<()> {
                     project_name,
                 },
             docker_host: DockerHost { host },
+            image_source_host,
         } => deploy::go(deploy::In {
             compose_file,
             docker_host: host,
+            image_source_host,
             project_folder,
             project_name,
         }),
@@ -69,6 +71,9 @@ enum Subcommand {
 
         #[command(flatten)]
         docker_host: DockerHost,
+
+        #[arg(long)]
+        image_source_host: Option<String>,
     },
     Provision {
         #[arg(default_value = "wheelsticks", long)]

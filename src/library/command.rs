@@ -103,6 +103,7 @@ pub fn stdout_raw(command: &mut process::Command) -> anyhow::Result<Vec<u8>> {
     })
 }
 
+#[allow(dead_code)]
 pub fn stdout_utf8(command: &mut process::Command) -> anyhow::Result<String> {
     go(command, process::Command::output, |output| {
         if output.status.success() {

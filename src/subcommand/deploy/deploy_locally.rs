@@ -11,7 +11,7 @@ use std::thread;
 use std::time;
 
 pub fn go(project: &compose::Project) -> anyhow::Result<()> {
-    let target_image_ids = load_target_images(project)?;
+    let target_image_ids = get_target_images(project)?;
     let images = get_images()?;
 
     let actual_images = images
@@ -72,30 +72,28 @@ enum Operator {
     Remove,
 }
 
-fn load_target_images(project: &compose::Project) -> anyhow::Result<collections::HashSet<String>> {
-    let remote_workbench = &project.x_wheelsticks.remote_workbench;
-    let image_files = fs::read_dir(remote_workbench)?
-        .map(|result| result.map(|entry| entry.path()))
-        .collect::<Result<Vec<_>, _>>()?
-        .into_iter()
-        .filter(|path| path.extension() == Some("tar".as_ref()))
-        .collect::<collections::BTreeSet<_>>();
-    for image_file in image_files.iter() {
-        eprintln!("Loading image file {image_file:?}.");
-        command::status_ok(
-            process::Command::new("podman")
-                .args(["load", "--input"])
-                .arg(image_file),
-        )?;
-    }
-    Ok(image_files
-        .iter()
-        .flat_map(|image_file| {
-            image_file
-                .file_stem()
-                .map(|image_id| image_id.to_string_lossy().into())
-        })
-        .collect())
+fn get_target_images(project: &compose::Project) -> anyhow::Result<collections::HashSet<String>> {
+    let project_name = &project.name;
+
+    let image_ids = command::stdout_jsons(
+        process::Command::new("podman")
+            .args([
+                "inspect",
+                "--format",
+                "{{range .}}{{json .ID}}{{end}}",
+                "--type",
+                "image",
+                "--",
+            ])
+            .args(
+                project
+                    .services
+                    .keys()
+                    .map(|service| format!("{project_name}-{service}")),
+            ),
+    )?;
+
+    Ok(image_ids.into_iter().collect())
 }
 
 fn get_images() -> anyhow::Result<collections::HashSet<Image>> {

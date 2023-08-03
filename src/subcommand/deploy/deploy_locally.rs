@@ -99,9 +99,9 @@ fn load_target_images(project: &compose::Project) -> anyhow::Result<collections:
 }
 
 fn get_images() -> anyhow::Result<collections::HashSet<Image>> {
-    let images = serde_json::from_slice::<Vec<_>>(&command::stdout_raw(
+    let images = command::stdout_json::<Vec<_>>(
         process::Command::new("podman").args(["images", "--format", "json"]),
-    )?)?;
+    )?;
     Ok(images.into_iter().map(parse_image_metadata).collect())
 }
 

@@ -92,6 +92,7 @@ pub fn stdout_jsons<T: de::DeserializeOwned>(
     })
 }
 
+#[allow(dead_code)]
 pub fn stdout_raw(command: &mut process::Command) -> anyhow::Result<Vec<u8>> {
     go(command, process::Command::output, |output| {
         if output.status.success() {

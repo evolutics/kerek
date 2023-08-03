@@ -2,7 +2,6 @@ mod library;
 mod subcommand;
 
 use clap::Parser;
-use subcommand::build;
 use subcommand::deploy;
 use subcommand::provision;
 
@@ -10,19 +9,6 @@ fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.subcommand {
-        Subcommand::Build {
-            compose:
-                Compose {
-                    compose_file,
-                    project_folder,
-                    project_name,
-                },
-        } => build::go(build::In {
-            compose_file,
-            project_folder,
-            project_name,
-        }),
-
         Subcommand::Deploy {
             compose:
                 Compose {
@@ -61,10 +47,6 @@ struct Cli {
 
 #[derive(clap::Subcommand)]
 enum Subcommand {
-    Build {
-        #[command(flatten)]
-        compose: Compose,
-    },
     Deploy {
         #[command(flatten)]
         compose: Compose,

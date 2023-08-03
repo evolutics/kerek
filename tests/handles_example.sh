@@ -28,7 +28,7 @@ main() {
 
   "${WHEELSTICKS}" provision --deploy-user "${deploy_user}" \
     --host "ssh://${ssh_host}"
-  "${WHEELSTICKS}" build
+  docker compose build
   "${WHEELSTICKS}" deploy --host "ssh://${deploy_user}@${ssh_host}" \
     --image-source-host "${DOCKER_HOST}"
 

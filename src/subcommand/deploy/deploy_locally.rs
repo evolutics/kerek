@@ -11,19 +11,19 @@ use std::thread;
 use std::time;
 
 pub fn go(project: &compose::Project) -> anyhow::Result<()> {
-    let target_image_ids = get_target_images(project)?;
+    let desired_image_ids = get_desired_images(project)?;
     let images = get_images()?;
 
     let actual_images = images
         .iter()
         .filter(|image| image.container_count != 0)
         .collect();
-    let target_images = images
+    let desired_images = images
         .iter()
-        .filter(|image| target_image_ids.contains(&image.image_id))
+        .filter(|image| desired_image_ids.contains(&image.image_id))
         .collect();
 
-    let changes = plan_changes(actual_images, target_images);
+    let changes = plan_changes(actual_images, desired_images);
 
     for change in changes {
         apply_change(project, &change)?;
@@ -72,7 +72,7 @@ enum Operator {
     Remove,
 }
 
-fn get_target_images(project: &compose::Project) -> anyhow::Result<collections::HashSet<String>> {
+fn get_desired_images(project: &compose::Project) -> anyhow::Result<collections::HashSet<String>> {
     let project_name = &project.name;
 
     let image_ids = command::stdout_jsons(
@@ -128,11 +128,11 @@ fn csv_fields(optional_string: Option<&String>) -> Vec<String> {
 
 fn plan_changes(
     actual_images: collections::HashSet<&Image>,
-    target_images: collections::HashSet<&Image>,
+    desired_images: collections::HashSet<&Image>,
 ) -> Vec<ContainerChange> {
     let mut changes = [
         (Operator::Remove, actual_images),
-        (Operator::Add, target_images),
+        (Operator::Add, desired_images),
     ]
     .iter()
     .flat_map(|(operator, images)| {

@@ -78,11 +78,10 @@ fn get_desired_images(project: &compose::Project) -> anyhow::Result<collections:
     let image_ids = command::stdout_jsons(
         process::Command::new("podman")
             .args([
+                "image",
                 "inspect",
                 "--format",
                 "{{range .}}{{json .ID}}{{end}}",
-                "--type",
-                "image",
                 "--",
             ])
             .args(

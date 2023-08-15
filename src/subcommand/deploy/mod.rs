@@ -17,7 +17,7 @@ pub fn go(in_: In) -> anyhow::Result<()> {
     })?;
 
     match docker_host.scheme {
-        docker_host::Scheme::Ssh => deploy_remotely(&project, &docker_host, &in_.image_source_host),
+        docker_host::Scheme::Ssh => deploy_remotely(&project, &docker_host),
         _ => deploy_locally::go(&project),
     }
 }
@@ -25,7 +25,6 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 pub struct In {
     pub compose_file: String,
     pub docker_host: Option<String>,
-    pub image_source_host: Option<String>,
     pub project_folder: Option<String>,
     pub project_name: Option<String>,
 }
@@ -33,16 +32,11 @@ pub struct In {
 fn deploy_remotely(
     project: &compose::Project,
     docker_host: &docker_host::Host,
-    image_source_host: &Option<String>,
 ) -> anyhow::Result<()> {
     eprintln!("Assembling artifacts.");
     assemble_artifacts(project)?;
     eprintln!("Synchronizing artifacts.");
     synchronize_artifacts(project, docker_host)?;
-    if let Some(image_source_host) = image_source_host {
-        eprintln!("Transferring images.");
-        transfer_images(project, docker_host, image_source_host)?;
-    }
     eprintln!("Deploying on remote.");
     run_deploy_on_remote(project, docker_host)
 }
@@ -83,37 +77,6 @@ fn synchronize_artifacts(
             .arg("--")
             .args([source, destination]),
     )
-}
-
-fn transfer_images(
-    project: &compose::Project,
-    docker_host: &docker_host::Host,
-    image_source_host: &str,
-) -> anyhow::Result<()> {
-    let project_name = &project.name;
-
-    for service in project.services.keys() {
-        let image_name = format!("{project_name}-{service}");
-
-        let save_child = process::Command::new("docker")
-            .args(["--host", image_source_host, "save", "--", &image_name])
-            .stdout(process::Stdio::piped())
-            .spawn()
-            .with_context(|| format!("Unable to save image {image_name:?}"))?;
-
-        let save_stdout = save_child
-            .stdout
-            .ok_or_else(|| anyhow::anyhow!("Unable to open stdout for image {image_name:?}"))?;
-
-        command::status_ok(
-            process::Command::new("docker")
-                .args(["--host", &docker_host.url, "load"])
-                .stdin(save_stdout),
-        )
-        .with_context(|| format!("Unable to load image {image_name:?}"))?;
-    }
-
-    Ok(())
 }
 
 fn run_deploy_on_remote(

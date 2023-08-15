@@ -28,9 +28,12 @@ main() {
 
   "${WHEELSTICKS}" provision --deploy-user "${deploy_user}" \
     --host "ssh://${ssh_host}"
+
   docker compose build
-  "${WHEELSTICKS}" deploy --host "ssh://${deploy_user}@${ssh_host}" \
-    --image-source-host "${DOCKER_HOST}"
+  docker --host "${DOCKER_HOST}" save example-web \
+    | docker --host "ssh://${deploy_user}@${ssh_host}" load
+
+  "${WHEELSTICKS}" deploy --host "ssh://${deploy_user}@${ssh_host}"
 
   curl --fail --max-time 3 --retry 99 --retry-connrefused --retry-max-time 15 \
     --show-error "http://${WHEELSTICKS_VM_IP_ADDRESS}"

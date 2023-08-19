@@ -5,6 +5,7 @@ use std::process;
 use std::time;
 use wait_timeout::ChildExt;
 
+#[allow(dead_code)]
 pub fn status_bit(command: &mut process::Command) -> anyhow::Result<bool> {
     go(command, process::Command::status, |status| {
         match status.code() {
@@ -25,6 +26,7 @@ pub fn status_ok(command: &mut process::Command) -> anyhow::Result<()> {
     })
 }
 
+#[allow(dead_code)]
 pub fn status_within_time(
     command: &mut process::Command,
     timeout: time::Duration,
@@ -103,7 +105,6 @@ pub fn stdout_raw(command: &mut process::Command) -> anyhow::Result<Vec<u8>> {
     })
 }
 
-#[allow(dead_code)]
 pub fn stdout_utf8(command: &mut process::Command) -> anyhow::Result<String> {
     go(command, process::Command::output, |output| {
         if output.status.success() {

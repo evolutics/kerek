@@ -1,7 +1,6 @@
 use crate::library::command;
 use crate::library::docker_host;
 use anyhow::Context;
-use std::env;
 use std::fs;
 use std::path;
 use std::process;
@@ -31,8 +30,6 @@ pub fn go(in_: In) -> anyhow::Result<()> {
                 "--extra-vars",
                 &serde_json::to_string(&PlaybookVariables {
                     deploy_user: &in_.deploy_user,
-                    own_executable: &env::current_exe()
-                        .context("Unable to get current executable")?,
                     provision_test: provision_test.as_ref(),
                     upgrade_packages: in_.upgrade_packages,
                 })?,
@@ -60,7 +57,6 @@ pub struct In {
 #[derive(serde::Serialize)]
 struct PlaybookVariables<'a> {
     deploy_user: &'a str,
-    own_executable: &'a path::Path,
     provision_test: &'a path::Path,
     upgrade_packages: bool,
 }

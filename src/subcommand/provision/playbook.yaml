@@ -70,12 +70,6 @@
             name: net.ipv4.ip_unprivileged_port_start
             value: "80"
 
-        - name: Manage container orchestrator
-          ansible.builtin.copy:
-            dest: /usr/local/bin/wheelsticks
-            mode: u=rwx,go=rx
-            src: "{{ own_executable }}"
-
     - name: Provision Podman
       become: true
       block:

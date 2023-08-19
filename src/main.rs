@@ -1,3 +1,4 @@
+// TODO: Flatten module tree.
 mod library;
 mod subcommand;
 
@@ -45,6 +46,15 @@ struct Cli {
 
 #[derive(clap::Subcommand)]
 enum Subcommand {
+    // TODO: Support collecting garbage with `system prune --all --force --volumes`.
+    // TODO: Support dry run.
+    // TODO: Support forced update.
+    // TODO: Support limiting to given service names.
+    // TODO: Support maintaining systemd units.
+    // TODO: Support more Docker Compose `up` arguments, e.g. `--build`.
+    // TODO: Support more Docker Compose standard arguments, e.g. `--env-file`.
+    // TODO: Support more Docker standard arguments, e.g. `--context`.
+    // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
     Deploy {
         #[command(flatten)]
         compose: Compose,
@@ -52,6 +62,7 @@ enum Subcommand {
         #[command(flatten)]
         docker_host: DockerHost,
     },
+    // TODO: Extract as own project with Ansible playbook for independence.
     Provision {
         #[arg(default_value = "wheelsticks", long)]
         deploy_user: String,
@@ -66,7 +77,7 @@ enum Subcommand {
 
 #[derive(clap::Args)]
 struct Compose {
-    #[arg(default_value = "compose.yaml", long, short = 'f')]
+    #[arg(default_value = "compose.yaml", long, short = 'f')] // TODO: Remove default.
     compose_file: String,
     #[arg(long = "project-directory")]
     project_folder: Option<String>,

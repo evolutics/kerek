@@ -1,7 +1,0 @@
-name: my_project
-services: {}
-x-wheelsticks:
-  local_workbench: .wheelsticks
-  remote_workbench: .wheelsticks
-  schema_mode: default
-  systemd_unit_folder: .config/systemd/user

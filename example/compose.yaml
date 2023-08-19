@@ -2,5 +2,7 @@ name: example
 services:
   web:
     build: "."
+    ports:
+      - "80:8080"
 x-wheelsticks:
   schema_mode: strict

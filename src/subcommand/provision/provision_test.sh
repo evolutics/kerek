@@ -9,7 +9,6 @@ set -o xtrace
 test_container_platform() {
   [[ "$(loginctl -P Linger show-user "${WHEELSTICKS_DEPLOY_USER}")" == "yes" ]]
   [[ "$(sysctl --values net.ipv4.ip_unprivileged_port_start)" == 80 ]]
-  wheelsticks --version
 }
 
 test_firewall() {

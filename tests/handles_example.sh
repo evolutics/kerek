@@ -26,8 +26,11 @@ main() {
   # shellcheck disable=SC2064
   trap "kill -SIGINT $!" EXIT
 
-  "${WHEELSTICKS}" provision --deploy-user "${deploy_user}" \
-    --host "ssh://${ssh_host}"
+  ansible-playbook --extra-vars "{ \
+      \"deploy_user\": \"${deploy_user}\", \
+      \"provision_test\": \"provision_test.sh\", \
+      \"upgrade_packages\": false \
+    }" --inventory ",${ssh_host}" provision/playbook.yaml
 
   docker compose build
   docker --host "${DOCKER_HOST}" save example-web \

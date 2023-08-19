@@ -4,7 +4,6 @@ mod subcommand;
 
 use clap::Parser;
 use subcommand::deploy;
-use subcommand::provision;
 
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
@@ -23,16 +22,6 @@ fn main() -> anyhow::Result<()> {
             docker_host: host,
             project_folder,
             project_name,
-        }),
-
-        Subcommand::Provision {
-            deploy_user,
-            docker_host: DockerHost { host },
-            upgrade_packages,
-        } => provision::go(provision::In {
-            deploy_user,
-            docker_host: host,
-            upgrade_packages,
         }),
     }
 }
@@ -61,17 +50,6 @@ enum Subcommand {
 
         #[command(flatten)]
         docker_host: DockerHost,
-    },
-    // TODO: Extract as own project with Ansible playbook for independence.
-    Provision {
-        #[arg(default_value = "wheelsticks", long)]
-        deploy_user: String,
-
-        #[command(flatten)]
-        docker_host: DockerHost,
-
-        #[arg(long)]
-        upgrade_packages: bool,
     },
 }
 

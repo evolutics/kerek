@@ -60,22 +60,34 @@ fn summarize_change(change: &model::ServiceContainerChange) -> String {
             service_config_hash,
             service_name,
         } => {
+            let container = summarize_container(container_id);
             let service = summarize_service(service_name, service_config_hash);
-            format!("keep the container {container_id:?} of {service}")
+            format!("keep the {container} of {service}")
         }
         model::ServiceContainerChange::Remove {
             container_id,
             service_config_hash,
             service_name,
         } => {
+            let container = summarize_container(container_id);
             let service = summarize_service(service_name, service_config_hash);
-            format!("remove the container {container_id:?} of {service}")
+            format!("remove the {container} of {service}")
         }
     }
 }
 
+fn summarize_container(container_id: &str) -> String {
+    let container_id = summarize_hash(container_id);
+    format!("container {container_id}")
+}
+
+fn summarize_hash(hash: &str) -> &str {
+    &hash[..8]
+}
+
 fn summarize_service(service_name: &str, service_config_hash: &str) -> String {
-    format!("service {service_name:?} with config hash {service_config_hash:?}")
+    let service_config_hash = summarize_hash(service_config_hash);
+    format!("service {service_name:?} with config hash {service_config_hash}")
 }
 
 fn apply_change<'a>(

@@ -4,7 +4,7 @@ mod get_desired_state;
 mod model;
 mod plan_changes;
 
-use crate::library::docker_host;
+use super::docker_host;
 
 pub fn go(in_: In) -> anyhow::Result<()> {
     // TODO: Handle stopped containers.

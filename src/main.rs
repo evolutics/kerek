@@ -1,9 +1,8 @@
-// TODO: Flatten module tree.
-mod library;
-mod subcommand;
+mod command;
+mod deploy;
+mod docker_host;
 
 use clap::Parser;
-use subcommand::deploy;
 
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();

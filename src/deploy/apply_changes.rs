@@ -3,6 +3,8 @@ use crate::command;
 use anyhow::Context;
 use std::collections;
 use std::process;
+use std::thread;
+use std::time;
 
 pub fn go(in_: In) -> anyhow::Result<()> {
     let mut state = new_rolling_state(in_.actual_containers);
@@ -118,9 +120,12 @@ fn add_container<'a>(
         &format!("{service_name}={container_count}"),
         "--",
         service_name,
-    ]))
+    ]))?;
 
     // TODO: Wait until healthy, e.g. using "--wait".
+    thread::sleep(time::Duration::from_secs(2));
+
+    Ok(())
 }
 
 fn remove_container<'a>(

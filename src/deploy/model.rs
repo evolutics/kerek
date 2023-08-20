@@ -23,7 +23,6 @@ pub struct DesiredServiceDefinition {
 }
 
 pub enum OperationOrder {
-    #[allow(dead_code)]
     StartFirst,
     StopFirst,
 }

@@ -37,6 +37,19 @@ struct ServiceDefinition {
 #[derive(serde::Deserialize)]
 struct Deploy {
     replicas: Option<u16>,
+    update_config: Option<UpdateConfig>,
+}
+
+#[derive(serde::Deserialize)]
+struct UpdateConfig {
+    order: Option<OperationOrder>,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum OperationOrder {
+    StartFirst,
+    StopFirst,
 }
 
 fn get_compose_app_definition(docker_host: &str) -> anyhow::Result<ComposeAppDefinition> {
@@ -78,10 +91,18 @@ fn convert_service_definition(
     model::DesiredServiceDefinition {
         replica_count: service_definition
             .deploy
+            .as_ref()
             .and_then(|deploy| deploy.replicas)
             .unwrap_or(1),
         service_config_hash,
-        // TODO: Support `services.*.deploy.update_config.order`.
-        update_order: model::OperationOrder::StopFirst,
+        update_order: match service_definition
+            .deploy
+            .and_then(|deploy| deploy.update_config)
+            .and_then(|update_config| update_config.order)
+            .unwrap_or(OperationOrder::StopFirst)
+        {
+            OperationOrder::StartFirst => model::OperationOrder::StartFirst,
+            OperationOrder::StopFirst => model::OperationOrder::StopFirst,
+        },
     }
 }

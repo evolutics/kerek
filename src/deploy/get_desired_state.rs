@@ -1,11 +1,11 @@
 use super::model;
 use crate::command;
+use crate::docker;
 use std::collections;
-use std::process;
 
-pub fn go(docker_host: &str) -> anyhow::Result<model::DesiredState> {
-    let compose_app_definition = get_compose_app_definition(docker_host)?;
-    let service_config_hashes = get_service_config_hashes(docker_host)?;
+pub fn go(docker_cli: &docker::Cli) -> anyhow::Result<model::DesiredState> {
+    let compose_app_definition = get_compose_app_definition(docker_cli)?;
+    let service_config_hashes = get_service_config_hashes(docker_cli)?;
 
     Ok(model::DesiredState {
         project_name: compose_app_definition.name,
@@ -52,28 +52,19 @@ pub enum OperationOrder {
     StopFirst,
 }
 
-fn get_compose_app_definition(docker_host: &str) -> anyhow::Result<ComposeAppDefinition> {
-    command::stdout_json(process::Command::new("docker").args([
-        "--host",
-        docker_host,
-        "compose",
-        "config",
-        "--format",
-        "json",
-    ]))
+fn get_compose_app_definition(docker_cli: &docker::Cli) -> anyhow::Result<ComposeAppDefinition> {
+    command::stdout_json(
+        docker_cli
+            .docker_compose()
+            .args(["config", "--format", "json"]),
+    )
 }
 
 fn get_service_config_hashes(
-    docker_host: &str,
+    docker_cli: &docker::Cli,
 ) -> anyhow::Result<collections::BTreeMap<String, String>> {
-    let service_hashes = command::stdout_utf8(process::Command::new("docker").args([
-        "--host",
-        docker_host,
-        "compose",
-        "config",
-        "--hash",
-        "*",
-    ]))?;
+    let service_hashes =
+        command::stdout_utf8(docker_cli.docker_compose().args(["config", "--hash", "*"]))?;
 
     Ok(service_hashes
         .lines()

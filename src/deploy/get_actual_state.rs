@@ -1,24 +1,19 @@
 use super::model;
 use crate::command;
+use crate::docker;
 use std::collections;
-use std::process;
 
-pub fn go(docker_host: &str) -> anyhow::Result<model::ActualContainers> {
-    let container_ids = command::stdout_utf8(process::Command::new("docker").args([
-        "--host",
-        docker_host,
-        "compose",
-        "ps",
-        "--quiet",
-    ]))?;
+pub fn go(docker_cli: &docker::Cli) -> anyhow::Result<model::ActualContainers> {
+    let container_ids = command::stdout_utf8(docker_cli.docker_compose().args(["ps", "--quiet"]))?;
     let container_ids = container_ids.lines().collect::<Vec<_>>();
 
     let containers = if container_ids.is_empty() {
         vec![]
     } else {
         command::stdout_json(
-            process::Command::new("docker")
-                .args(["--host", docker_host, "inspect", "--"])
+            docker_cli
+                .docker()
+                .args(["inspect", "--"])
                 .args(container_ids),
         )?
     };

@@ -1,6 +1,6 @@
 mod command;
 mod deploy;
-mod docker_host;
+mod docker;
 
 use clap::Parser;
 
@@ -18,7 +18,7 @@ fn main() -> anyhow::Result<()> {
             docker_host: DockerHost { host },
         } => deploy::go(deploy::In {
             compose_file,
-            docker_host: host,
+            docker_cli: docker::Cli::new(docker::In { docker_host: host }),
             project_folder,
             project_name,
         }),

@@ -1,8 +1,8 @@
 use super::model;
 use crate::command;
+use crate::docker;
 use anyhow::Context;
 use std::collections;
-use std::process;
 use std::thread;
 use std::time;
 
@@ -12,7 +12,7 @@ pub fn go(in_: In) -> anyhow::Result<()> {
     for change in in_.changes {
         let summary = summarize_change(change);
         eprintln!("Going to {summary}.");
-        apply_change(change, in_.docker_host, &mut state)
+        apply_change(change, in_.docker_cli, &mut state)
             .with_context(|| format!("Unable to {summary}"))?;
     }
 
@@ -23,7 +23,7 @@ pub struct In<'a> {
     pub actual_containers: &'a model::ActualContainers,
     pub changes: &'a [model::ServiceContainerChange],
     pub desired_state: &'a model::DesiredState,
-    pub docker_host: &'a str,
+    pub docker_cli: &'a docker::Cli,
 }
 
 struct RollingState<'a> {
@@ -92,12 +92,12 @@ fn summarize_service(service_name: &str, service_config_hash: &str) -> String {
 
 fn apply_change<'a>(
     change: &'a model::ServiceContainerChange,
-    docker_host: &str,
+    docker_cli: &docker::Cli,
     state: &mut RollingState<'a>,
 ) -> anyhow::Result<()> {
     match change {
         model::ServiceContainerChange::Add { service_name, .. } => {
-            add_container(service_name, docker_host, state)
+            add_container(service_name, docker_cli, state)
         }
 
         model::ServiceContainerChange::Keep { .. } => Ok(()),
@@ -106,13 +106,13 @@ fn apply_change<'a>(
             container_id,
             service_name,
             ..
-        } => remove_container(service_name, container_id, docker_host, state),
+        } => remove_container(service_name, container_id, docker_cli, state),
     }
 }
 
 fn add_container<'a>(
     service_name: &'a str,
-    docker_host: &str,
+    docker_cli: &docker::Cli,
     state: &mut RollingState<'a>,
 ) -> anyhow::Result<()> {
     let container_count = state
@@ -121,10 +121,7 @@ fn add_container<'a>(
         .and_modify(|count| *count += 1)
         .or_insert(1);
 
-    command::status_ok(process::Command::new("docker").args([
-        "--host",
-        docker_host,
-        "compose",
+    command::status_ok(docker_cli.docker_compose().args([
         "up",
         "--detach",
         "--no-recreate",
@@ -143,24 +140,12 @@ fn add_container<'a>(
 fn remove_container<'a>(
     service_name: &'a str,
     container_id: &str,
-    docker_host: &str,
+    docker_cli: &docker::Cli,
     state: &mut RollingState<'a>,
 ) -> anyhow::Result<()> {
-    command::status_ok(process::Command::new("docker").args([
-        "--host",
-        docker_host,
-        "stop",
-        "--",
-        container_id,
-    ]))?;
+    command::status_ok(docker_cli.docker().args(["stop", "--", container_id]))?;
 
-    command::status_ok(process::Command::new("docker").args([
-        "--host",
-        docker_host,
-        "rm",
-        "--",
-        container_id,
-    ]))?;
+    command::status_ok(docker_cli.docker().args(["rm", "--", container_id]))?;
 
     state
         .service_container_count

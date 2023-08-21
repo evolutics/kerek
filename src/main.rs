@@ -15,13 +15,13 @@ fn main() -> anyhow::Result<()> {
             compose_arguments:
                 ComposeArguments {
                     file,
-                    project_folder,
+                    project_directory,
                     project_name,
                 },
         } => deploy::go(deploy::In {
-            docker_cli: docker::Cli::new(docker::In { docker_host: host }),
+            docker_cli: docker::Cli::new(docker::In { host }),
             file,
-            project_folder,
+            project_directory,
             project_name,
         }),
     }
@@ -64,8 +64,8 @@ enum Subcommand {
 struct ComposeArguments {
     #[arg(long, short = 'f')]
     file: Vec<String>,
-    #[arg(long = "project-directory")]
-    project_folder: Option<String>,
+    #[arg(long)]
+    project_directory: Option<String>,
     #[arg(long, short = 'p')]
     project_name: Option<String>,
 }

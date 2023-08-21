@@ -21,7 +21,7 @@
     - name: Manage Podman APT package
       become: true
       ansible.builtin.apt:
-        pkg: podman
+        name: podman
 
     - name: Manage socket activation of Podman API service
       ansible.builtin.systemd:
@@ -33,6 +33,6 @@
     - name: Link Docker to Podman
       become: true
       ansible.builtin.file:
-        dest: /usr/local/bin/docker
+        path: /usr/local/bin/docker
         src: /usr/bin/podman
         state: link

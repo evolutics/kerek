@@ -2,7 +2,6 @@
   hosts: all
   vars:
     deploy_user:
-    own_executable:
     upgrade_packages:
 
   tasks:
@@ -141,7 +140,6 @@
 - name: Test provisioning
   hosts: all
   vars:
-    own_executable:
     provision_test:
   tasks:
     - name: Run script

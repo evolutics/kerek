@@ -1,6 +1,7 @@
 use std::process;
 
 pub struct Cli {
+    context: Option<String>,
     file: Vec<String>,
     host: Option<String>,
     project_directory: Option<String>,
@@ -8,6 +9,7 @@ pub struct Cli {
 }
 
 pub struct In {
+    pub context: Option<String>,
     pub file: Vec<String>,
     pub host: Option<String>,
     pub project_directory: Option<String>,
@@ -17,6 +19,7 @@ pub struct In {
 impl Cli {
     pub fn new(
         In {
+            context,
             file,
             host,
             project_directory,
@@ -24,6 +27,7 @@ impl Cli {
         }: In,
     ) -> Self {
         Cli {
+            context,
             file,
             host,
             project_directory,
@@ -33,9 +37,14 @@ impl Cli {
 
     pub fn docker(&self) -> process::Command {
         let mut command = process::Command::new("docker");
+
+        if let Some(context) = &self.context {
+            command.args(["--context", context]);
+        }
         if let Some(host) = &self.host {
             command.args(["--host", host]);
         }
+
         command
     }
 

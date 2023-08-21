@@ -6,7 +6,7 @@ use clap::Parser;
 
 fn main() -> anyhow::Result<()> {
     let Cli {
-        docker_arguments: DockerArguments { host },
+        docker_arguments: DockerArguments { context, host },
         subcommand,
     } = Cli::parse();
 
@@ -20,6 +20,7 @@ fn main() -> anyhow::Result<()> {
                 },
         } => deploy::go(deploy::In {
             docker_cli: docker::Cli::new(docker::In {
+                context,
                 file,
                 host,
                 project_directory,
@@ -41,6 +42,8 @@ struct Cli {
 
 #[derive(clap::Args)]
 struct DockerArguments {
+    #[arg(long, short = 'c')]
+    context: Option<String>,
     #[arg(long, short = 'H')]
     host: Option<String>,
 }

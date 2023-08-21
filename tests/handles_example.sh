@@ -29,7 +29,7 @@ main() {
   docker --host "${DOCKER_HOST}" save example-web \
     | docker --host "ssh://${ssh_host}" load
 
-  "${WHEELSTICKS}" deploy --host "ssh://${ssh_host}"
+  "${WHEELSTICKS}" --host "ssh://${ssh_host}" deploy
 
   curl --fail --max-time 3 --retry 99 --retry-connrefused --retry-max-time 15 \
     --show-error "http://${WHEELSTICKS_VM_IP_ADDRESS}"

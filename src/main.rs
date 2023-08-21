@@ -5,9 +5,12 @@ mod docker;
 use clap::Parser;
 
 fn main() -> anyhow::Result<()> {
-    let cli = Cli::parse();
+    let Cli {
+        docker_arguments: DockerArguments { host },
+        subcommand,
+    } = Cli::parse();
 
-    match cli.subcommand {
+    match subcommand {
         Subcommand::Deploy {
             compose_arguments:
                 ComposeArguments {
@@ -15,7 +18,6 @@ fn main() -> anyhow::Result<()> {
                     project_folder,
                     project_name,
                 },
-            docker_arguments: DockerArguments { host },
         } => deploy::go(deploy::In {
             compose_file,
             docker_cli: docker::Cli::new(docker::In { docker_host: host }),
@@ -28,8 +30,17 @@ fn main() -> anyhow::Result<()> {
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
+    #[command(flatten)]
+    docker_arguments: DockerArguments,
+
     #[command(subcommand)]
     subcommand: Subcommand,
+}
+
+#[derive(clap::Args)]
+struct DockerArguments {
+    #[arg(long, short = 'H')]
+    host: Option<String>,
 }
 
 #[derive(clap::Subcommand)]
@@ -46,9 +57,6 @@ enum Subcommand {
     Deploy {
         #[command(flatten)]
         compose_arguments: ComposeArguments,
-
-        #[command(flatten)]
-        docker_arguments: DockerArguments,
     },
 }
 
@@ -60,12 +68,6 @@ struct ComposeArguments {
     project_folder: Option<String>,
     #[arg(long, short = 'p')]
     project_name: Option<String>,
-}
-
-#[derive(clap::Args)]
-struct DockerArguments {
-    #[arg(long, short = 'H')]
-    host: Option<String>,
 }
 
 #[cfg(test)]

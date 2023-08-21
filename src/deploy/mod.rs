@@ -23,7 +23,7 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 
 pub struct In {
     pub docker_cli: docker::Cli,
-    pub file: Option<String>,           // TODO: Implement.
+    pub file: Vec<String>,              // TODO: Implement.
     pub project_folder: Option<String>, // TODO: Implement.
     pub project_name: Option<String>,   // TODO: Implement.
 }

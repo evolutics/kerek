@@ -63,7 +63,7 @@ enum Subcommand {
 #[derive(clap::Args)]
 struct ComposeArguments {
     #[arg(long, short = 'f')]
-    file: Option<String>,
+    file: Vec<String>,
     #[arg(long = "project-directory")]
     project_folder: Option<String>,
     #[arg(long, short = 'p')]

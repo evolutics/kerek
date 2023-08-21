@@ -19,10 +19,12 @@ fn main() -> anyhow::Result<()> {
                     project_name,
                 },
         } => deploy::go(deploy::In {
-            docker_cli: docker::Cli::new(docker::In { host }),
-            file,
-            project_directory,
-            project_name,
+            docker_cli: docker::Cli::new(docker::In {
+                file,
+                host,
+                project_directory,
+                project_name,
+            }),
         }),
     }
 }

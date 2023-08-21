@@ -62,8 +62,8 @@ enum Subcommand {
 
 #[derive(clap::Args)]
 struct ComposeArguments {
-    #[arg(default_value = "compose.yaml", long, short = 'f')] // TODO: Remove default.
-    file: String,
+    #[arg(long, short = 'f')]
+    file: Option<String>,
     #[arg(long = "project-directory")]
     project_folder: Option<String>,
     #[arg(long, short = 'p')]

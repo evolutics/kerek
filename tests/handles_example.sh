@@ -14,7 +14,6 @@ main() {
   export DOCKER_HOST="unix://${PWD}/podman.sock"
   export PATH="${PWD}/example/custom_bin:${PATH}"
   export WHEELSTICKS_VM_IP_ADDRESS='192.168.60.97'
-  local -r deploy_user='wheelsticks'
   local -r ssh_host='example'
 
   cd example
@@ -26,17 +25,11 @@ main() {
   # shellcheck disable=SC2064
   trap "kill -SIGINT $!" EXIT
 
-  ansible-playbook --extra-vars "{ \
-      \"deploy_user\": \"${deploy_user}\", \
-      \"provision_test\": \"provision_test.sh\", \
-      \"upgrade_packages\": false \
-    }" --inventory ",${ssh_host}" provision/playbook.yaml
-
   docker compose build
   docker --host "${DOCKER_HOST}" save example-web \
-    | docker --host "ssh://${deploy_user}@${ssh_host}" load
+    | docker --host "ssh://${ssh_host}" load
 
-  "${WHEELSTICKS}" deploy --host "ssh://${deploy_user}@${ssh_host}"
+  "${WHEELSTICKS}" deploy --host "ssh://${ssh_host}"
 
   curl --fail --max-time 3 --retry 99 --retry-connrefused --retry-max-time 15 \
     --show-error "http://${WHEELSTICKS_VM_IP_ADDRESS}"

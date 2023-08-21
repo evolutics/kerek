@@ -9,13 +9,13 @@ fn main() -> anyhow::Result<()> {
 
     match cli.subcommand {
         Subcommand::Deploy {
-            compose:
-                Compose {
+            compose_arguments:
+                ComposeArguments {
                     compose_file,
                     project_folder,
                     project_name,
                 },
-            docker_host: DockerHost { host },
+            docker_arguments: DockerArguments { host },
         } => deploy::go(deploy::In {
             compose_file,
             docker_cli: docker::Cli::new(docker::In { docker_host: host }),
@@ -45,15 +45,15 @@ enum Subcommand {
     // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
     Deploy {
         #[command(flatten)]
-        compose: Compose,
+        compose_arguments: ComposeArguments,
 
         #[command(flatten)]
-        docker_host: DockerHost,
+        docker_arguments: DockerArguments,
     },
 }
 
 #[derive(clap::Args)]
-struct Compose {
+struct ComposeArguments {
     #[arg(default_value = "compose.yaml", long, short = 'f')] // TODO: Remove default.
     compose_file: String,
     #[arg(long = "project-directory")]
@@ -63,7 +63,7 @@ struct Compose {
 }
 
 #[derive(clap::Args)]
-struct DockerHost {
+struct DockerArguments {
     #[arg(long, short = 'H')]
     host: Option<String>,
 }

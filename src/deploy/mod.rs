@@ -22,8 +22,8 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 }
 
 pub struct In {
-    pub compose_file: String, // TODO: Implement.
     pub docker_cli: docker::Cli,
+    pub file: String,                   // TODO: Implement.
     pub project_folder: Option<String>, // TODO: Implement.
     pub project_name: Option<String>,   // TODO: Implement.
 }

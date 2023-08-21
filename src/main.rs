@@ -14,13 +14,13 @@ fn main() -> anyhow::Result<()> {
         Subcommand::Deploy {
             compose_arguments:
                 ComposeArguments {
-                    compose_file,
+                    file,
                     project_folder,
                     project_name,
                 },
         } => deploy::go(deploy::In {
-            compose_file,
             docker_cli: docker::Cli::new(docker::In { docker_host: host }),
+            file,
             project_folder,
             project_name,
         }),
@@ -63,7 +63,7 @@ enum Subcommand {
 #[derive(clap::Args)]
 struct ComposeArguments {
     #[arg(default_value = "compose.yaml", long, short = 'f')] // TODO: Remove default.
-    compose_file: String,
+    file: String,
     #[arg(long = "project-directory")]
     project_folder: Option<String>,
     #[arg(long, short = 'p')]

@@ -35,34 +35,47 @@ impl Cli {
     pub fn docker(&self) -> process::Command {
         let mut command = process::Command::new("docker");
 
-        if let Some(config) = &self.docker_arguments.config {
+        let DockerArguments {
+            config,
+            context,
+            debug,
+            host,
+            log_level,
+            tls,
+            tlscacert,
+            tlscert,
+            tlskey,
+            tlsverify,
+        } = &self.docker_arguments;
+
+        if let Some(config) = config {
             command.args(["--config", config]);
         }
-        if let Some(context) = &self.docker_arguments.context {
+        if let Some(context) = context {
             command.args(["--context", context]);
         }
-        if self.docker_arguments.debug {
+        if *debug {
             command.arg("--debug");
         }
-        if let Some(host) = &self.docker_arguments.host {
+        if let Some(host) = host {
             command.args(["--host", host]);
         }
-        if let Some(log_level) = &self.docker_arguments.log_level {
+        if let Some(log_level) = log_level {
             command.args(["--log-level", log_level]);
         }
-        if self.docker_arguments.tls {
+        if *tls {
             command.arg("--tls");
         }
-        if let Some(tlscacert) = &self.docker_arguments.tlscacert {
+        if let Some(tlscacert) = tlscacert {
             command.args(["--tlscacert", tlscacert]);
         }
-        if let Some(tlscert) = &self.docker_arguments.tlscert {
+        if let Some(tlscert) = tlscert {
             command.args(["--tlscert", tlscert]);
         }
-        if let Some(tlskey) = &self.docker_arguments.tlskey {
+        if let Some(tlskey) = tlskey {
             command.args(["--tlskey", tlskey]);
         }
-        if self.docker_arguments.tlsverify {
+        if *tlsverify {
             command.arg("--tlsverify");
         }
 
@@ -73,13 +86,19 @@ impl Cli {
         let mut command = self.docker();
         command.arg("compose");
 
-        for file in &self.compose_arguments.file {
+        let ComposeArguments {
+            file,
+            project_directory,
+            project_name,
+        } = &self.compose_arguments;
+
+        for file in file {
             command.args(["--file", file]);
         }
-        if let Some(project_directory) = &self.compose_arguments.project_directory {
+        if let Some(project_directory) = project_directory {
             command.args(["--project-directory", project_directory]);
         }
-        if let Some(project_name) = &self.compose_arguments.project_name {
+        if let Some(project_name) = project_name {
             command.args(["--project-name", project_name]);
         }
 

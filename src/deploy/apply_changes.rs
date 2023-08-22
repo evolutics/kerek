@@ -46,7 +46,6 @@ fn new_rolling_state(actual_containers: &model::ActualContainers) -> RollingStat
 }
 
 fn summarize_change(change: &model::ServiceContainerChange) -> String {
-    // TODO: Display shortened container ID for brevity.
     match change {
         model::ServiceContainerChange::Add {
             service_config_hash,

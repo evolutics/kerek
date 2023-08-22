@@ -71,10 +71,16 @@ enum Subcommand {
 
 #[derive(clap::Args)]
 struct ComposeArguments {
+    /// Compose configuration files
     #[arg(long, short = 'f')]
     file: Vec<String>,
+
+    /// Specify an alternate working directory (default: the path of the, first
+    /// specified, Compose file)
     #[arg(long)]
     project_directory: Option<String>,
+
+    /// Project name
     #[arg(long, short = 'p')]
     project_name: Option<String>,
 }

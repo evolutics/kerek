@@ -22,6 +22,20 @@ fn main() -> anyhow::Result<()> {
             },
         subcommand,
     } = Cli::parse();
+    let docker_arguments = docker::DockerArguments {
+        config,
+        context,
+        debug,
+        host,
+        log_level: log_level
+            .and_then(|level| level.to_possible_value())
+            .map(|level| level.get_name().into()),
+        tls,
+        tlscacert,
+        tlscert,
+        tlskey,
+        tlsverify,
+    };
 
     match subcommand {
         Subcommand::Deploy {
@@ -32,23 +46,14 @@ fn main() -> anyhow::Result<()> {
                     project_name,
                 },
         } => deploy::go(deploy::In {
-            docker_cli: docker::Cli::new(docker::In {
-                config,
-                context,
-                debug,
-                file,
-                host,
-                log_level: log_level
-                    .and_then(|level| level.to_possible_value())
-                    .map(|level| level.get_name().into()),
-                project_directory,
-                project_name,
-                tls,
-                tlscacert,
-                tlscert,
-                tlskey,
-                tlsverify,
-            }),
+            docker_cli: docker::Cli::new(
+                docker_arguments,
+                docker::ComposeArguments {
+                    file,
+                    project_directory,
+                    project_name,
+                },
+            ),
         }),
     }
 }

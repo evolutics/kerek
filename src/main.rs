@@ -42,8 +42,12 @@ struct Cli {
 
 #[derive(clap::Args)]
 struct DockerArguments {
+    /// Name of the context to use to connect to the daemon (overrides
+    /// DOCKER_HOST env var and default context set with "docker context use")
     #[arg(long, short = 'c')]
     context: Option<String>,
+
+    /// Daemon socket to connect to
     #[arg(long, short = 'H')]
     host: Option<String>,
 }

@@ -7,6 +7,12 @@ use clap::ValueEnum;
 
 fn main() -> anyhow::Result<()> {
     let Cli {
+        compose_arguments:
+            ComposeArguments {
+                file,
+                project_directory,
+                project_name,
+            },
         docker_arguments:
             DockerArguments {
                 config,
@@ -22,47 +28,43 @@ fn main() -> anyhow::Result<()> {
             },
         subcommand,
     } = Cli::parse();
-    let docker_arguments = docker::DockerArguments {
-        config,
-        context,
-        debug,
-        host,
-        log_level: log_level
-            .and_then(|level| level.to_possible_value())
-            .map(|level| level.get_name().into()),
-        tls,
-        tlscacert,
-        tlscert,
-        tlskey,
-        tlsverify,
-    };
+
+    let docker_cli = docker::Cli::new(
+        docker::DockerArguments {
+            config,
+            context,
+            debug,
+            host,
+            log_level: log_level
+                .and_then(|level| level.to_possible_value())
+                .map(|level| level.get_name().into()),
+            tls,
+            tlscacert,
+            tlscert,
+            tlskey,
+            tlsverify,
+        },
+        docker::ComposeArguments {
+            file,
+            project_directory,
+            project_name,
+        },
+    );
 
     match subcommand {
-        Subcommand::Deploy {
-            compose_arguments:
-                ComposeArguments {
-                    file,
-                    project_directory,
-                    project_name,
-                },
-        } => deploy::go(deploy::In {
-            docker_cli: docker::Cli::new(
-                docker_arguments,
-                docker::ComposeArguments {
-                    file,
-                    project_directory,
-                    project_name,
-                },
-            ),
-        }),
+        Subcommand::Deploy => deploy::go(deploy::In { docker_cli }),
     }
 }
 
+// Order of fields matters for generated help.
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
     #[command(flatten)]
     docker_arguments: DockerArguments,
+
+    #[command(flatten)]
+    compose_arguments: ComposeArguments,
 
     #[command(subcommand)]
     subcommand: Subcommand,
@@ -121,22 +123,6 @@ enum LogLevel {
     Fatal,
 }
 
-#[derive(clap::Subcommand)]
-enum Subcommand {
-    // TODO: Support collecting garbage with `system prune --all --force --volumes`.
-    // TODO: Support dry run.
-    // TODO: Support forced update.
-    // TODO: Support limiting to given service names.
-    // TODO: Support maintaining systemd units.
-    // TODO: Support more Docker Compose `up` arguments, e.g. `--build`.
-    // TODO: Support more Docker Compose standard arguments, e.g. `--env-file`.
-    // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
-    Deploy {
-        #[command(flatten)]
-        compose_arguments: ComposeArguments,
-    },
-}
-
 #[derive(clap::Args)]
 struct ComposeArguments {
     /// Compose configuration files
@@ -151,6 +137,19 @@ struct ComposeArguments {
     /// Project name
     #[arg(long, short = 'p')]
     project_name: Option<String>,
+}
+
+#[derive(clap::Subcommand)]
+enum Subcommand {
+    // TODO: Support collecting garbage with `system prune --all --force --volumes`.
+    // TODO: Support dry run.
+    // TODO: Support forced update.
+    // TODO: Support limiting to given service names.
+    // TODO: Support maintaining systemd units.
+    // TODO: Support more Docker Compose `up` arguments, e.g. `--build`.
+    // TODO: Support more Docker Compose standard arguments, e.g. `--env-file`.
+    // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
+    Deploy,
 }
 
 #[cfg(test)]

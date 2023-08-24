@@ -9,7 +9,13 @@ fn main() -> anyhow::Result<()> {
     let Cli {
         compose_arguments:
             ComposeArguments {
+                ansi,
+                compatibility,
+                env_file,
                 file,
+                parallel,
+                profile,
+                progress,
                 project_directory,
                 project_name,
             },
@@ -35,9 +41,7 @@ fn main() -> anyhow::Result<()> {
             context,
             debug,
             host,
-            log_level: log_level
-                .and_then(|level| level.to_possible_value())
-                .map(|level| level.get_name().into()),
+            log_level: log_level.and_then(canonical_argument),
             tls,
             tlscacert,
             tlscert,
@@ -45,7 +49,13 @@ fn main() -> anyhow::Result<()> {
             tlsverify,
         },
         docker::ComposeArguments {
+            ansi: ansi.and_then(canonical_argument),
+            compatibility,
+            env_file,
             file,
+            parallel,
+            profile,
+            progress: progress.and_then(canonical_argument),
             project_directory,
             project_name,
         },
@@ -131,9 +141,33 @@ enum LogLevel {
 /// Source: https://docs.docker.com/engine/reference/commandline/compose/
 #[derive(clap::Args)]
 struct ComposeArguments {
+    /// Control when to print ANSI control characters
+    #[arg(long, value_enum)]
+    ansi: Option<Ansi>,
+
+    /// Run compose in backward compatibility mode
+    #[arg(long)]
+    compatibility: bool,
+
+    /// Specify an alternate environment file
+    #[arg(long)]
+    env_file: Vec<String>,
+
     /// Compose configuration files
     #[arg(long, short = 'f')]
     file: Vec<String>,
+
+    /// Control max parallelism, -1 for unlimited
+    #[arg(long)]
+    parallel: Option<i16>,
+
+    /// Specify a profile to enable
+    #[arg(long)]
+    profile: Vec<String>,
+
+    /// Set type of progress output
+    #[arg(long, value_enum)]
+    progress: Option<Progress>,
 
     /// Specify an alternate working directory (default: the path of the, first
     /// specified, Compose file)
@@ -143,6 +177,22 @@ struct ComposeArguments {
     /// Project name
     #[arg(long, short = 'p')]
     project_name: Option<String>,
+    // Do not support `--verbose` as it just translates to `--debug`.
+}
+
+#[derive(Clone, ValueEnum)]
+enum Ansi {
+    Never,
+    Always,
+    Auto,
+}
+
+#[derive(Clone, ValueEnum)]
+enum Progress {
+    Auto,
+    Tty,
+    Plain,
+    Quiet,
 }
 
 #[derive(clap::Subcommand)]
@@ -156,6 +206,12 @@ enum Subcommand {
     // TODO: Support more Docker Compose standard arguments, e.g. `--env-file`.
     // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
     Deploy,
+}
+
+fn canonical_argument<T: ValueEnum>(value: T) -> Option<String> {
+    value
+        .to_possible_value()
+        .map(|value| value.get_name().into())
 }
 
 #[cfg(test)]

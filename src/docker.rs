@@ -6,7 +6,13 @@ pub struct Cli {
 }
 
 pub struct ComposeArguments {
+    pub ansi: Option<String>,
+    pub compatibility: bool,
+    pub env_file: Vec<String>,
     pub file: Vec<String>,
+    pub parallel: Option<i16>,
+    pub profile: Vec<String>,
+    pub progress: Option<String>,
     pub project_directory: Option<String>,
     pub project_name: Option<String>,
 }
@@ -87,13 +93,37 @@ impl Cli {
         command.arg("compose");
 
         let ComposeArguments {
+            ansi,
+            compatibility,
+            env_file,
             file,
+            parallel,
+            profile,
+            progress,
             project_directory,
             project_name,
         } = &self.compose_arguments;
 
+        if let Some(ansi) = ansi {
+            command.args(["--ansi", ansi]);
+        }
+        if *compatibility {
+            command.arg("--compatibility");
+        }
+        for env_file in env_file {
+            command.args(["--env-file", env_file]);
+        }
         for file in file {
             command.args(["--file", file]);
+        }
+        if let Some(parallel) = parallel {
+            command.args(["--parallel", &parallel.to_string()]);
+        }
+        for profile in profile {
+            command.args(["--profile", profile]);
+        }
+        if let Some(progress) = progress {
+            command.args(["--progress", progress]);
         }
         if let Some(project_directory) = project_directory {
             command.args(["--project-directory", project_directory]);

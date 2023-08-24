@@ -11,6 +11,7 @@ fn main() -> anyhow::Result<()> {
             ComposeArguments {
                 ansi,
                 compatibility,
+                dry_run,
                 env_file,
                 file,
                 parallel,
@@ -62,7 +63,10 @@ fn main() -> anyhow::Result<()> {
     );
 
     match subcommand {
-        Subcommand::Deploy => deploy::go(deploy::In { docker_cli }),
+        Subcommand::Deploy => deploy::go(deploy::In {
+            docker_cli,
+            dry_run,
+        }),
     }
 }
 
@@ -149,6 +153,10 @@ struct ComposeArguments {
     #[arg(long)]
     compatibility: bool,
 
+    /// Execute command in dry run mode
+    #[arg(long)]
+    dry_run: bool,
+
     /// Specify an alternate environment file
     #[arg(long)]
     env_file: Vec<String>,
@@ -198,12 +206,10 @@ enum Progress {
 #[derive(clap::Subcommand)]
 enum Subcommand {
     // TODO: Support collecting garbage with `system prune --all --force --volumes`.
-    // TODO: Support dry run.
     // TODO: Support forced update.
     // TODO: Support limiting to given service names.
     // TODO: Support maintaining systemd units.
     // TODO: Support more Docker Compose `up` arguments, e.g. `--build`.
-    // TODO: Support more Docker Compose standard arguments, e.g. `--env-file`.
     // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
     Deploy,
 }

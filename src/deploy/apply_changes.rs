@@ -11,9 +11,14 @@ pub fn go(in_: In) -> anyhow::Result<()> {
 
     for change in in_.changes {
         let summary = summarize_change(change);
-        eprintln!("Going to {summary}.");
-        apply_change(change, in_.docker_cli, &mut state)
-            .with_context(|| format!("Unable to {summary}"))?;
+
+        if in_.dry_run {
+            eprintln!("Would {summary}.");
+        } else {
+            eprintln!("Going to {summary}.");
+            apply_change(change, in_.docker_cli, &mut state)
+                .with_context(|| format!("Unable to {summary}"))?;
+        }
     }
 
     Ok(())
@@ -24,6 +29,7 @@ pub struct In<'a> {
     pub changes: &'a [model::ServiceContainerChange],
     pub desired_state: &'a model::DesiredState,
     pub docker_cli: &'a docker::Cli,
+    pub dry_run: bool,
 }
 
 struct RollingState<'a> {

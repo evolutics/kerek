@@ -18,9 +18,11 @@ pub fn go(in_: In) -> anyhow::Result<()> {
         changes: &changes,
         desired_state: &desired_state,
         docker_cli: &in_.docker_cli,
+        dry_run: in_.dry_run,
     })
 }
 
 pub struct In {
     pub docker_cli: docker::Cli,
+    pub dry_run: bool,
 }

@@ -6,17 +6,25 @@ use std::collections;
 use std::thread;
 use std::time;
 
-pub fn go(in_: In) -> anyhow::Result<()> {
-    let mut state = new_rolling_state(in_.actual_containers);
+pub fn go(
+    In {
+        actual_containers,
+        changes,
+        desired_state: _,
+        docker_cli,
+        dry_run,
+    }: In,
+) -> anyhow::Result<()> {
+    let mut state = new_rolling_state(actual_containers);
 
-    for change in in_.changes {
+    for change in changes {
         let summary = summarize_change(change);
 
-        if in_.dry_run {
+        if dry_run {
             eprintln!("Would {summary}.");
         } else {
             eprintln!("Going to {summary}.");
-            apply_change(change, in_.docker_cli, &mut state)
+            apply_change(change, docker_cli, &mut state)
                 .with_context(|| format!("Unable to {summary}"))?;
         }
     }

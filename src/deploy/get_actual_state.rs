@@ -3,8 +3,16 @@ use crate::command;
 use crate::docker;
 use std::collections;
 
-pub fn go(docker_cli: &docker::Cli) -> anyhow::Result<model::ActualContainers> {
-    let container_ids = command::stdout_utf8(docker_cli.docker_compose().args(["ps", "--quiet"]))?;
+pub fn go(
+    service_names: &collections::BTreeSet<String>,
+    docker_cli: &docker::Cli,
+) -> anyhow::Result<model::ActualContainers> {
+    let container_ids = command::stdout_utf8(
+        docker_cli
+            .docker_compose()
+            .args(["ps", "--quiet", "--"])
+            .args(service_names),
+    )?;
     let container_ids = container_ids.lines().collect::<Vec<_>>();
 
     let containers = if container_ids.is_empty() {

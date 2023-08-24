@@ -63,9 +63,10 @@ fn main() -> anyhow::Result<()> {
     );
 
     match subcommand {
-        Subcommand::Deploy => deploy::go(deploy::In {
+        Subcommand::Deploy { service_names } => deploy::go(deploy::In {
             docker_cli,
             dry_run,
+            service_names: service_names.into_iter().collect(),
         }),
     }
 }
@@ -207,11 +208,10 @@ enum Progress {
 enum Subcommand {
     // TODO: Support collecting garbage with `system prune --all --force --volumes`.
     // TODO: Support forced update.
-    // TODO: Support limiting to given service names.
     // TODO: Support maintaining systemd units.
     // TODO: Support more Docker Compose `up` arguments, e.g. `--build`.
     // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
-    Deploy,
+    Deploy { service_names: Vec<String> },
 }
 
 fn canonical_argument<T: ValueEnum>(value: T) -> Option<String> {

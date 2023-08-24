@@ -10,7 +10,6 @@ pub fn go(
     In {
         actual_containers,
         changes,
-        desired_state: _,
         docker_cli,
         dry_run,
     }: In,
@@ -35,7 +34,6 @@ pub fn go(
 pub struct In<'a> {
     pub actual_containers: &'a model::ActualContainers,
     pub changes: &'a [model::ServiceContainerChange],
-    pub desired_state: &'a model::DesiredState,
     pub docker_cli: &'a docker::Cli,
     pub dry_run: bool,
 }

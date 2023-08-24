@@ -3,29 +3,25 @@ use crate::command;
 use crate::docker;
 use std::collections;
 
-pub fn go(docker_cli: &docker::Cli) -> anyhow::Result<model::DesiredState> {
+pub fn go(docker_cli: &docker::Cli) -> anyhow::Result<model::DesiredServices> {
     let compose_app_definition = get_compose_app_definition(docker_cli)?;
     let service_config_hashes = get_service_config_hashes(docker_cli)?;
 
-    Ok(model::DesiredState {
-        project_name: compose_app_definition.name,
-        services: compose_app_definition
-            .services
-            .into_iter()
-            .map(|(service_name, service_definition)| {
-                let service_config_hash = service_config_hashes[&service_name].clone();
-                (
-                    service_name,
-                    convert_service_definition(service_definition, service_config_hash),
-                )
-            })
-            .collect(),
-    })
+    Ok(compose_app_definition
+        .services
+        .into_iter()
+        .map(|(service_name, service_definition)| {
+            let service_config_hash = service_config_hashes[&service_name].clone();
+            (
+                service_name,
+                convert_service_definition(service_definition, service_config_hash),
+            )
+        })
+        .collect())
 }
 
 #[derive(serde::Deserialize)]
 struct ComposeAppDefinition {
-    name: String,
     services: collections::BTreeMap<String, ServiceDefinition>,
 }
 

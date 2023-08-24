@@ -9,11 +9,6 @@ pub struct ActualContainer {
     pub service_name: String,
 }
 
-pub struct DesiredState {
-    pub project_name: String,
-    pub services: DesiredServices,
-}
-
 pub type DesiredServices = collections::BTreeMap<String, DesiredServiceDefinition>;
 
 pub struct DesiredServiceDefinition {

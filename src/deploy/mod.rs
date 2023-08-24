@@ -15,13 +15,12 @@ pub fn go(
     // TODO: Handle stopped containers.
 
     let actual_containers = get_actual_state::go(&docker_cli)?;
-    let desired_state = get_desired_state::go(&docker_cli)?;
-    let changes = plan_changes::go(&actual_containers, &desired_state.services);
+    let desired_services = get_desired_state::go(&docker_cli)?;
+    let changes = plan_changes::go(&actual_containers, &desired_services);
 
     apply_changes::go(apply_changes::In {
         actual_containers: &actual_containers,
         changes: &changes,
-        desired_state: &desired_state,
         docker_cli: &docker_cli,
         dry_run,
     })

@@ -7,15 +7,12 @@ pub fn go(
     service_names: &collections::BTreeSet<String>,
     docker_cli: &docker::Cli,
 ) -> anyhow::Result<model::DesiredServices> {
-    let compose_app_definition = get_compose_app_definition(docker_cli)?;
+    let compose_app_definition = get_compose_app_definition(service_names, docker_cli)?;
     let service_config_hashes = get_service_config_hashes(docker_cli)?;
 
     Ok(compose_app_definition
         .services
         .into_iter()
-        .filter(|(service_name, _)| {
-            service_names.is_empty() || service_names.contains(service_name)
-        })
         .map(|(service_name, service_definition)| {
             let service_config_hash = service_config_hashes[&service_name].clone();
             (
@@ -54,11 +51,15 @@ pub enum OperationOrder {
     StopFirst,
 }
 
-fn get_compose_app_definition(docker_cli: &docker::Cli) -> anyhow::Result<ComposeAppDefinition> {
+fn get_compose_app_definition(
+    service_names: &collections::BTreeSet<String>,
+    docker_cli: &docker::Cli,
+) -> anyhow::Result<ComposeAppDefinition> {
     command::stdout_json(
         docker_cli
             .docker_compose()
-            .args(["config", "--format", "json"]),
+            .args(["config", "--format", "json", "--"])
+            .args(service_names),
     )
 }
 

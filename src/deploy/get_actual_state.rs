@@ -10,7 +10,7 @@ pub fn go(
     let container_ids = command::stdout_utf8(
         docker_cli
             .docker_compose()
-            .args(["ps", "--quiet", "--"])
+            .args(["ps", "--all", "--quiet", "--"])
             .args(service_names),
     )?;
     let container_ids = container_ids.lines().collect::<Vec<_>>();

@@ -101,9 +101,9 @@ struct Cli {
     subcommand: Subcommand,
 }
 
-/// Top-level Docker arguments.
-///
-/// Source: https://docs.docker.com/engine/reference/commandline/cli/
+// Top-level Docker arguments.
+//
+// Source: https://docs.docker.com/engine/reference/commandline/cli/
 #[derive(clap::Args)]
 struct DockerArguments {
     /// Location of client config files
@@ -157,9 +157,9 @@ enum LogLevel {
     Fatal,
 }
 
-/// Top-level Compose arguments.
-///
-/// Source: https://docs.docker.com/engine/reference/commandline/compose/
+// Top-level Compose arguments.
+//
+// Source: https://docs.docker.com/engine/reference/commandline/compose/
 #[derive(clap::Args)]
 struct ComposeArguments {
     /// Control when to print ANSI control characters

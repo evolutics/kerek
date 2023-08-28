@@ -12,6 +12,12 @@ pub fn go(
         build,
         docker_cli,
         dry_run,
+        no_build,
+        no_deps,
+        pull,
+        quiet_pull,
+        remove_orphans,
+        renew_anon_volumes,
         service_names,
     }: In,
 ) -> anyhow::Result<()> {
@@ -27,6 +33,12 @@ pub fn go(
         changes: &changes,
         docker_cli: &docker_cli,
         dry_run,
+        no_build,
+        no_deps,
+        pull: pull.as_deref(),
+        quiet_pull,
+        remove_orphans,
+        renew_anon_volumes,
         service_names: &service_names,
     })
 }
@@ -35,5 +47,11 @@ pub struct In {
     pub build: bool,
     pub docker_cli: docker::Cli,
     pub dry_run: bool,
+    pub no_build: bool,
+    pub no_deps: bool,
+    pub pull: Option<String>,
+    pub quiet_pull: bool,
+    pub remove_orphans: bool,
+    pub renew_anon_volumes: bool,
     pub service_names: collections::BTreeSet<String>,
 }

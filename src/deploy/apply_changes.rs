@@ -13,6 +13,12 @@ pub fn go(
         changes,
         docker_cli,
         dry_run,
+        no_build,
+        no_deps,
+        pull,
+        quiet_pull,
+        remove_orphans,
+        renew_anon_volumes,
         service_names,
     }: In,
 ) -> anyhow::Result<()> {
@@ -33,8 +39,20 @@ pub fn go(
             eprintln!("Would {summary}.");
         } else {
             eprintln!("Going to {summary}.");
-            apply_change(change, docker_cli, &mut state)
-                .with_context(|| format!("Unable to {summary}"))?;
+            apply_change(
+                change,
+                ChangeOptions {
+                    no_build,
+                    no_deps,
+                    pull,
+                    quiet_pull,
+                    remove_orphans,
+                    renew_anon_volumes,
+                },
+                docker_cli,
+                &mut state,
+            )
+            .with_context(|| format!("Unable to {summary}"))?;
         }
     }
 
@@ -47,6 +65,12 @@ pub struct In<'a> {
     pub changes: &'a [model::ServiceContainerChange],
     pub docker_cli: &'a docker::Cli,
     pub dry_run: bool,
+    pub no_build: bool,
+    pub no_deps: bool,
+    pub pull: Option<&'a str>,
+    pub quiet_pull: bool,
+    pub remove_orphans: bool,
+    pub renew_anon_volumes: bool,
     pub service_names: &'a collections::BTreeSet<String>,
 }
 
@@ -58,6 +82,15 @@ struct BuildImages<'a> {
     docker_cli: &'a docker::Cli,
     dry_run: bool,
     service_names: &'a collections::BTreeSet<String>,
+}
+
+struct ChangeOptions<'a> {
+    no_build: bool,
+    no_deps: bool,
+    pull: Option<&'a str>,
+    quiet_pull: bool,
+    remove_orphans: bool,
+    renew_anon_volumes: bool,
 }
 
 fn new_rolling_state(actual_containers: &model::ActualContainers) -> RollingState {
@@ -137,12 +170,13 @@ fn summarize_service(service_name: &str, service_config_hash: &str) -> String {
 
 fn apply_change<'a>(
     change: &'a model::ServiceContainerChange,
+    change_options: ChangeOptions,
     docker_cli: &docker::Cli,
     state: &mut RollingState<'a>,
 ) -> anyhow::Result<()> {
     match change {
         model::ServiceContainerChange::Add { service_name, .. } => {
-            add_container(service_name, docker_cli, state)
+            add_container(service_name, change_options, docker_cli, state)
         }
 
         model::ServiceContainerChange::Keep { .. } => Ok(()),
@@ -157,6 +191,14 @@ fn apply_change<'a>(
 
 fn add_container<'a>(
     service_name: &'a str,
+    ChangeOptions {
+        no_build,
+        no_deps,
+        pull,
+        quiet_pull,
+        remove_orphans,
+        renew_anon_volumes,
+    }: ChangeOptions,
     docker_cli: &docker::Cli,
     state: &mut RollingState<'a>,
 ) -> anyhow::Result<()> {
@@ -166,15 +208,28 @@ fn add_container<'a>(
         .and_modify(|count| *count += 1)
         .or_insert(1);
 
-    command::status_ok(docker_cli.docker_compose().args([
-        "up",
-        "--detach",
-        "--no-recreate",
-        "--scale",
-        &format!("{service_name}={container_count}"),
-        "--",
-        service_name,
-    ]))?;
+    command::status_ok(
+        docker_cli
+            .docker_compose()
+            .args(["up", "--detach"])
+            .args(["--no-build"].iter().filter(|_| no_build))
+            .args(["--no-deps"].iter().filter(|_| no_deps))
+            .arg("--no-recreate")
+            .args(pull.iter().flat_map(|pull| ["--pull", pull]))
+            .args(["--quiet-pull"].iter().filter(|_| quiet_pull))
+            .args(["--remove-orphans"].iter().filter(|_| remove_orphans))
+            .args(
+                ["--renew-anon-volumes"]
+                    .iter()
+                    .filter(|_| renew_anon_volumes),
+            )
+            .args([
+                "--scale",
+                &format!("{service_name}={container_count}"),
+                "--",
+                service_name,
+            ]),
+    )?;
 
     // TODO: Wait until healthy, e.g. using "--wait".
     thread::sleep(time::Duration::from_secs(2));

@@ -65,11 +65,23 @@ fn main() -> anyhow::Result<()> {
     match subcommand {
         Subcommand::Deploy {
             build,
+            no_build,
+            no_deps,
+            pull,
+            quiet_pull,
+            remove_orphans,
+            renew_anon_volumes,
             service_names,
         } => deploy::go(deploy::In {
             build,
             docker_cli,
             dry_run,
+            no_build,
+            no_deps,
+            pull: pull.and_then(canonical_argument),
+            quiet_pull,
+            remove_orphans,
+            renew_anon_volumes,
             service_names: service_names.into_iter().collect(),
         }),
     }
@@ -210,19 +222,52 @@ enum Progress {
 
 #[derive(clap::Subcommand)]
 enum Subcommand {
-    /// Source: https://docs.docker.com/engine/reference/commandline/compose_up/
+    // Source for some arguments:
+    // https://docs.docker.com/engine/reference/commandline/compose_up/
+
     // TODO: Support collecting garbage with `system prune --all --force --volumes`.
-    // TODO: Support forced update.
+    // TODO: Support forced update with `--force-recreate`.
     // TODO: Support maintaining systemd units.
-    // TODO: Support more Docker Compose `up` arguments, e.g. `--pull`.
     // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
     Deploy {
         /// Build images before starting containers.
         #[arg(long)]
         build: bool,
 
+        /// Don't build an image, even if it's missing.
+        #[arg(long)]
+        no_build: bool,
+
+        /// Don't start linked services.
+        #[arg(long)]
+        no_deps: bool,
+
+        /// Pull image before running
+        #[arg(long, value_enum)]
+        pull: Option<Pull>,
+
+        /// Pull without printing progress information.
+        #[arg(long)]
+        quiet_pull: bool,
+
+        /// Remove containers for services not defined in the Compose file.
+        #[arg(long)]
+        remove_orphans: bool,
+
+        /// Recreate anonymous volumes instead of retrieving data from the
+        /// previous containers.
+        #[arg(long, short = 'V')]
+        renew_anon_volumes: bool,
+
         service_names: Vec<String>,
     },
+}
+
+#[derive(Clone, ValueEnum)]
+enum Pull {
+    Always,
+    Missing,
+    Never,
 }
 
 fn canonical_argument<T: ValueEnum>(value: T) -> Option<String> {

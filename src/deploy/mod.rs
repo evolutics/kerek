@@ -9,6 +9,7 @@ use std::collections;
 
 pub fn go(
     In {
+        build,
         docker_cli,
         dry_run,
         service_names,
@@ -22,13 +23,16 @@ pub fn go(
 
     apply_changes::go(apply_changes::In {
         actual_containers: &actual_containers,
+        build,
         changes: &changes,
         docker_cli: &docker_cli,
         dry_run,
+        service_names: &service_names,
     })
 }
 
 pub struct In {
+    pub build: bool,
     pub docker_cli: docker::Cli,
     pub dry_run: bool,
     pub service_names: collections::BTreeSet<String>,

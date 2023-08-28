@@ -63,7 +63,11 @@ fn main() -> anyhow::Result<()> {
     );
 
     match subcommand {
-        Subcommand::Deploy { service_names } => deploy::go(deploy::In {
+        Subcommand::Deploy {
+            build,
+            service_names,
+        } => deploy::go(deploy::In {
+            build,
             docker_cli,
             dry_run,
             service_names: service_names.into_iter().collect(),
@@ -206,12 +210,19 @@ enum Progress {
 
 #[derive(clap::Subcommand)]
 enum Subcommand {
+    /// Source: https://docs.docker.com/engine/reference/commandline/compose_up/
     // TODO: Support collecting garbage with `system prune --all --force --volumes`.
     // TODO: Support forced update.
     // TODO: Support maintaining systemd units.
-    // TODO: Support more Docker Compose `up` arguments, e.g. `--build`.
+    // TODO: Support more Docker Compose `up` arguments, e.g. `--pull`.
     // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
-    Deploy { service_names: Vec<String> },
+    Deploy {
+        /// Build images before starting containers.
+        #[arg(long)]
+        build: bool,
+
+        service_names: Vec<String>,
+    },
 }
 
 fn canonical_argument<T: ValueEnum>(value: T) -> Option<String> {

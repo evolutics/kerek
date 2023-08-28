@@ -9,12 +9,22 @@ use std::time;
 pub fn go(
     In {
         actual_containers,
+        build,
         changes,
         docker_cli,
         dry_run,
+        service_names,
     }: In,
 ) -> anyhow::Result<()> {
     let mut state = new_rolling_state(actual_containers);
+
+    if build {
+        build_images(BuildImages {
+            docker_cli,
+            dry_run,
+            service_names,
+        })?;
+    }
 
     for change in changes {
         let summary = summarize_change(change);
@@ -33,13 +43,21 @@ pub fn go(
 
 pub struct In<'a> {
     pub actual_containers: &'a model::ActualContainers,
+    pub build: bool,
     pub changes: &'a [model::ServiceContainerChange],
     pub docker_cli: &'a docker::Cli,
     pub dry_run: bool,
+    pub service_names: &'a collections::BTreeSet<String>,
 }
 
 struct RollingState<'a> {
     service_container_count: collections::BTreeMap<&'a str, u16>,
+}
+
+struct BuildImages<'a> {
+    docker_cli: &'a docker::Cli,
+    dry_run: bool,
+    service_names: &'a collections::BTreeSet<String>,
 }
 
 fn new_rolling_state(actual_containers: &model::ActualContainers) -> RollingState {
@@ -55,6 +73,22 @@ fn new_rolling_state(actual_containers: &model::ActualContainers) -> RollingStat
     RollingState {
         service_container_count,
     }
+}
+
+fn build_images(
+    BuildImages {
+        docker_cli,
+        dry_run,
+        service_names,
+    }: BuildImages,
+) -> anyhow::Result<()> {
+    command::status_ok(
+        docker_cli
+            .docker_compose()
+            .args(["--dry-run"].iter().filter(|_| dry_run))
+            .arg("--")
+            .args(service_names),
+    )
 }
 
 fn summarize_change(change: &model::ServiceContainerChange) -> String {

@@ -226,7 +226,6 @@ enum Subcommand {
     // Source for some arguments:
     // https://docs.docker.com/engine/reference/commandline/compose_up/
 
-    // TODO: Support collecting garbage with `system prune --all --force --volumes`.
     // TODO: Support forced update with `--force-recreate`.
     // TODO: Support maintaining systemd units.
     // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).

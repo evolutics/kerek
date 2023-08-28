@@ -160,6 +160,8 @@ enum LogLevel {
 // Top-level Compose arguments.
 //
 // Source: https://docs.docker.com/engine/reference/commandline/compose/
+//
+// Do not support `--verbose` as it just translates to `--debug`.
 #[derive(clap::Args)]
 struct ComposeArguments {
     /// Control when to print ANSI control characters
@@ -202,7 +204,6 @@ struct ComposeArguments {
     /// Project name
     #[arg(long, short = 'p')]
     project_name: Option<String>,
-    // Do not support `--verbose` as it just translates to `--debug`.
 }
 
 #[derive(Clone, ValueEnum)]

@@ -66,7 +66,6 @@ fn main() -> anyhow::Result<()> {
         Subcommand::Deploy {
             build,
             no_build,
-            no_deps,
             pull,
             quiet_pull,
             remove_orphans,
@@ -77,7 +76,6 @@ fn main() -> anyhow::Result<()> {
             docker_cli,
             dry_run,
             no_build,
-            no_deps,
             pull: pull.and_then(canonical_argument),
             quiet_pull,
             remove_orphans,
@@ -237,10 +235,6 @@ enum Subcommand {
         /// Don't build an image, even if it's missing.
         #[arg(long)]
         no_build: bool,
-
-        /// Don't start linked services.
-        #[arg(long)]
-        no_deps: bool,
 
         /// Pull image before running
         #[arg(long, value_enum)]

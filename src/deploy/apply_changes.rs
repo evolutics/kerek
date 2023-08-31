@@ -14,7 +14,6 @@ pub fn go(
         docker_cli,
         dry_run,
         no_build,
-        no_deps,
         pull,
         quiet_pull,
         remove_orphans,
@@ -43,7 +42,6 @@ pub fn go(
                 change,
                 ChangeOptions {
                     no_build,
-                    no_deps,
                     pull,
                     quiet_pull,
                     remove_orphans,
@@ -66,7 +64,6 @@ pub struct In<'a> {
     pub docker_cli: &'a docker::Cli,
     pub dry_run: bool,
     pub no_build: bool,
-    pub no_deps: bool,
     pub pull: Option<&'a str>,
     pub quiet_pull: bool,
     pub remove_orphans: bool,
@@ -86,7 +83,6 @@ struct BuildImages<'a> {
 
 struct ChangeOptions<'a> {
     no_build: bool,
-    no_deps: bool,
     pull: Option<&'a str>,
     quiet_pull: bool,
     remove_orphans: bool,
@@ -193,7 +189,6 @@ fn add_container<'a>(
     service_name: &'a str,
     ChangeOptions {
         no_build,
-        no_deps,
         pull,
         quiet_pull,
         remove_orphans,
@@ -213,8 +208,7 @@ fn add_container<'a>(
             .docker_compose()
             .args(["up", "--detach"])
             .args(["--no-build"].iter().filter(|_| no_build))
-            .args(["--no-deps"].iter().filter(|_| no_deps))
-            .arg("--no-recreate")
+            .args(["--no-deps", "--no-recreate"])
             .args(pull.iter().flat_map(|pull| ["--pull", pull]))
             .args(["--quiet-pull"].iter().filter(|_| quiet_pull))
             .args(["--remove-orphans"].iter().filter(|_| remove_orphans))

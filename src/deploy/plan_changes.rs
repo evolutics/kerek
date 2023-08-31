@@ -5,6 +5,7 @@ use std::iter;
 pub fn go(
     actual_containers: &model::ActualContainers,
     desired_services: &model::DesiredServices,
+    force_recreate: bool,
 ) -> Vec<model::ServiceContainerChange> {
     let service_names = actual_containers
         .iter()
@@ -38,7 +39,11 @@ pub fn go(
         })
         .collect();
 
-    simplify(changes)
+    if force_recreate {
+        changes
+    } else {
+        simplify(changes)
+    }
 }
 
 fn service_container_removal(
@@ -147,84 +152,105 @@ mod tests {
     #[test_case::test_case(
         "",
         "",
+        false,
         "";
         "0 to 0"
     )]
     #[test_case::test_case(
         "",
         "Xa1±",
+        false,
         "+Xa";
         "0 to 1, start first"
     )]
     #[test_case::test_case(
         "",
         "Xa1∓",
+        false,
         "+Xa";
         "0 to 1, stop first"
     )]
     #[test_case::test_case(
         "Xa₀",
         "",
+        false,
         "-Xa₀";
         "1 to 0"
     )]
     #[test_case::test_case(
         "Xa₀ Xa₁",
         "Xa2±",
+        false,
         "=Xa₀ =Xa₁";
         "2 to 2, equal hash, start first"
     )]
     #[test_case::test_case(
         "Xa₀ Xa₁",
         "Xa2∓",
+        false,
         "=Xa₀ =Xa₁";
         "2 to 2, equal hash, stop first"
     )]
     #[test_case::test_case(
         "Xa₀ Xa₁",
         "Xb2±",
+        false,
         "+Xb -Xa₀ +Xb -Xa₁";
         "2 to 2, unequal hash, start first"
     )]
     #[test_case::test_case(
         "Xa₀ Xa₁",
         "Xb2∓",
+        false,
         "-Xa₀ +Xb -Xa₁ +Xb";
         "2 to 2, unequal hash, stop first"
     )]
     #[test_case::test_case(
         "Xa₀ Xa₁ Xa₂",
         "Xa5±",
+        false,
         "=Xa₀ =Xa₁ =Xa₂ +Xa +Xa";
         "3 to 5, equal hash, start first"
     )]
     #[test_case::test_case(
         "Xa₀ Xa₁ Xa₂",
         "Xa5∓",
+        false,
         "=Xa₀ =Xa₁ =Xa₂ +Xa +Xa";
         "3 to 5, equal hash, stop first"
     )]
     #[test_case::test_case(
         "Xa₀ Xa₁ Xa₂",
         "Xb5±",
+        false,
         "+Xb -Xa₀ +Xb -Xa₁ +Xb -Xa₂ +Xb +Xb";
         "3 to 5, unequal hash, start first"
     )]
     #[test_case::test_case(
         "Xa₀ Xa₁ Xa₂",
         "Xb5∓",
+        false,
         "-Xa₀ +Xb -Xa₁ +Xb -Xa₂ +Xb +Xb +Xb";
         "3 to 5, unequal hash, stop first"
     )]
     #[test_case::test_case(
         "Xa₀ Yb₁ Yb₂ Zc₃ Zc₄",
         "Xd1∓ Yb3± Ze1∓",
+        false,
         "-Xa₀ +Xd =Yb₁ =Yb₂ +Yb -Zc₃ +Ze -Zc₄";
         "multiple services"
+    )]
+    #[test_case::test_case(
+        "Xa₀ Yb₁ Yb₂ Zc₃ Zc₄",
+        "Xd1∓ Yb3± Ze1∓",
+        true,
+        "-Xa₀ +Xd +Yb -Yb₁ +Yb -Yb₂ +Yb -Zc₃ +Ze -Zc₄";
+        "force recreate"
     )]
     fn handles(
         actual_containers: &str,
         desired_services: &str,
+        force_recreate: bool,
         expected_changes: &str,
     ) -> anyhow::Result<()> {
         let actual_containers = actual_containers
@@ -273,7 +299,10 @@ mod tests {
             })
             .collect::<anyhow::Result<Vec<_>>>()?;
 
-        assert_eq!(go(&actual_containers, &desired_services), expected_changes);
+        assert_eq!(
+            go(&actual_containers, &desired_services, force_recreate),
+            expected_changes,
+        );
 
         Ok(())
     }

@@ -65,6 +65,7 @@ fn main() -> anyhow::Result<()> {
     match subcommand {
         Subcommand::Deploy {
             build,
+            force_recreate,
             no_build,
             pull,
             quiet_pull,
@@ -75,6 +76,7 @@ fn main() -> anyhow::Result<()> {
             build,
             docker_cli,
             dry_run,
+            force_recreate,
             no_build,
             pull: pull.and_then(canonical_argument),
             quiet_pull,
@@ -224,13 +226,16 @@ enum Subcommand {
     // Source for some arguments:
     // https://docs.docker.com/engine/reference/commandline/compose_up/
 
-    // TODO: Support forced update with `--force-recreate`.
     // TODO: Support maintaining systemd units.
     // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
     Deploy {
         /// Build images before starting containers
         #[arg(long)]
         build: bool,
+
+        /// Recreate containers even if their configuration hasn't changed
+        #[arg(long)]
+        force_recreate: bool,
 
         /// Don't build an image, even if it's missing
         #[arg(long)]

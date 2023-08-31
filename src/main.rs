@@ -228,11 +228,11 @@ enum Subcommand {
     // TODO: Support maintaining systemd units.
     // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
     Deploy {
-        /// Build images before starting containers.
+        /// Build images before starting containers
         #[arg(long)]
         build: bool,
 
-        /// Don't build an image, even if it's missing.
+        /// Don't build an image, even if it's missing
         #[arg(long)]
         no_build: bool,
 
@@ -240,16 +240,16 @@ enum Subcommand {
         #[arg(long, value_enum)]
         pull: Option<Pull>,
 
-        /// Pull without printing progress information.
+        /// Pull without printing progress information
         #[arg(long)]
         quiet_pull: bool,
 
-        /// Remove containers for services not defined in the Compose file.
+        /// Remove containers for services not defined in the Compose file
         #[arg(long)]
         remove_orphans: bool,
 
         /// Recreate anonymous volumes instead of retrieving data from the
-        /// previous containers.
+        /// previous containers
         #[arg(long, short = 'V')]
         renew_anon_volumes: bool,
 

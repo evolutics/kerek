@@ -115,7 +115,7 @@ fn build_images(
         docker_cli
             .docker_compose()
             .args(["--dry-run"].iter().filter(|_| dry_run))
-            .arg("--")
+            .args(["build", "--"])
             .args(service_names),
     )
 }

@@ -19,7 +19,7 @@ main() {
   cd example
 
   reset_vm
-  git clean --force -X -- .wheelsticks
+  git clean --force -X
 
   podman system service --time 0 "${DOCKER_HOST}" &
   # shellcheck disable=SC2064

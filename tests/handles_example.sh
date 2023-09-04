@@ -10,9 +10,8 @@ test_container_engine() {
   cd example
 
   docker compose down
-  docker compose build
 
-  "${WHEELSTICKS}" --container-engine "${container_engine}" deploy
+  "${WHEELSTICKS}" --container-engine "${container_engine}" deploy --build
 
   curl --fail --max-time 3 --retry 99 --retry-connrefused --retry-max-time 15 \
     --show-error http://localhost:8080

@@ -11,7 +11,8 @@ test_container_engine() {
 
   docker compose down
 
-  "${WHEELSTICKS}" --container-engine "${container_engine}" deploy --build
+  "${WHEELSTICKS}" --container-engine "${container_engine}" deploy --build \
+    --wait --wait-timeout 60
 
   curl --fail --max-time 3 --retry 99 --retry-connrefused --retry-max-time 15 \
     --show-error http://localhost:8080

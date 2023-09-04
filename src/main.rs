@@ -74,6 +74,8 @@ fn main() -> anyhow::Result<()> {
             remove_orphans,
             renew_anon_volumes,
             service_names,
+            wait,
+            wait_timeout,
         } => deploy::go(deploy::In {
             build,
             docker_cli,
@@ -85,6 +87,8 @@ fn main() -> anyhow::Result<()> {
             remove_orphans,
             renew_anon_volumes,
             service_names: service_names.into_iter().collect(),
+            wait,
+            wait_timeout,
         }),
     }
 }
@@ -269,6 +273,14 @@ enum Subcommand {
         /// previous containers
         #[arg(long, short = 'V')]
         renew_anon_volumes: bool,
+
+        /// Wait for services to be running|healthy
+        #[arg(long)]
+        wait: bool,
+
+        /// timeout waiting for application to be running|healthy
+        #[arg(long)]
+        wait_timeout: Option<i64>,
 
         service_names: Vec<String>,
     },

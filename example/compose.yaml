@@ -2,5 +2,7 @@ name: example
 services:
   web:
     build: "."
+    healthcheck:
+      test: "curl --fail localhost:8080 || exit 1"
     ports:
       - "8080:8080"

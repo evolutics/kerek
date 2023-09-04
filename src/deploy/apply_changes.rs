@@ -3,8 +3,6 @@ use crate::command;
 use crate::docker;
 use anyhow::Context;
 use std::collections;
-use std::thread;
-use std::time;
 
 pub fn go(
     In {
@@ -19,6 +17,8 @@ pub fn go(
         remove_orphans,
         renew_anon_volumes,
         service_names,
+        wait,
+        wait_timeout,
     }: In,
 ) -> anyhow::Result<()> {
     let mut state = new_rolling_state(actual_containers);
@@ -46,6 +46,8 @@ pub fn go(
                     quiet_pull,
                     remove_orphans,
                     renew_anon_volumes,
+                    wait,
+                    wait_timeout,
                 },
                 docker_cli,
                 &mut state,
@@ -69,6 +71,8 @@ pub struct In<'a> {
     pub remove_orphans: bool,
     pub renew_anon_volumes: bool,
     pub service_names: &'a collections::BTreeSet<String>,
+    pub wait: bool,
+    pub wait_timeout: Option<i64>,
 }
 
 struct RollingState<'a> {
@@ -87,6 +91,8 @@ struct ChangeOptions<'a> {
     quiet_pull: bool,
     remove_orphans: bool,
     renew_anon_volumes: bool,
+    wait: bool,
+    wait_timeout: Option<i64>,
 }
 
 fn new_rolling_state(actual_containers: &model::ActualContainers) -> RollingState {
@@ -193,6 +199,8 @@ fn add_container<'a>(
         quiet_pull,
         remove_orphans,
         renew_anon_volumes,
+        wait,
+        wait_timeout,
     }: ChangeOptions,
     docker_cli: &docker::Cli,
     state: &mut RollingState<'a>,
@@ -202,6 +210,7 @@ fn add_container<'a>(
         .entry(service_name)
         .and_modify(|count| *count += 1)
         .or_insert(1);
+    let wait_timeout = wait_timeout.map(|wait_timeout| wait_timeout.to_string());
 
     command::status_ok(
         docker_cli
@@ -217,18 +226,15 @@ fn add_container<'a>(
                     .iter()
                     .filter(|_| renew_anon_volumes),
             )
-            .args([
-                "--scale",
-                &format!("{service_name}={container_count}"),
-                "--",
-                service_name,
-            ]),
-    )?;
-
-    // TODO: Wait until healthy, e.g. using "--wait".
-    thread::sleep(time::Duration::from_secs(2));
-
-    Ok(())
+            .args(["--scale", &format!("{service_name}={container_count}")])
+            .args(["--wait"].iter().filter(|_| wait))
+            .args(
+                wait_timeout
+                    .iter()
+                    .flat_map(|wait_timeout| ["--wait-timeout", wait_timeout]),
+            )
+            .args(["--", service_name]),
+    )
 }
 
 fn remove_container<'a>(

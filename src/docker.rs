@@ -2,6 +2,7 @@ use std::process;
 
 pub struct Cli {
     compose_arguments: ComposeArguments,
+    container_engine: String,
     docker_arguments: DockerArguments,
 }
 
@@ -31,15 +32,24 @@ pub struct DockerArguments {
 }
 
 impl Cli {
-    pub fn new(docker_arguments: DockerArguments, compose_arguments: ComposeArguments) -> Self {
+    pub fn new(
+        docker_arguments: DockerArguments,
+        compose_arguments: ComposeArguments,
+        container_engine: String,
+    ) -> Self {
         Cli {
             compose_arguments,
+            container_engine,
             docker_arguments,
         }
     }
 
     pub fn docker(&self) -> process::Command {
-        let mut command = process::Command::new("docker");
+        self.container_engine(&self.container_engine)
+    }
+
+    fn container_engine(&self, container_engine: &str) -> process::Command {
+        let mut command = process::Command::new(container_engine);
 
         let DockerArguments {
             config,
@@ -89,7 +99,7 @@ impl Cli {
     }
 
     pub fn docker_compose(&self) -> process::Command {
-        let mut command = self.docker();
+        let mut command = self.container_engine("docker");
         command.arg("compose");
 
         let ComposeArguments {

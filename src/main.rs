@@ -20,6 +20,7 @@ fn main() -> anyhow::Result<()> {
                 project_directory,
                 project_name,
             },
+        container_engine,
         docker_arguments:
             DockerArguments {
                 config,
@@ -60,6 +61,7 @@ fn main() -> anyhow::Result<()> {
             project_directory,
             project_name,
         },
+        canonical_argument(container_engine).ok_or(anyhow::anyhow!(""))?,
     );
 
     match subcommand {
@@ -96,6 +98,10 @@ struct Cli {
 
     #[command(flatten)]
     compose_arguments: ComposeArguments,
+
+    /// Container engine to use
+    #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
+    container_engine: ContainerEngine,
 
     #[command(subcommand)]
     subcommand: Subcommand,
@@ -219,6 +225,12 @@ enum Progress {
     Tty,
     Plain,
     Quiet,
+}
+
+#[derive(Clone, ValueEnum)]
+enum ContainerEngine {
+    Docker,
+    Podman,
 }
 
 #[derive(clap::Subcommand)]

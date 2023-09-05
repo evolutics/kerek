@@ -14,23 +14,32 @@ pub fn status_ok(command: &mut process::Command) -> anyhow::Result<()> {
 }
 
 pub fn stdout_json<T: de::DeserializeOwned>(command: &mut process::Command) -> anyhow::Result<T> {
-    go(command, process::Command::output, |output| {
-        if output.status.success() {
-            serde_json::from_slice(&output.stdout).context("Unable to deserialize JSON from stdout")
-        } else {
-            status_error(output.status)
-        }
-    })
+    go(
+        command.stderr(process::Stdio::inherit()),
+        process::Command::output,
+        |output| {
+            if output.status.success() {
+                serde_json::from_slice(&output.stdout)
+                    .context("Unable to deserialize JSON from stdout")
+            } else {
+                status_error(output.status)
+            }
+        },
+    )
 }
 
 pub fn stdout_utf8(command: &mut process::Command) -> anyhow::Result<String> {
-    go(command, process::Command::output, |output| {
-        if output.status.success() {
-            String::from_utf8(output.stdout).context("Stdout is not valid UTF-8")
-        } else {
-            status_error(output.status)
-        }
-    })
+    go(
+        command.stderr(process::Stdio::inherit()),
+        process::Command::output,
+        |output| {
+            if output.status.success() {
+                String::from_utf8(output.stdout).context("Stdout is not valid UTF-8")
+            } else {
+                status_error(output.status)
+            }
+        },
+    )
 }
 
 fn go<

@@ -254,7 +254,6 @@ enum Subcommand {
     // Source for some arguments:
     // https://docs.docker.com/engine/reference/commandline/compose_up/
 
-    // TODO: Support maintaining systemd units.
     // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
     /// Update containers
     Deploy {

@@ -41,8 +41,6 @@ struct Deploy {
 
 #[derive(serde::Deserialize)]
 struct UpdateConfig {
-    // TODO: Support `delay`.
-    // TODO: Support `monitor`.
     order: Option<OperationOrder>,
 }
 

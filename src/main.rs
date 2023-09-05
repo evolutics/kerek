@@ -69,6 +69,7 @@ fn main() -> anyhow::Result<()> {
             build,
             force_recreate,
             no_build,
+            no_start,
             pull,
             quiet_pull,
             remove_orphans,
@@ -82,6 +83,7 @@ fn main() -> anyhow::Result<()> {
             dry_run,
             force_recreate,
             no_build,
+            no_start,
             pull: pull.and_then(canonical_argument),
             quiet_pull,
             remove_orphans,
@@ -256,6 +258,10 @@ enum Subcommand {
         /// Don't build an image, even if it's missing
         #[arg(long)]
         no_build: bool,
+
+        /// Don't start the services after creating them
+        #[arg(long)]
+        no_start: bool,
 
         /// Pull image before running
         #[arg(long, value_enum)]

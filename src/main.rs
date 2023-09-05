@@ -256,6 +256,7 @@ enum Subcommand {
 
     // TODO: Support maintaining systemd units.
     // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
+    /// Update containers
     Deploy {
         /// Build images before starting containers
         #[arg(long)]

@@ -75,6 +75,7 @@ fn main() -> anyhow::Result<()> {
             remove_orphans,
             renew_anon_volumes,
             service_names,
+            timeout,
             wait,
             wait_timeout,
         } => deploy::go(deploy::In {
@@ -89,6 +90,7 @@ fn main() -> anyhow::Result<()> {
             remove_orphans,
             renew_anon_volumes,
             service_names: service_names.into_iter().collect(),
+            timeout,
             wait,
             wait_timeout,
         }),
@@ -279,6 +281,11 @@ enum Subcommand {
         /// previous containers
         #[arg(long, short = 'V')]
         renew_anon_volumes: bool,
+
+        /// Use this timeout in seconds for container shutdown when containers
+        /// are already running
+        #[arg(long, short = 't')]
+        timeout: Option<i64>,
 
         /// Wait for services to be running|healthy
         #[arg(long)]

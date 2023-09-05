@@ -18,6 +18,7 @@ pub fn go(
         remove_orphans,
         renew_anon_volumes,
         service_names,
+        timeout,
         wait,
         wait_timeout,
     }: In,
@@ -48,6 +49,7 @@ pub fn go(
                     quiet_pull,
                     remove_orphans,
                     renew_anon_volumes,
+                    timeout,
                     wait,
                     wait_timeout,
                 },
@@ -74,6 +76,7 @@ pub struct In<'a> {
     pub remove_orphans: bool,
     pub renew_anon_volumes: bool,
     pub service_names: &'a collections::BTreeSet<String>,
+    pub timeout: Option<i64>,
     pub wait: bool,
     pub wait_timeout: Option<i64>,
 }
@@ -95,6 +98,7 @@ struct ChangeOptions<'a> {
     quiet_pull: bool,
     remove_orphans: bool,
     renew_anon_volumes: bool,
+    timeout: Option<i64>,
     wait: bool,
     wait_timeout: Option<i64>,
 }
@@ -204,6 +208,7 @@ fn add_container<'a>(
         quiet_pull,
         remove_orphans,
         renew_anon_volumes,
+        timeout,
         wait,
         wait_timeout,
     }: ChangeOptions,
@@ -215,6 +220,7 @@ fn add_container<'a>(
         .entry(service_name)
         .and_modify(|count| *count += 1)
         .or_insert(1);
+    let timeout = timeout.map(|timeout| timeout.to_string());
     let wait_timeout = wait_timeout.map(|wait_timeout| wait_timeout.to_string());
 
     command::status_ok(
@@ -233,6 +239,7 @@ fn add_container<'a>(
                     .filter(|_| renew_anon_volumes),
             )
             .args(["--scale", &format!("{service_name}={container_count}")])
+            .args(timeout.iter().flat_map(|timeout| ["--timeout", timeout]))
             .args(["--wait"].iter().filter(|_| wait))
             .args(
                 wait_timeout

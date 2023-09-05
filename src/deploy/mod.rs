@@ -20,6 +20,7 @@ pub fn go(
         remove_orphans,
         renew_anon_volumes,
         service_names,
+        timeout,
         wait,
         wait_timeout,
     }: In,
@@ -41,6 +42,7 @@ pub fn go(
         remove_orphans,
         renew_anon_volumes,
         service_names: &service_names,
+        timeout,
         wait,
         wait_timeout,
     })
@@ -58,6 +60,7 @@ pub struct In {
     pub remove_orphans: bool,
     pub renew_anon_volumes: bool,
     pub service_names: collections::BTreeSet<String>,
+    pub timeout: Option<i64>,
     pub wait: bool,
     pub wait_timeout: Option<i64>,
 }

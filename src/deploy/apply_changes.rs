@@ -1,6 +1,7 @@
 use super::model;
 use crate::command;
 use crate::docker;
+use crate::log;
 use anyhow::Context;
 use std::collections;
 
@@ -37,9 +38,9 @@ pub fn go(
         let summary = summarize_change(change);
 
         if dry_run {
-            eprintln!("Would {summary}.");
+            log::info!("Would {summary}.");
         } else {
-            eprintln!("Going to {summary}.");
+            log::info!("Going to {summary}.");
             apply_change(
                 change,
                 ChangeOptions {

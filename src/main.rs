@@ -1,6 +1,7 @@
 mod command;
 mod deploy;
 mod docker;
+mod log;
 
 use clap::Parser;
 use clap::ValueEnum;
@@ -36,6 +37,13 @@ fn main() -> anyhow::Result<()> {
             },
         subcommand,
     } = Cli::parse();
+
+    let is_log_level_debug_or_info = debug
+        || match log_level {
+            None | Some(LogLevel::Debug) | Some(LogLevel::Info) => true,
+            Some(LogLevel::Error) | Some(LogLevel::Fatal) | Some(LogLevel::Warn) => false,
+        };
+    log::set_level(is_log_level_debug_or_info)?;
 
     let docker_cli = docker::Cli::new(
         docker::DockerArguments {

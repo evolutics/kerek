@@ -299,7 +299,7 @@ enum Subcommand {
         #[arg(long)]
         wait: bool,
 
-        /// timeout waiting for application to be running|healthy
+        /// timeout in seconds waiting for application to be running|healthy
         #[arg(long)]
         wait_timeout: Option<i64>,
 

@@ -77,9 +77,9 @@ pub struct In<'a> {
     pub remove_orphans: bool,
     pub renew_anon_volumes: bool,
     pub service_names: &'a collections::BTreeSet<String>,
-    pub timeout: Option<i64>,
+    pub timeout: Option<&'a str>,
     pub wait: bool,
-    pub wait_timeout: Option<i64>,
+    pub wait_timeout: Option<&'a str>,
 }
 
 struct RollingState<'a> {
@@ -99,9 +99,9 @@ struct ChangeOptions<'a> {
     quiet_pull: bool,
     remove_orphans: bool,
     renew_anon_volumes: bool,
-    timeout: Option<i64>,
+    timeout: Option<&'a str>,
     wait: bool,
-    wait_timeout: Option<i64>,
+    wait_timeout: Option<&'a str>,
 }
 
 fn new_rolling_state(actual_containers: &model::ActualContainers) -> RollingState {
@@ -221,8 +221,6 @@ fn add_container<'a>(
         .entry(service_name)
         .and_modify(|count| *count += 1)
         .or_insert(1);
-    let timeout = timeout.map(|timeout| timeout.to_string());
-    let wait_timeout = wait_timeout.map(|wait_timeout| wait_timeout.to_string());
 
     command::status_ok(
         docker_cli

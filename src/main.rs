@@ -63,7 +63,7 @@ fn main() -> anyhow::Result<()> {
             compatibility,
             env_file,
             file,
-            parallel,
+            parallel: parallel.map(|parallel| parallel.to_string()),
             profile,
             progress: progress.and_then(canonical_argument),
             project_directory,
@@ -98,9 +98,9 @@ fn main() -> anyhow::Result<()> {
             remove_orphans,
             renew_anon_volumes,
             service_names: service_names.into_iter().collect(),
-            timeout,
+            timeout: timeout.map(|timeout| timeout.to_string()),
             wait,
-            wait_timeout,
+            wait_timeout: wait_timeout.map(|wait_timeout| wait_timeout.to_string()),
         }),
     }
 }

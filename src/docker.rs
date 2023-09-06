@@ -11,7 +11,7 @@ pub struct ComposeArguments {
     pub compatibility: bool,
     pub env_file: Vec<String>,
     pub file: Vec<String>,
-    pub parallel: Option<i16>,
+    pub parallel: Option<String>,
     pub profile: Vec<String>,
     pub progress: Option<String>,
     pub project_directory: Option<String>,
@@ -101,8 +101,6 @@ impl Cli {
             project_directory,
             project_name,
         } = &self.compose_arguments;
-
-        let parallel = parallel.map(|parallel| parallel.to_string());
 
         command
             .args(ansi.iter().flat_map(|ansi| ["--ansi", ansi]))

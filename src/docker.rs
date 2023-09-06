@@ -45,12 +45,10 @@ impl Cli {
     }
 
     pub fn docker(&self) -> process::Command {
-        self.container_engine(&self.container_engine)
+        self.with_docker_arguments(process::Command::new(&self.container_engine))
     }
 
-    fn container_engine(&self, container_engine: &str) -> process::Command {
-        let mut command = process::Command::new(container_engine);
-
+    fn with_docker_arguments(&self, mut command: process::Command) -> process::Command {
         let DockerArguments {
             config,
             context,
@@ -99,7 +97,8 @@ impl Cli {
     }
 
     pub fn docker_compose(&self) -> process::Command {
-        let mut command = self.container_engine("docker");
+        let mut command = process::Command::new("docker");
+        command = self.with_docker_arguments(command);
         command.arg("compose");
 
         let ComposeArguments {

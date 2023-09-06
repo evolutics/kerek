@@ -62,36 +62,25 @@ impl Cli {
             tlsverify,
         } = &self.docker_arguments;
 
-        if let Some(config) = config {
-            command.args(["--config", config]);
-        }
-        if let Some(context) = context {
-            command.args(["--context", context]);
-        }
-        if *debug {
-            command.arg("--debug");
-        }
-        if let Some(host) = host {
-            command.args(["--host", host]);
-        }
-        if let Some(log_level) = log_level {
-            command.args(["--log-level", log_level]);
-        }
-        if *tls {
-            command.arg("--tls");
-        }
-        if let Some(tlscacert) = tlscacert {
-            command.args(["--tlscacert", tlscacert]);
-        }
-        if let Some(tlscert) = tlscert {
-            command.args(["--tlscert", tlscert]);
-        }
-        if let Some(tlskey) = tlskey {
-            command.args(["--tlskey", tlskey]);
-        }
-        if *tlsverify {
-            command.arg("--tlsverify");
-        }
+        command
+            .args(config.iter().flat_map(|config| ["--config", config]))
+            .args(context.iter().flat_map(|context| ["--context", context]))
+            .args(["--debug"].iter().filter(|_| *debug))
+            .args(host.iter().flat_map(|host| ["--host", host]))
+            .args(
+                log_level
+                    .iter()
+                    .flat_map(|log_level| ["--log-level", log_level]),
+            )
+            .args(["--tls"].iter().filter(|_| *tls))
+            .args(
+                tlscacert
+                    .iter()
+                    .flat_map(|tlscacert| ["--tlscacert", tlscacert]),
+            )
+            .args(tlscert.iter().flat_map(|tlscert| ["--tlscert", tlscert]))
+            .args(tlskey.iter().flat_map(|tlskey| ["--tlskey", tlskey]))
+            .args(["--tlsverify"].iter().filter(|_| *tlsverify));
 
         command
     }
@@ -113,33 +102,38 @@ impl Cli {
             project_name,
         } = &self.compose_arguments;
 
-        if let Some(ansi) = ansi {
-            command.args(["--ansi", ansi]);
-        }
-        if *compatibility {
-            command.arg("--compatibility");
-        }
-        for env_file in env_file {
-            command.args(["--env-file", env_file]);
-        }
-        for file in file {
-            command.args(["--file", file]);
-        }
-        if let Some(parallel) = parallel {
-            command.args(["--parallel", &parallel.to_string()]);
-        }
-        for profile in profile {
-            command.args(["--profile", profile]);
-        }
-        if let Some(progress) = progress {
-            command.args(["--progress", progress]);
-        }
-        if let Some(project_directory) = project_directory {
-            command.args(["--project-directory", project_directory]);
-        }
-        if let Some(project_name) = project_name {
-            command.args(["--project-name", project_name]);
-        }
+        let parallel = parallel.map(|parallel| parallel.to_string());
+
+        command
+            .args(ansi.iter().flat_map(|ansi| ["--ansi", ansi]))
+            .args(["--compatibility"].iter().filter(|_| *compatibility))
+            .args(
+                env_file
+                    .iter()
+                    .flat_map(|env_file| ["--env-file", env_file]),
+            )
+            .args(file.iter().flat_map(|file| ["--file", file]))
+            .args(
+                parallel
+                    .iter()
+                    .flat_map(|parallel| ["--parallel", parallel]),
+            )
+            .args(profile.iter().flat_map(|profile| ["--profile", profile]))
+            .args(
+                progress
+                    .iter()
+                    .flat_map(|progress| ["--progress", progress]),
+            )
+            .args(
+                project_directory
+                    .iter()
+                    .flat_map(|project_directory| ["--project-directory", project_directory]),
+            )
+            .args(
+                project_name
+                    .iter()
+                    .flat_map(|project_name| ["--project-name", project_name]),
+            );
 
         command
     }

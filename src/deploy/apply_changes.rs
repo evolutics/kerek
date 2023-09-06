@@ -27,11 +27,7 @@ pub fn go(
     let mut state = new_rolling_state(actual_containers);
 
     if build {
-        build_images(BuildImages {
-            docker_cli,
-            dry_run,
-            service_names,
-        })?;
+        build_images(service_names, dry_run, docker_cli)?;
     }
 
     for change in changes {
@@ -86,12 +82,6 @@ struct RollingState<'a> {
     service_container_count: collections::BTreeMap<&'a str, u16>,
 }
 
-struct BuildImages<'a> {
-    docker_cli: &'a docker::Cli,
-    dry_run: bool,
-    service_names: &'a collections::BTreeSet<String>,
-}
-
 struct ChangeOptions<'a> {
     no_build: bool,
     no_start: bool,
@@ -120,11 +110,9 @@ fn new_rolling_state(actual_containers: &model::ActualContainers) -> RollingStat
 }
 
 fn build_images(
-    BuildImages {
-        docker_cli,
-        dry_run,
-        service_names,
-    }: BuildImages,
+    service_names: &collections::BTreeSet<String>,
+    dry_run: bool,
+    docker_cli: &docker::Cli,
 ) -> anyhow::Result<()> {
     command::status_ok(
         docker_cli

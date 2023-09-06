@@ -51,7 +51,7 @@ fn main() -> anyhow::Result<()> {
             context,
             debug,
             host,
-            log_level: log_level.and_then(canonical_argument),
+            log_level: log_level.map(canonical_argument),
             tls,
             tlscacert,
             tlscert,
@@ -59,17 +59,17 @@ fn main() -> anyhow::Result<()> {
             tlsverify,
         },
         docker::ComposeArguments {
-            ansi: ansi.and_then(canonical_argument),
+            ansi: ansi.map(canonical_argument),
             compatibility,
             env_file,
             file,
             parallel: parallel.map(|parallel| parallel.to_string()),
             profile,
-            progress: progress.and_then(canonical_argument),
+            progress: progress.map(canonical_argument),
             project_directory,
             project_name,
         },
-        canonical_argument(container_engine).ok_or(anyhow::anyhow!(""))?,
+        canonical_argument(container_engine),
     );
 
     match subcommand {
@@ -93,7 +93,7 @@ fn main() -> anyhow::Result<()> {
             force_recreate,
             no_build,
             no_start,
-            pull: pull.and_then(canonical_argument),
+            pull: pull.map(canonical_argument),
             quiet_pull,
             remove_orphans,
             renew_anon_volumes,
@@ -314,10 +314,12 @@ enum Pull {
     Never,
 }
 
-fn canonical_argument<T: ValueEnum>(value: T) -> Option<String> {
+fn canonical_argument<T: ValueEnum>(value: T) -> String {
     value
         .to_possible_value()
-        .map(|value| value.get_name().into())
+        .expect("Assertion error: skipped variant unexpected")
+        .get_name()
+        .into()
 }
 
 #[cfg(test)]

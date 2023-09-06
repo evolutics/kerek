@@ -21,6 +21,7 @@ fn main() -> anyhow::Result<()> {
                 project_directory,
                 project_name,
             },
+        compose_engine,
         container_engine,
         docker_arguments:
             DockerArguments {
@@ -70,6 +71,10 @@ fn main() -> anyhow::Result<()> {
             project_name,
         },
         canonical_argument(container_engine),
+        canonical_argument(compose_engine)
+            .split_whitespace()
+            .map(|part| part.into())
+            .collect(),
     );
 
     match subcommand {
@@ -118,6 +123,11 @@ struct Cli {
     /// Container engine to use
     #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
     container_engine: ContainerEngine,
+
+    /// Compose engine to use; Podman Compose is not supported due to missing
+    /// features
+    #[arg(default_value_t = ComposeEngine::DockerComposeV2, long, value_enum)]
+    compose_engine: ComposeEngine,
 
     #[command(subcommand)]
     subcommand: Subcommand,
@@ -247,6 +257,14 @@ enum Progress {
 enum ContainerEngine {
     Docker,
     Podman,
+}
+
+#[derive(Clone, ValueEnum)]
+enum ComposeEngine {
+    #[clap(name = "docker-compose")]
+    DockerComposeV1,
+    #[clap(name = "docker compose")]
+    DockerComposeV2,
 }
 
 #[derive(clap::Subcommand)]

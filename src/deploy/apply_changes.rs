@@ -114,6 +114,7 @@ fn build_images(
     dry_run: bool,
     docker_cli: &docker::Cli,
 ) -> anyhow::Result<()> {
+    log::debug!("Building services.");
     command::status_ok(
         docker_cli
             .docker_compose()
@@ -210,6 +211,7 @@ fn add_container<'a>(
         .and_modify(|count| *count += 1)
         .or_insert(1);
 
+    log::debug!("Scaling service {service_name:?} to {container_count} instances.");
     command::status_ok(
         docker_cli
             .docker_compose()
@@ -243,8 +245,12 @@ fn remove_container<'a>(
     docker_cli: &docker::Cli,
     state: &mut RollingState<'a>,
 ) -> anyhow::Result<()> {
+    let container = summarize_container(container_id);
+
+    log::debug!("Stopping {container}.");
     command::status_ok(docker_cli.docker().args(["stop", "--", container_id]))?;
 
+    log::debug!("Removing {container}.");
     command::status_ok(docker_cli.docker().args(["rm", "--", container_id]))?;
 
     state

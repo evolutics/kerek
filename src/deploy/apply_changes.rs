@@ -160,7 +160,11 @@ fn summarize_container(container_id: &str) -> String {
 }
 
 fn summarize_hash(hash: &str) -> &str {
-    &hash[..8]
+    if log::level() <= log::Level::Debug {
+        hash
+    } else {
+        &hash[..8]
+    }
 }
 
 fn summarize_service(service_name: &str, service_config_hash: &str) -> String {

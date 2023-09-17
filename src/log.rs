@@ -22,6 +22,15 @@ pub fn set_level(level: Level) -> anyhow::Result<()> {
 }
 
 #[macro_export]
+macro_rules! debug {
+    ($($argument:tt)*) => {{
+        if $crate::log::level() <= $crate::log::Level::Debug {
+            eprintln!($($argument)*);
+        }
+    }};
+}
+
+#[macro_export]
 macro_rules! info {
     ($($argument:tt)*) => {{
         if $crate::log::level() <= $crate::log::Level::Info {
@@ -30,4 +39,5 @@ macro_rules! info {
     }};
 }
 
+pub use debug;
 pub use info;

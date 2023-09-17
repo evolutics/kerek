@@ -39,12 +39,15 @@ fn main() -> anyhow::Result<()> {
         subcommand,
     } = Cli::parse();
 
-    let is_log_level_debug_or_info = debug
-        || match log_level {
-            None | Some(LogLevel::Debug) | Some(LogLevel::Info) => true,
-            Some(LogLevel::Error) | Some(LogLevel::Fatal) | Some(LogLevel::Warn) => false,
-        };
-    log::set_level(is_log_level_debug_or_info)?;
+    log::set_level(match log_level {
+        _ if debug => log::Level::Debug,
+        None => log::Level::Info,
+        Some(LogLevel::Debug) => log::Level::Debug,
+        Some(LogLevel::Error) => log::Level::Error,
+        Some(LogLevel::Fatal) => log::Level::Fatal,
+        Some(LogLevel::Info) => log::Level::Info,
+        Some(LogLevel::Warn) => log::Level::Warn,
+    })?;
 
     let docker_cli = docker::Cli::new(
         docker::DockerArguments {

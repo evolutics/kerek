@@ -1,21 +1,30 @@
 use std::sync;
 
-static IS_LEVEL_DEBUG_OR_INFO: sync::OnceLock<bool> = sync::OnceLock::new();
+static LEVEL: sync::OnceLock<Level> = sync::OnceLock::new();
 
-pub fn is_level_debug_or_info() -> bool {
-    IS_LEVEL_DEBUG_OR_INFO.get().copied().unwrap_or(true)
+#[derive(Eq, Ord, PartialEq, PartialOrd)]
+pub enum Level {
+    Debug,
+    Info,
+    Warn,
+    Error,
+    Fatal,
 }
 
-pub fn set_level(is_level_debug_or_info: bool) -> anyhow::Result<()> {
-    IS_LEVEL_DEBUG_OR_INFO
-        .set(is_level_debug_or_info)
+pub fn level() -> &'static Level {
+    LEVEL.get().unwrap_or(&Level::Debug)
+}
+
+pub fn set_level(level: Level) -> anyhow::Result<()> {
+    LEVEL
+        .set(level)
         .map_err(|_| anyhow::anyhow!("Log level set twice"))
 }
 
 #[macro_export]
 macro_rules! info {
     ($($argument:tt)*) => {{
-        if $crate::log::is_level_debug_or_info() {
+        if $crate::log::level() <= &$crate::log::Level::Info {
             eprintln!($($argument)*);
         }
     }};

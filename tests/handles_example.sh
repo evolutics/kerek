@@ -12,9 +12,9 @@ test_container_engine() {
   docker compose down
 
   "${WHEELSTICKS}" --container-engine "${container_engine}" deploy --wait \
-    --wait-timeout 60
+    --wait-timeout 30
 
-  curl --fail --max-time 3 --show-error http://localhost:8080
+  curl --fail --max-time 0.2 --show-error http://localhost:8080
 
   docker compose down
 }

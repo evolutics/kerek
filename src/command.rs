@@ -28,6 +28,43 @@ pub fn stdout_json<T: de::DeserializeOwned>(command: &mut process::Command) -> a
     )
 }
 
+pub fn stdout_table<const N: usize>(
+    command: &mut process::Command,
+) -> anyhow::Result<Vec<[String; N]>> {
+    go(
+        command.stderr(process::Stdio::inherit()),
+        process::Command::output,
+        |output| {
+            if output.status.success() {
+                let table =
+                    String::from_utf8(output.stdout).context("Stdout is not valid UTF-8")?;
+                table
+                    .lines()
+                    .enumerate()
+                    .map(|(row_index, row)| {
+                        let fields = row
+                            .split_whitespace()
+                            .map(|field| field.into())
+                            .collect::<Vec<_>>();
+
+                        fields.try_into().map_err(|fields: Vec<_>| {
+                            let line_number = row_index + 1;
+                            let field_count = fields.len();
+                            anyhow::anyhow!(
+                                "Unable to parse result line {line_number}, \
+                                expected {N} fields \
+                                but got {field_count}: {row:?}"
+                            )
+                        })
+                    })
+                    .collect()
+            } else {
+                status_error(output.status)
+            }
+        },
+    )
+}
+
 pub fn stdout_utf8(command: &mut process::Command) -> anyhow::Result<String> {
     go(
         command.stderr(process::Stdio::inherit()),
@@ -79,6 +116,20 @@ mod tests {
     #[test_case::test_case(shell("printf '\"Hi\"'"), Some("Hi".into()); "success")]
     fn stdout_json_handles(mut command: process::Command, expected: Option<String>) {
         assert_eq!(stdout_json(&mut command).ok(), expected)
+    }
+
+    #[test_case::test_case(invalid_program_(), None; "invalid program")]
+    #[test_case::test_case(shell("exit 1"), None; "failure")]
+    #[test_case::test_case(
+        shell("printf '13 a  b\n 8 x\tyz'"),
+        Some(vec![
+            ["13".into(), "a".into(), "b".into()],
+            ["8".into(), "x".into(), "yz".into()],
+        ]);
+        "success"
+    )]
+    fn stdout_table_handles(mut command: process::Command, expected: Option<Vec<[String; 3]>>) {
+        assert_eq!(stdout_table(&mut command).ok(), expected)
     }
 
     #[test_case::test_case(invalid_program_(), None; "invalid program")]

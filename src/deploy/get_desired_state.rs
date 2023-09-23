@@ -67,14 +67,11 @@ fn get_service_config_hashes(
     docker_cli: &docker::Cli,
 ) -> anyhow::Result<collections::BTreeMap<String, String>> {
     let service_hashes =
-        command::stdout_utf8(docker_cli.docker_compose().args(["config", "--hash", "*"]))?;
+        command::stdout_table(docker_cli.docker_compose().args(["config", "--hash", "*"]))?;
 
     Ok(service_hashes
-        .lines()
-        .map(|line| {
-            let key_value = line.split_whitespace().collect::<Vec<_>>();
-            (key_value[0].into(), key_value[1].into())
-        })
+        .into_iter()
+        .map(|[service_name, service_config_hash]| (service_name, service_config_hash))
         .collect())
 }
 

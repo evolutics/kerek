@@ -1,0 +1,8 @@
+{
+	auto_https off
+}
+
+:80
+
+respond "Hi from {$HI_VERSION}
+"

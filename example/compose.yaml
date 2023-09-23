@@ -1,8 +1,22 @@
 name: example
 services:
-  web:
-    build: "."
-    healthcheck:
-      test: "curl --fail localhost:8080 || exit 1"
+  hi:
+    deploy:
+      update_config:
+        order: start-first
+    environment:
+      - "HI_VERSION=${HI_VERSION-A}"
+    image: "docker.io/caddy:2-alpine"
+    networks:
+      default:
+        aliases:
+          - greet
+    volumes:
+      - "./hi.Caddyfile:/etc/caddy/Caddyfile"
+
+  reverse-proxy:
+    image: "docker.io/caddy:2-alpine"
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:80"
+    volumes:
+      - "./reverse-proxy.Caddyfile:/etc/caddy/Caddyfile"

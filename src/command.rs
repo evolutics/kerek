@@ -91,9 +91,9 @@ fn go<
 ) -> anyhow::Result<U> {
     match run(command) {
         Err(error) => Err(anyhow::anyhow!(error))
-            .with_context(|| format!("Unable to run command {command:?}")),
+            .with_context(|| format!("Unable to run command: {command:?}")),
         Ok(value) => evaluate(value)
-            .with_context(|| format!("Unable to evaluate result of command {command:?}")),
+            .with_context(|| format!("Unable to evaluate result of command: {command:?}")),
     }
 }
 

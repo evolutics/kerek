@@ -5,14 +5,11 @@ set -o nounset
 set -o pipefail
 
 test_container_engine() {
-  local -r container_engine="$1"
-
   cd example
 
   docker compose down
 
-  "${WHEELSTICKS}" --container-engine "${container_engine}" \
-    deploy --wait --wait-timeout 30
+  wheelsticks_deploy
 
   while true; do
     curl --fail --max-time 0.2 --silent http://localhost:8080 || echo "Error $?"
@@ -21,8 +18,7 @@ test_container_engine() {
 
   sleep 2s
 
-  HI_VERSION=B "${WHEELSTICKS}" --container-engine "${container_engine}" \
-    deploy --wait --wait-timeout 30
+  HI_VERSION=B wheelsticks_deploy
 
   sleep 2s
 
@@ -44,9 +40,14 @@ test_container_engine() {
   docker compose down
 }
 
+wheelsticks_deploy() {
+  "${WHEELSTICKS}" --container-engine "${WHEELSTICKS_CONTAINER_ENGINE}" deploy \
+    --wait --wait-timeout 30
+}
+
 main() {
   (
-    test_container_engine docker
+    WHEELSTICKS_CONTAINER_ENGINE=docker test_container_engine
   )
 
   (
@@ -56,7 +57,7 @@ main() {
     trap "kill -SIGINT $!" EXIT
     sleep 2s
 
-    test_container_engine podman
+    WHEELSTICKS_CONTAINER_ENGINE=podman test_container_engine
   )
 }
 

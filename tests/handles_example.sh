@@ -8,6 +8,7 @@ test_container_engine() {
   cd example
 
   docker compose down
+  trap 'docker compose down' EXIT
 
   wheelsticks_deploy
 
@@ -36,8 +37,6 @@ test_container_engine() {
     printf 'Failed pings:\n%s\n' "${ping_errors}" >&2
     exit 1
   fi
-
-  docker compose down
 }
 
 wheelsticks_deploy() {
@@ -57,7 +56,9 @@ main() {
     trap "kill -SIGINT $!" EXIT
     sleep 2s
 
-    WHEELSTICKS_CONTAINER_ENGINE=podman test_container_engine
+    (
+      WHEELSTICKS_CONTAINER_ENGINE=podman test_container_engine
+    )
   )
 }
 

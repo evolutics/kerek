@@ -362,4 +362,22 @@ mod tests {
     fn get_readme() -> &'static str {
         include_str!("../README.md")
     }
+
+    #[test_case::test_case(&[]; "")]
+    #[test_case::test_case(&["deploy"]; "deploy")]
+    fn readme_includes_subcommand_help(subcommands: &[&str]) {
+        let help_command = [&[env!("CARGO_BIN_NAME")], subcommands, &["--help"]]
+            .concat()
+            .join(" ");
+        let mut root = Cli::command().term_width(80);
+        root.build();
+        let leaf = subcommands.iter().fold(&mut root, |node, subcommand| {
+            node.find_subcommand_mut(subcommand).expect(subcommand)
+        });
+        let help_message = leaf.render_help();
+        let help_message = help_message.to_string().replace("...  ", "...");
+        let help_section = format!("\n\n### `{help_command}`\n\n```\n{help_message}```\n");
+
+        assert!(get_readme().contains(&help_section))
+    }
 }

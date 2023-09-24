@@ -39,7 +39,7 @@ impl Cli {
         container_engine: String,
         compose_engine: Vec<String>,
     ) -> Self {
-        Cli {
+        Self {
             compose_arguments,
             compose_engine,
             container_engine,

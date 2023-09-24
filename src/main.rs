@@ -151,7 +151,7 @@ struct DockerArguments {
     context: Option<String>,
 
     /// Enable debug mode
-    #[arg(long, short = 'D')]
+    #[arg(long, short = 'D', visible_alias = "verbose")]
     debug: bool,
 
     /// Daemon socket to connect to
@@ -195,8 +195,6 @@ enum LogLevel {
 // Top-level Compose arguments.
 //
 // Source: https://docs.docker.com/engine/reference/commandline/compose/
-//
-// Do not support `--verbose` as it just translates to `--debug`.
 #[derive(clap::Args)]
 struct ComposeArguments {
     /// Control when to print ANSI control characters

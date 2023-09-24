@@ -118,7 +118,7 @@ fn build_images(
     command::status_ok(
         docker_cli
             .docker_compose()
-            .args(["--dry-run"].iter().filter(|_| dry_run))
+            .args(dry_run.then_some("--dry-run").iter())
             .args(["build", "--"])
             .args(service_names),
     )
@@ -220,20 +220,16 @@ fn add_container<'a>(
         docker_cli
             .docker_compose()
             .args(["up", "--detach"])
-            .args(["--no-build"].iter().filter(|_| no_build))
+            .args(no_build.then_some("--no-build").iter())
             .args(["--no-deps", "--no-recreate"])
-            .args(["--no-start"].iter().filter(|_| no_start))
+            .args(no_start.then_some("--no-start").iter())
             .args(pull.iter().flat_map(|pull| ["--pull", pull]))
-            .args(["--quiet-pull"].iter().filter(|_| quiet_pull))
-            .args(["--remove-orphans"].iter().filter(|_| remove_orphans))
-            .args(
-                ["--renew-anon-volumes"]
-                    .iter()
-                    .filter(|_| renew_anon_volumes),
-            )
+            .args(quiet_pull.then_some("--quiet-pull").iter())
+            .args(remove_orphans.then_some("--remove-orphans").iter())
+            .args(renew_anon_volumes.then_some("--renew-anon-volumes").iter())
             .args(["--scale", &format!("{service_name}={container_count}")])
             .args(timeout.iter().flat_map(|timeout| ["--timeout", timeout]))
-            .args(["--wait"].iter().filter(|_| wait))
+            .args(wait.then_some("--wait").iter())
             .args(
                 wait_timeout
                     .iter()

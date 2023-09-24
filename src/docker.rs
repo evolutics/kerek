@@ -68,14 +68,14 @@ impl Cli {
         command
             .args(config.iter().flat_map(|config| ["--config", config]))
             .args(context.iter().flat_map(|context| ["--context", context]))
-            .args(["--debug"].iter().filter(|_| *debug))
+            .args(debug.then_some("--debug").iter())
             .args(host.iter().flat_map(|host| ["--host", host]))
             .args(
                 log_level
                     .iter()
                     .flat_map(|log_level| ["--log-level", log_level]),
             )
-            .args(["--tls"].iter().filter(|_| *tls))
+            .args(tls.then_some("--tls").iter())
             .args(
                 tlscacert
                     .iter()
@@ -83,7 +83,7 @@ impl Cli {
             )
             .args(tlscert.iter().flat_map(|tlscert| ["--tlscert", tlscert]))
             .args(tlskey.iter().flat_map(|tlskey| ["--tlskey", tlskey]))
-            .args(["--tlsverify"].iter().filter(|_| *tlsverify));
+            .args(tlsverify.then_some("--tlsverify").iter());
 
         command
     }
@@ -107,7 +107,7 @@ impl Cli {
 
         command
             .args(ansi.iter().flat_map(|ansi| ["--ansi", ansi]))
-            .args(["--compatibility"].iter().filter(|_| *compatibility))
+            .args(compatibility.then_some("--compatibility").iter())
             .args(
                 env_file
                     .iter()

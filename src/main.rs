@@ -352,4 +352,16 @@ mod tests {
     fn cli_verifies() {
         Cli::command().debug_assert()
     }
+
+    #[test]
+    fn readme_top_level_heading_includes_description() {
+        let description = env!("CARGO_PKG_DESCRIPTION");
+        let top_level_heading = format!("# Wheelsticks: {description}\n\n");
+
+        assert!(get_readme().starts_with(&top_level_heading));
+    }
+
+    fn get_readme() -> &'static str {
+        include_str!("../README.md")
+    }
 }

@@ -1,4 +1,4 @@
-# Wheelsticks
+# Wheelsticks: Zero-downtime deployments for Docker Compose
 
 Container orchestrator for lightweight environments.
 

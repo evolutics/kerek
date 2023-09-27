@@ -1,19 +1,84 @@
 # Wheelsticks: Zero-downtime deployments for Docker Compose
 
-Container orchestrator for lightweight environments.
+Docker Compose offers simple, declarative orchestration of containerized apps.
 
-## Motivation
+When updating a service container with Docker Compose, the old container is
+stopped _before_ a new container is started. This causes a service interruption
+(unless the service is replicated).
 
-This is a work in progress. The plan is to target single-node environments with
-support for these:
+To achieve a zero-downtime deployment instead, you can use Wheelsticks.
 
-- Simple, declarative orchestration using [Compose](https://compose-spec.io)
-  files.
-- Zero-downtime deployments.
-- Efficient resource usage.
-- Deploying locally, but also remotely over SSH.
-- Image distribution via SSH, alternatively via image registry.
-- Building and deploying with Podman or Docker.
+## Installation
+
+### Prerequisites
+
+- Docker or Podman
+- Docker Compose
+
+### Build
+
+Pre-compiled executables are coming soon, until then run
+
+```bash
+cargo install --git https://github.com/evolutics/wheelsticks.git
+```
+
+The built executable is installed into the folder `~/.cargo/bin` by default.
+
+### Docker CLI plugin
+
+Coming soon for integration with the familiar Docker CLI.
+
+## Usage
+
+### Quick start
+
+1. For services whose container lifetimes should overlap during an update,
+   configure their update order like so:
+
+   ```yaml
+   services:
+     web:
+       image: …
+       deploy:
+         update_config:
+           order: start-first # Most important line.
+   ```
+
+   While this follows the
+   [Compose specification](https://github.com/compose-spec/compose-spec/blob/master/deploy.md#update_config),
+   support for `start-first` is optional: plain Docker Compose ignores it,
+   always using `stop-first` instead.
+
+1. In order to seamlessly switch traffic from an old to a new container during a
+   deployment, you need to use something like a reverse proxy.
+
+1. Now each time you update your services, simply run
+
+   ```bash
+   wheelsticks deploy
+   ```
+
+### Demo
+
+See the [`example`](example) folder for a demo. You can play with it as follows:
+
+```
+cd example
+docker compose up --detach
+curl localhost:8080
+
+# Deploy an update:
+HI_VERSION=B wheelsticks deploy
+
+# Deploy another update:
+HI_VERSION=C wheelsticks deploy
+```
+
+Note how the service at localhost:8080 is always available, even during
+deployments.
+
+You can clean up with `docker compose down`.
 
 ## Command-line arguments reference
 

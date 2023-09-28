@@ -1,16 +1,12 @@
 name: example
 services:
-  hi:
+  greet:
     deploy:
       update_config:
         order: start-first
     environment:
       - "HI_VERSION=${HI_VERSION-A}"
     image: "docker.io/caddy:2-alpine"
-    networks:
-      default:
-        aliases:
-          - greet
     volumes:
       - "./hi.Caddyfile:/etc/caddy/Caddyfile"
 

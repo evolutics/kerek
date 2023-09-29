@@ -5,10 +5,10 @@ services:
       update_config:
         order: start-first
     environment:
-      - "HI_VERSION=${HI_VERSION-A}"
+      - "GREET_VERSION=${GREET_VERSION-A}"
     image: "docker.io/caddy:2-alpine"
     volumes:
-      - "./hi.Caddyfile:/etc/caddy/Caddyfile"
+      - "./greet.Caddyfile:/etc/caddy/Caddyfile"
 
   reverse-proxy:
     image: "docker.io/caddy:2-alpine"

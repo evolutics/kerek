@@ -69,10 +69,10 @@ docker compose up --detach
 curl localhost:8080
 
 # Deploy an update:
-HI_VERSION=B wheelsticks deploy
+GREET_VERSION=B wheelsticks deploy
 
 # Deploy another update:
-HI_VERSION=C wheelsticks deploy
+GREET_VERSION=C wheelsticks deploy
 ```
 
 Note how the service at localhost:8080 is always available, even during

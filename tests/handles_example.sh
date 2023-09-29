@@ -19,15 +19,15 @@ test_container_engine() {
 
   sleep 2s
 
-  HI_VERSION=B wheelsticks_deploy
+  GREET_VERSION=B wheelsticks_deploy
 
   sleep 2s
 
   kill %%
 
-  for hi_version in 'A' 'B'; do
-    if ! grep --quiet "Hi from ${hi_version}" test.log; then
-      echo "No successful ping for hi version: ${hi_version}" >&2
+  for greet_version in 'A' 'B'; do
+    if ! grep --quiet "Hi from ${greet_version}" test.log; then
+      echo "No successful ping for greet version: ${greet_version}" >&2
       exit 1
     fi
   done

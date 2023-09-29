@@ -1,12 +1,49 @@
 # Wheelsticks: Zero-downtime deployments for Docker Compose
 
+Wheelsticks is an addition to Docker Compose that helps updating services with
+zero downtime.
+
+## Motivation
+
 Docker Compose offers simple, declarative orchestration of containerized apps.
 
-When updating a service container with Docker Compose, the old container is
-stopped _before_ a new container is started. This causes a service interruption
-(unless the service is replicated).
+When updating a service container with Docker Compose using `docker compose up`,
+the old container is stopped _before_ a new container is started
+(**`stop-first`** case):
 
-To achieve a zero-downtime deployment instead, you can use Wheelsticks.
+```
+old container              stop
+------------------------------|
+                                                  start            new container
+                                                  |-----------------------------
+```
+
+This causes a service interruption as there is a time when neither container is
+available.
+
+Imagine that we could make the container lifetimes overlap instead
+(**`start-first`** case):
+
+```
+old container                                  stop
+--------------------------------------------------|
+                              start                                new container
+                              |-------------------------------------------------
+```
+
+If a reverse proxy seamlessly switches traffic over from old to new container,
+then a zero-downtime deployment is achieved.
+
+The
+[Compose specification](https://github.com/compose-spec/compose-spec/blob/master/deploy.md)
+in fact defines options to distinguish above two cases: `stop-first` (default)
+and `start-first`. But support for this part of the specification is optional,
+and plain Docker Compose always applies `stop-first` irrespective of what's in
+your Compose files.
+
+However, Wheelsticks supports both options. Just run `wheelsticks deploy` in
+place of `docker compose up`. No need to change any other Docker or Docker
+Compose workflows.
 
 ## Installation
 
@@ -31,54 +68,49 @@ Coming soon for integration with the familiar Docker CLI.
 
 ## Usage
 
-### Quick start
+For services whose container lifetimes should overlap during an update,
+configure their update order like so:
 
-1. For services whose container lifetimes should overlap during an update,
-   configure their update order like so:
+```yaml
+# compose.yaml
+services:
+  greet:
+    # …
+    deploy:
+      update_config:
+        order: start-first # Most important line.
+```
 
-   ```yaml
-   services:
-     web:
-       image: …
-       deploy:
-         update_config:
-           order: start-first # Most important line.
-   ```
-
-   While this follows the
-   [Compose specification](https://github.com/compose-spec/compose-spec/blob/master/deploy.md#update_config),
-   support for `start-first` is optional: plain Docker Compose ignores it,
-   always using `stop-first` instead.
-
-1. In order to seamlessly switch traffic from an old to a new container during a
-   deployment, you need to use something like a reverse proxy.
-
-1. Now each time you update your services, simply run
-
-   ```bash
-   wheelsticks deploy
-   ```
-
-### Demo
-
-See the [`example`](example) folder for a demo. You can play with it as follows:
+See [`example/compose.yaml`](example/compose.yaml) for a demo. It defines a
+service called `greet` made available on localhost:8080 via a `reverse-proxy`:
 
 ```
+    localhost:8080    +-------------------------+    :80 +-----------------+
+----------------------| reverse-proxy container |--------| greet container |
+                      | (stop-first)            |        | (start-first)   |
+                      +-------------------------+        +-----------------+
+```
+
+With this design the service stays available, even during updates. You can play
+with it as follows:
+
+```bash
 cd example
-docker compose up --detach
-curl localhost:8080
+wheelsticks deploy
+curl localhost:8080 # … prints "Hi from A"
 
-# Deploy an update:
-GREET_VERSION=B wheelsticks deploy
+export GREET_VERSION=B
+wheelsticks deploy
+curl localhost:8080 # … prints "Hi from B"
 
-# Deploy another update:
-GREET_VERSION=C wheelsticks deploy
+docker compose down
 ```
 
-Note how the service at localhost:8080 is always available, even during
-deployments.
+To see above deployments in action, use a separate shell session to run
 
-You can clean up with `docker compose down`.
+```bash
+while true; do curl --fail --max-time 0.2 localhost:8080; sleep 0.01s; done
+```
 
 ## Command-line arguments reference
 

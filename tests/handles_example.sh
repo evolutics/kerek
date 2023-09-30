@@ -41,7 +41,7 @@ test_container_engine() {
 
 wheelsticks_deploy() {
   "${WHEELSTICKS}" --container-engine "${WHEELSTICKS_CONTAINER_ENGINE}" deploy \
-    --detach --wait --wait-timeout 30
+    --wait --wait-timeout 30
 }
 
 main() {

@@ -96,11 +96,11 @@ with it as follows:
 
 ```bash
 cd example
-wheelsticks deploy --detach
+wheelsticks deploy
 curl localhost:8080 # … prints "Hi from A"
 
 export GREET_VERSION=B
-wheelsticks deploy --detach
+wheelsticks deploy
 curl localhost:8080 # … prints "Hi from B"
 
 docker compose down
@@ -197,7 +197,7 @@ Options:
       --build
           Build images before starting containers
   -d, --detach
-          Detached mode: Run containers in the background
+          This has no effect as detached mode is always on; for migration only
       --force-recreate
           Recreate containers even if their configuration hasn't changed
       --no-build

@@ -10,7 +10,6 @@ use std::collections;
 pub fn go(
     In {
         build,
-        detach,
         docker_cli,
         dry_run,
         force_recreate,
@@ -34,7 +33,6 @@ pub fn go(
         actual_containers: &actual_containers,
         build,
         changes: &changes,
-        detach,
         docker_cli: &docker_cli,
         dry_run,
         no_build,
@@ -52,7 +50,6 @@ pub fn go(
 
 pub struct In {
     pub build: bool,
-    pub detach: bool,
     pub docker_cli: docker::Cli,
     pub dry_run: bool,
     pub force_recreate: bool,

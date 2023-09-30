@@ -95,23 +95,27 @@ fn main() -> anyhow::Result<()> {
             timeout,
             wait,
             wait_timeout,
-        } => deploy::go(deploy::In {
-            build,
-            detach,
-            docker_cli,
-            dry_run,
-            force_recreate,
-            no_build,
-            no_start,
-            pull: pull.map(canonical_argument),
-            quiet_pull,
-            remove_orphans,
-            renew_anon_volumes,
-            service_names: service_names.into_iter().collect(),
-            timeout: timeout.map(|timeout| timeout.to_string()),
-            wait,
-            wait_timeout: wait_timeout.map(|wait_timeout| wait_timeout.to_string()),
-        }),
+        } => {
+            if detach {
+                log::warn!("Detached mode is always on, no need to set it.");
+            }
+            deploy::go(deploy::In {
+                build,
+                docker_cli,
+                dry_run,
+                force_recreate,
+                no_build,
+                no_start,
+                pull: pull.map(canonical_argument),
+                quiet_pull,
+                remove_orphans,
+                renew_anon_volumes,
+                service_names: service_names.into_iter().collect(),
+                timeout: timeout.map(|timeout| timeout.to_string()),
+                wait,
+                wait_timeout: wait_timeout.map(|wait_timeout| wait_timeout.to_string()),
+            })
+        }
     }
 }
 
@@ -282,7 +286,7 @@ enum Subcommand {
         #[arg(long)]
         build: bool,
 
-        /// Detached mode: Run containers in the background
+        /// This has no effect as detached mode is always on; for migration only
         #[arg(long, short = 'd')]
         detach: bool,
 

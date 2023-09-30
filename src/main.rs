@@ -280,7 +280,24 @@ enum Subcommand {
     // https://docs.docker.com/engine/reference/commandline/compose_up/
 
     // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
-    /// Update containers
+    /// Create or update services
+    ///
+    /// Builds, (re)creates, and starts containers for a service.
+    ///
+    /// Unless they are already running, this command also starts any linked
+    /// services.
+    ///
+    /// The containers are always started in the background and left running
+    /// (detached mode).
+    ///
+    /// If there are existing containers for a service, and the service's
+    /// configuration was changed after the container's creation, then the
+    /// changes are picked up by recreating the containers (preserving mounted
+    /// volumes). Whether the old containers are stopped before or after
+    /// the new containers are started is controlled via
+    /// `services.*.deploy.update_config.order` in a Compose file.
+    ///
+    /// To force recreating all containers, use the `--force-recreate` flag.
     Deploy {
         /// Build images before starting containers
         #[arg(long)]

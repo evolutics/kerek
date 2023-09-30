@@ -122,7 +122,7 @@ Zero-downtime deployments for Docker Compose
 Usage: wheelsticks [OPTIONS] <COMMAND>
 
 Commands:
-  deploy  Update containers
+  deploy  Create or update services
   help    Print this message or the help of the given subcommand(s)
 
 Options:
@@ -186,7 +186,7 @@ Options:
 ### `wheelsticks deploy --help`
 
 ```
-Update containers
+Create or update services
 
 Usage: wheelsticks deploy [OPTIONS] [SERVICE_NAMES]...
 
@@ -221,5 +221,5 @@ Options:
       --wait-timeout <WAIT_TIMEOUT>
           timeout in seconds waiting for application to be running|healthy
   -h, --help
-          Print help
+          Print help (see more with '--help')
 ```

@@ -75,10 +75,10 @@ configure their update order like so:
 # compose.yaml
 services:
   greet:
-    # …
     deploy:
       update_config:
         order: start-first # Most important line.
+    # …
 ```
 
 See [`example/compose.yaml`](example/compose.yaml) for a demo. It defines a

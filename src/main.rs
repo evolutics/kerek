@@ -393,7 +393,7 @@ mod tests {
     #[test_case::test_case(&[]; "")]
     #[test_case::test_case(&["deploy"]; "deploy")]
     fn readme_includes_subcommand_help(subcommands: &[&str]) {
-        let help_command = [&[env!("CARGO_BIN_NAME")], subcommands, &["--help"]]
+        let help_command = [&[env!("CARGO_BIN_NAME")], subcommands, &["-h"]]
             .concat()
             .join(" ");
         let mut root = Cli::command().term_width(80);

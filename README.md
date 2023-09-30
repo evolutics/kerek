@@ -114,7 +114,7 @@ while true; do curl --fail --max-time 0.2 localhost:8080; sleep 0.01s; done
 
 ## Command-line arguments reference
 
-### `wheelsticks --help`
+### `wheelsticks -h`
 
 ```
 Zero-downtime deployments for Docker Compose
@@ -183,7 +183,7 @@ Options:
           Print version
 ```
 
-### `wheelsticks deploy --help`
+### `wheelsticks deploy -h`
 
 ```
 Create or update services

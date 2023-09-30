@@ -1,6 +1,7 @@
 mod command;
 mod deploy;
 mod docker;
+mod docker_cli_plugin_metadata;
 mod log;
 
 use clap::Parser;
@@ -115,6 +116,12 @@ fn main() -> anyhow::Result<()> {
                 wait,
                 wait_timeout: wait_timeout.map(|wait_timeout| wait_timeout.to_string()),
             })
+        }
+
+        Subcommand::DockerCliPluginMetadata => {
+            let metadata = docker_cli_plugin_metadata::go()?;
+            println!("{metadata}");
+            Ok(())
         }
     }
 }
@@ -278,8 +285,7 @@ enum ComposeEngine {
 enum Subcommand {
     // Source for some arguments:
     // https://docs.docker.com/engine/reference/commandline/compose_up/
-
-    // TODO: Support use as plugin (https://github.com/docker/cli/issues/1534).
+    //
     /// Create or update services
     ///
     /// Builds, (re)creates, and starts containers for a service.
@@ -351,6 +357,9 @@ enum Subcommand {
 
         service_names: Vec<String>,
     },
+
+    #[command(hide = true)]
+    DockerCliPluginMetadata,
 }
 
 #[derive(Clone, ValueEnum)]

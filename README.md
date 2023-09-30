@@ -64,7 +64,14 @@ The built executable is installed into the folder `~/.cargo/bin` by default.
 
 ### Docker CLI plugin
 
-Coming soon for integration with the familiar Docker CLI.
+Optionally, Wheelsticks can be set up as a Docker CLI plugin. With that, calls
+to `wheelsticks deploy` can be replaced by `docker deploy`, which some people
+prefer. Example [setup](https://github.com/docker/cli/issues/1534):
+
+```bash
+mkdir --parents ~/.docker/cli-plugins
+ln --symbolic "$(which wheelsticks)" ~/.docker/cli-plugins/docker-deploy
+```
 
 ## Usage
 

@@ -83,6 +83,7 @@ fn main() -> anyhow::Result<()> {
     match subcommand {
         Subcommand::Deploy {
             build,
+            detach,
             force_recreate,
             no_build,
             no_start,
@@ -96,6 +97,7 @@ fn main() -> anyhow::Result<()> {
             wait_timeout,
         } => deploy::go(deploy::In {
             build,
+            detach,
             docker_cli,
             dry_run,
             force_recreate,
@@ -279,6 +281,10 @@ enum Subcommand {
         /// Build images before starting containers
         #[arg(long)]
         build: bool,
+
+        /// Detached mode: Run containers in the background
+        #[arg(long, short = 'd')]
+        detach: bool,
 
         /// Recreate containers even if their configuration hasn't changed
         #[arg(long)]

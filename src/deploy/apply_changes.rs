@@ -10,6 +10,7 @@ pub fn go(
         actual_containers,
         build,
         changes,
+        detach,
         docker_cli,
         dry_run,
         no_build,
@@ -57,6 +58,10 @@ pub fn go(
         }
     }
 
+    if !detach {
+        follow_logs(service_names, dry_run, docker_cli)?;
+    }
+
     Ok(())
 }
 
@@ -64,6 +69,7 @@ pub struct In<'a> {
     pub actual_containers: &'a model::ActualContainers,
     pub build: bool,
     pub changes: &'a [model::ServiceContainerChange],
+    pub detach: bool,
     pub docker_cli: &'a docker::Cli,
     pub dry_run: bool,
     pub no_build: bool,
@@ -259,4 +265,23 @@ fn remove_container<'a>(
         .and_modify(|count| *count -= 1);
 
     Ok(())
+}
+
+fn follow_logs(
+    service_names: &collections::BTreeSet<String>,
+    dry_run: bool,
+    docker_cli: &docker::Cli,
+) -> anyhow::Result<()> {
+    if dry_run {
+        Ok(())
+    } else {
+        log::debug!("Following service logs.");
+        command::status_ok(
+            docker_cli
+                .docker_compose()
+                .args(dry_run.then_some("--dry-run").iter())
+                .args(["logs", "--follow", "--since", "0s", "--"])
+                .args(service_names),
+        )
+    }
 }

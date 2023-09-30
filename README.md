@@ -85,9 +85,9 @@ See [`example/compose.yaml`](example/compose.yaml) for a demo. It defines a
 service called `greet` made available on localhost:8080 via a `reverse-proxy`:
 
 ```
-    localhost:8080    +-------------------------+    :80 +-----------------+
+    localhost:8080    +-------------------------+        +-----------------+
 ----------------------| reverse-proxy container |--------| greet container |
-                      | (stop-first)            |        | (start-first)   |
+                  :80 | (stop-first)            |    :80 | (start-first)   |
                       +-------------------------+        +-----------------+
 ```
 

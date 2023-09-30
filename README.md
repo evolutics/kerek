@@ -13,9 +13,9 @@ the old container is stopped _before_ a new container is started
 
 ```
     old container          stop
-------------------------------|
+┄┄┄┄──────────────────────────┤
                                                   start        new container
-                                                  |-----------------------------
+                                                  ├─────────────────────────┄┄┄┄
 ```
 
 This causes a service interruption as there is a time when neither container is
@@ -26,9 +26,9 @@ Imagine that we could make the container lifetimes overlap instead
 
 ```
     old container                              stop
---------------------------------------------------|
+┄┄┄┄──────────────────────────────────────────────┤
                               start                            new container
-                              |-------------------------------------------------
+                              ├─────────────────────────────────────────────┄┄┄┄
 ```
 
 If a reverse proxy seamlessly switches traffic over from old to new container,
@@ -85,10 +85,10 @@ See [`example/compose.yaml`](example/compose.yaml) for a demo. It defines a
 service called `greet` made available on localhost:8080 via a `reverse-proxy`:
 
 ```
-    localhost:8080    +-------------------------+        +-----------------+
-----------------------| reverse-proxy container |--------| greet container |
-                  :80 | (stop-first)            |    :80 | (start-first)   |
-                      +-------------------------+        +-----------------+
+    localhost:8080    ╭─────────────────────────╮        ╭─────────────────╮
+──────────────────────┤ reverse-proxy container ├────────┤ greet container │
+                  :80 │ (stop-first)            │    :80 │ (start-first)   │
+                      ╰─────────────────────────╯        ╰─────────────────╯
 ```
 
 With this design the service stays available, even during updates. You can play

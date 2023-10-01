@@ -159,6 +159,7 @@ Other lightweight options for single-node environments:
 - [`docker rollout`](https://github.com/Wowu/docker-rollout)
 - [Docker Swarm mode](https://docs.docker.com/engine/swarm/)
 - [K3s](https://docs.k3s.io)
+- PaaS like [CapRover](https://caprover.com), [Dokku](https://dokku.com), etc.
 
 ## Command-line arguments reference
 

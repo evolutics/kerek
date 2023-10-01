@@ -365,17 +365,17 @@ enum Pull {
 }
 
 #[derive(Clone, ValueEnum)]
-enum ContainerEngine {
-    Docker,
-    Podman,
-}
-
-#[derive(Clone, ValueEnum)]
 enum ComposeEngine {
     #[clap(name = "docker-compose")]
     DockerComposeV1,
     #[clap(name = "docker compose")]
     DockerComposeV2,
+}
+
+#[derive(Clone, ValueEnum)]
+enum ContainerEngine {
+    Docker,
+    Podman,
 }
 
 fn canonical_argument<T: ValueEnum>(value: T) -> String {

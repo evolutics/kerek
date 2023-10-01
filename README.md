@@ -209,13 +209,13 @@ Options:
           Wait for services to be running|healthy
       --wait-timeout <WAIT_TIMEOUT>
           timeout in seconds waiting for application to be running|healthy
-      --container-engine <CONTAINER_ENGINE>
-          Container engine to use [default: docker] [possible values: docker,
-          podman]
       --compose-engine <COMPOSE_ENGINE>
           Compose engine to use; Podman Compose is not supported due to missing
           features [default: "docker compose"] [possible values: docker-compose,
           "docker compose"]
+      --container-engine <CONTAINER_ENGINE>
+          Container engine to use [default: docker] [possible values: docker,
+          podman]
   -h, --help
           Print help (see more with '--help')
 ```

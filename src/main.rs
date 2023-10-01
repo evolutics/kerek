@@ -223,14 +223,14 @@ enum Subcommand {
         #[command(flatten)]
         compose_up_arguments: ComposeUpArguments,
 
-        /// Container engine to use
-        #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
-        container_engine: ContainerEngine,
-
         /// Compose engine to use; Podman Compose is not supported due to
         /// missing features
         #[arg(default_value_t = ComposeEngine::DockerComposeV2, long, value_enum)]
         compose_engine: ComposeEngine,
+
+        /// Container engine to use
+        #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
+        container_engine: ContainerEngine,
 
         service_names: Vec<String>,
     },

@@ -94,10 +94,10 @@ See [`example/compose.yaml`](example/compose.yaml) for a demo. It defines a
 service called `greet` made available on localhost:8080 via a `reverse-proxy`:
 
 ```
-    localhost:8080    ╭─────────────────────────╮        ╭─────────────────╮
-──────────────────────┤ reverse-proxy container ├────────┤ greet container │
-                  :80 │ (stop-first)            │    :80 │ (start-first)   │
-                      ╰─────────────────────────╯        ╰─────────────────╯
+    localhost:8080    ╭───────────────╮        ╭───────────────╮
+──────────────────────┤ reverse-proxy ├────────┤ greet         │
+                  :80 │ (stop-first)  │    :80 │ (start-first) │
+                      ╰───────────────╯        ╰───────────────╯
 ```
 
 With this design the service stays available, even during updates. You can play

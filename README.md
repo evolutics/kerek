@@ -160,6 +160,7 @@ Other lightweight options for single-node environments:
 - [Docker Swarm mode](https://docs.docker.com/engine/swarm/)
 - [K3s](https://docs.k3s.io)
 - PaaS like [CapRover](https://caprover.com), [Dokku](https://dokku.com), etc.
+- [`podman kube play`](https://docs.podman.io/en/latest/markdown/podman-kube-play.1.html)
 
 ## Command-line arguments reference
 

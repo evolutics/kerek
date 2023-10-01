@@ -37,7 +37,6 @@ fn main() -> anyhow::Result<()> {
 
     match subcommand {
         Subcommand::Deploy {
-            build,
             compose_arguments:
                 ComposeArguments {
                     ansi,
@@ -52,19 +51,23 @@ fn main() -> anyhow::Result<()> {
                     project_name,
                 },
             compose_engine,
+            compose_up_arguments:
+                ComposeUpArguments {
+                    build,
+                    detach,
+                    force_recreate,
+                    no_build,
+                    no_start,
+                    pull,
+                    quiet_pull,
+                    remove_orphans,
+                    renew_anon_volumes,
+                    timeout,
+                    wait_timeout,
+                    wait,
+                },
             container_engine,
-            detach,
-            force_recreate,
-            no_build,
-            no_start,
-            pull,
-            quiet_pull,
-            remove_orphans,
-            renew_anon_volumes,
             service_names,
-            timeout,
-            wait_timeout,
-            wait,
         } => {
             if detach {
                 log::warn!("Detached mode is always on, no need to set it.");
@@ -192,11 +195,9 @@ enum LogLevel {
     Fatal,
 }
 
+#[allow(clippy::large_enum_variant)]
 #[derive(clap::Subcommand)]
 enum Subcommand {
-    // Source for some arguments:
-    // https://docs.docker.com/engine/reference/commandline/compose_up/
-    //
     /// Create or update services
     ///
     /// Builds, (re)creates, and starts containers for a service.
@@ -219,55 +220,8 @@ enum Subcommand {
         #[command(flatten)]
         compose_arguments: ComposeArguments,
 
-        /// Build images before starting containers
-        #[arg(long)]
-        build: bool,
-
-        /// This has no effect as detached mode is always on; for migration only
-        #[arg(long, short = 'd')]
-        detach: bool,
-
-        /// Recreate containers even if their configuration hasn't changed
-        #[arg(long)]
-        force_recreate: bool,
-
-        /// Don't build an image, even if it's missing
-        #[arg(long)]
-        no_build: bool,
-
-        /// Don't start the services after creating them
-        #[arg(long)]
-        no_start: bool,
-
-        /// Pull image before running
-        #[arg(long, value_enum)]
-        pull: Option<Pull>,
-
-        /// Pull without printing progress information
-        #[arg(long)]
-        quiet_pull: bool,
-
-        /// Remove containers for services not defined in the Compose file
-        #[arg(long)]
-        remove_orphans: bool,
-
-        /// Recreate anonymous volumes instead of retrieving data from the
-        /// previous containers
-        #[arg(long, short = 'V')]
-        renew_anon_volumes: bool,
-
-        /// Use this timeout in seconds for container shutdown when containers
-        /// are already running
-        #[arg(long, short = 't')]
-        timeout: Option<i64>,
-
-        /// Wait for services to be running|healthy
-        #[arg(long)]
-        wait: bool,
-
-        /// timeout in seconds waiting for application to be running|healthy
-        #[arg(long)]
-        wait_timeout: Option<i64>,
+        #[command(flatten)]
+        compose_up_arguments: ComposeUpArguments,
 
         /// Container engine to use
         #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
@@ -345,6 +299,62 @@ enum Progress {
     Tty,
     Plain,
     Quiet,
+}
+
+// `docker compose up` arguments, where applicable.
+//
+// Source: https://docs.docker.com/engine/reference/commandline/compose_up/
+#[derive(clap::Args)]
+struct ComposeUpArguments {
+    /// Build images before starting containers
+    #[arg(long)]
+    build: bool,
+
+    /// This has no effect as detached mode is always on; for migration only
+    #[arg(long, short = 'd')]
+    detach: bool,
+
+    /// Recreate containers even if their configuration hasn't changed
+    #[arg(long)]
+    force_recreate: bool,
+
+    /// Don't build an image, even if it's missing
+    #[arg(long)]
+    no_build: bool,
+
+    /// Don't start the services after creating them
+    #[arg(long)]
+    no_start: bool,
+
+    /// Pull image before running
+    #[arg(long, value_enum)]
+    pull: Option<Pull>,
+
+    /// Pull without printing progress information
+    #[arg(long)]
+    quiet_pull: bool,
+
+    /// Remove containers for services not defined in the Compose file
+    #[arg(long)]
+    remove_orphans: bool,
+
+    /// Recreate anonymous volumes instead of retrieving data from the
+    /// previous containers
+    #[arg(long, short = 'V')]
+    renew_anon_volumes: bool,
+
+    /// Use this timeout in seconds for container shutdown when containers
+    /// are already running
+    #[arg(long, short = 't')]
+    timeout: Option<i64>,
+
+    /// Wait for services to be running|healthy
+    #[arg(long)]
+    wait: bool,
+
+    /// timeout in seconds waiting for application to be running|healthy
+    #[arg(long)]
+    wait_timeout: Option<i64>,
 }
 
 #[derive(Clone, ValueEnum)]

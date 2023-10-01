@@ -75,6 +75,8 @@ ln --symbolic "$(which wheelsticks)" ~/.docker/cli-plugins/docker-deploy
 
 ## Usage
 
+### Quick start
+
 For services whose container lifetimes should overlap during an update,
 configure their update order like so:
 
@@ -118,6 +120,29 @@ To see above deployments in action, use a separate shell session to run
 ```bash
 while true; do curl --fail --max-time 0.2 localhost:8080; sleep 0.01s; done
 ```
+
+### Conditions when services are updated
+
+By default, services are updated only if their service config hash changes. This
+hash is calculated over all service fields in the Compose file except `build`,
+`deploy.replicas`, `pull_policy`, and `scale`
+(see [source](https://github.com/docker/compose/blob/main/pkg/compose/hash.go)).
+
+Note that the service config hash does _not_ depend on the container image
+contents but just the `image` field. Thus, reusing an image tag like `latest`
+does not cause an update.
+
+Using `--force-recreate` always updates services irrespective of config hash
+changes.
+
+| Command                                 | Effect                                        |
+| --------------------------------------- | --------------------------------------------- |
+| `wheelsticks deploy`                    | Update all services with changed config hash  |
+| `wheelsticks deploy --dry-run`          | Update nothing but show what would be changed |
+| `wheelsticks deploy x`                  | Update service `x` if its config hash changed |
+| `wheelsticks deploy --force-recreate`   | Always update all services                    |
+| `wheelsticks deploy --force-recreate x` | Always update service `x`                     |
+| `docker compose config --hash '*'`      | Show service config hashes                    |
 
 ## Command-line arguments reference
 

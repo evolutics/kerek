@@ -151,6 +151,15 @@ Pass `--container-engine podman` to use Podman instead of Docker.
 Podman Compose is not supported as it currently lacks the functionality to
 calculate service config hashes (like `docker compose config --hash '*'`).
 
+## Alternatives
+
+Other lightweight options for single-node environments:
+
+- [Docker or Podman without Compose](https://github.com/evolutics/zero-downtime-deployments-with-podman)
+- [`docker rollout`](https://github.com/Wowu/docker-rollout)
+- [Docker Swarm mode](https://docs.docker.com/engine/swarm/)
+- [K3s](https://docs.k3s.io)
+
 ## Command-line arguments reference
 
 ### `wheelsticks -h`

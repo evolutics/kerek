@@ -12,7 +12,7 @@ the old container is stopped _before_ a new container is started
 (**`stop-first`** case):
 
 ```
-    old container           stop
+    old container              stop
 ┄┄┄┄───────────────────────────┤
                                        start           new container
                                        ├────────────────────────────┄┄┄┄
@@ -25,7 +25,7 @@ Imagine that we could make the container lifetimes overlap instead
 (**`start-first`** case):
 
 ```
-    old container                   stop
+    old container                      stop
 ┄┄┄┄───────────────────────────────────┤
                                start                   new container
                                ├────────────────────────────────────┄┄┄┄

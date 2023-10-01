@@ -144,6 +144,13 @@ changes.
 | `wheelsticks deploy --force-recreate x` | Always update service `x`                     |
 | `docker compose config --hash '*'`      | Show service config hashes                    |
 
+### Podman support
+
+Pass `--container-engine podman` to use Podman instead of Docker.
+
+Podman Compose is not supported as it currently lacks the functionality to
+calculate service config hashes (like `docker compose config --hash '*'`).
+
 ## Command-line arguments reference
 
 ### `wheelsticks -h`

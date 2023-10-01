@@ -12,10 +12,10 @@ the old container is stopped _before_ a new container is started
 (**`stop-first`** case):
 
 ```
-    old container              stop
-┄┄┄┄───────────────────────────┤
-                                       start           new container
-                                       ├────────────────────────────┄┄┄┄
+    old container          stop
+┄┄┄┄───────────────────────┤
+                                           start       new container
+                                           ├────────────────────────┄┄┄┄
 ```
 
 This causes a service interruption as there is a time when neither container is
@@ -25,10 +25,10 @@ Imagine that we could make the container lifetimes overlap instead
 (**`start-first`** case):
 
 ```
-    old container                      stop
-┄┄┄┄───────────────────────────────────┤
-                               start                   new container
-                               ├────────────────────────────────────┄┄┄┄
+    old container                          stop
+┄┄┄┄───────────────────────────────────────┤
+                           start                       new container
+                           ├────────────────────────────────────────┄┄┄┄
 ```
 
 If a reverse proxy seamlessly switches traffic over from old to new container,

@@ -40,7 +40,7 @@ test_container_engine() {
 }
 
 wheelsticks_deploy() {
-  "${WHEELSTICKS}" --container-engine "${WHEELSTICKS_CONTAINER_ENGINE}" deploy \
+  "${WHEELSTICKS}" deploy --container-engine "${WHEELSTICKS_CONTAINER_ENGINE}" \
     --wait --wait-timeout 30
 }
 

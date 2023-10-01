@@ -133,28 +133,34 @@ Commands:
   help    Print this message or the help of the given subcommand(s)
 
 Options:
-      --config <CONFIG>
-          Location of client config files
-  -c, --context <CONTEXT>
-          Name of the context to use to connect to the daemon (overrides
-          DOCKER_HOST env var and default context set with "docker context use")
-  -D, --debug
-          Enable debug mode [aliases: verbose]
-  -H, --host <HOST>
-          Daemon socket to connect to
-  -l, --log-level <LOG_LEVEL>
-          Set the logging level [possible values: debug, info, warn, error,
-          fatal]
-      --tls
-          Use TLS; implied by --tlsverify
-      --tlscacert <TLSCACERT>
-          Trust certs signed only by this CA
-      --tlscert <TLSCERT>
-          Path to TLS certificate file
-      --tlskey <TLSKEY>
-          Path to TLS key file
-      --tlsverify
-          Use TLS and verify the remote
+      --config <CONFIG>        Location of client config files
+  -c, --context <CONTEXT>      Name of the context to use to connect to the
+                               daemon (overrides DOCKER_HOST env var and default
+                               context set with "docker context use")
+  -D, --debug                  Enable debug mode [aliases: verbose]
+  -H, --host <HOST>            Daemon socket to connect to
+  -l, --log-level <LOG_LEVEL>  Set the logging level [possible values: debug,
+                               info, warn, error, fatal]
+      --tls                    Use TLS; implied by --tlsverify
+      --tlscacert <TLSCACERT>  Trust certs signed only by this CA
+      --tlscert <TLSCERT>      Path to TLS certificate file
+      --tlskey <TLSKEY>        Path to TLS key file
+      --tlsverify              Use TLS and verify the remote
+  -h, --help                   Print help
+  -V, --version                Print version
+```
+
+### `wheelsticks deploy -h`
+
+```
+Create or update services
+
+Usage: wheelsticks deploy [OPTIONS] [SERVICE_NAMES]...
+
+Arguments:
+  [SERVICE_NAMES]...
+
+Options:
       --ansi <ANSI>
           Control when to print ANSI control characters [possible values: never,
           always, auto]
@@ -177,30 +183,6 @@ Options:
           first specified, Compose file)
   -p, --project-name <PROJECT_NAME>
           Project name
-      --container-engine <CONTAINER_ENGINE>
-          Container engine to use [default: docker] [possible values: docker,
-          podman]
-      --compose-engine <COMPOSE_ENGINE>
-          Compose engine to use; Podman Compose is not supported due to missing
-          features [default: "docker compose"] [possible values: docker-compose,
-          "docker compose"]
-  -h, --help
-          Print help
-  -V, --version
-          Print version
-```
-
-### `wheelsticks deploy -h`
-
-```
-Create or update services
-
-Usage: wheelsticks deploy [OPTIONS] [SERVICE_NAMES]...
-
-Arguments:
-  [SERVICE_NAMES]...
-
-Options:
       --build
           Build images before starting containers
   -d, --detach
@@ -227,6 +209,13 @@ Options:
           Wait for services to be running|healthy
       --wait-timeout <WAIT_TIMEOUT>
           timeout in seconds waiting for application to be running|healthy
+      --container-engine <CONTAINER_ENGINE>
+          Container engine to use [default: docker] [possible values: docker,
+          podman]
+      --compose-engine <COMPOSE_ENGINE>
+          Compose engine to use; Podman Compose is not supported due to missing
+          features [default: "docker compose"] [possible values: docker-compose,
+          "docker compose"]
   -h, --help
           Print help (see more with '--help')
 ```

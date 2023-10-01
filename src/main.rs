@@ -9,21 +9,6 @@ use clap::ValueEnum;
 
 fn main() -> anyhow::Result<()> {
     let Cli {
-        compose_arguments:
-            ComposeArguments {
-                ansi,
-                compatibility,
-                dry_run,
-                env_file,
-                file,
-                parallel,
-                profile,
-                progress,
-                project_directory,
-                project_name,
-            },
-        compose_engine,
-        container_engine,
         docker_arguments:
             DockerArguments {
                 config,
@@ -50,40 +35,24 @@ fn main() -> anyhow::Result<()> {
         Some(LogLevel::Warn) => log::Level::Warn,
     })?;
 
-    let docker_cli = docker::Cli::new(
-        docker::DockerArguments {
-            config,
-            context,
-            debug,
-            host,
-            log_level: log_level.map(canonical_argument),
-            tls,
-            tlscacert,
-            tlscert,
-            tlskey,
-            tlsverify,
-        },
-        docker::ComposeArguments {
-            ansi: ansi.map(canonical_argument),
-            compatibility,
-            env_file,
-            file,
-            parallel: parallel.map(|parallel| parallel.to_string()),
-            profile,
-            progress: progress.map(canonical_argument),
-            project_directory,
-            project_name,
-        },
-        canonical_argument(container_engine),
-        canonical_argument(compose_engine)
-            .split_whitespace()
-            .map(|part| part.into())
-            .collect(),
-    );
-
     match subcommand {
         Subcommand::Deploy {
             build,
+            compose_arguments:
+                ComposeArguments {
+                    ansi,
+                    compatibility,
+                    dry_run,
+                    env_file,
+                    file,
+                    parallel,
+                    profile,
+                    progress,
+                    project_directory,
+                    project_name,
+                },
+            compose_engine,
+            container_engine,
             detach,
             force_recreate,
             no_build,
@@ -94,15 +63,45 @@ fn main() -> anyhow::Result<()> {
             renew_anon_volumes,
             service_names,
             timeout,
-            wait,
             wait_timeout,
+            wait,
         } => {
             if detach {
                 log::warn!("Detached mode is always on, no need to set it.");
             }
+
             deploy::go(deploy::In {
                 build,
-                docker_cli,
+                docker_cli: docker::Cli::new(
+                    docker::DockerArguments {
+                        config,
+                        context,
+                        debug,
+                        host,
+                        log_level: log_level.map(canonical_argument),
+                        tls,
+                        tlscacert,
+                        tlscert,
+                        tlskey,
+                        tlsverify,
+                    },
+                    docker::ComposeArguments {
+                        ansi: ansi.map(canonical_argument),
+                        compatibility,
+                        env_file,
+                        file,
+                        parallel: parallel.map(|parallel| parallel.to_string()),
+                        profile,
+                        progress: progress.map(canonical_argument),
+                        project_directory,
+                        project_name,
+                    },
+                    canonical_argument(container_engine),
+                    canonical_argument(compose_engine)
+                        .split_whitespace()
+                        .map(|part| part.into())
+                        .collect(),
+                ),
                 dry_run,
                 force_recreate,
                 no_build,
@@ -132,18 +131,6 @@ fn main() -> anyhow::Result<()> {
 struct Cli {
     #[command(flatten)]
     docker_arguments: DockerArguments,
-
-    #[command(flatten)]
-    compose_arguments: ComposeArguments,
-
-    /// Container engine to use
-    #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
-    container_engine: ContainerEngine,
-
-    /// Compose engine to use; Podman Compose is not supported due to missing
-    /// features
-    #[arg(default_value_t = ComposeEngine::DockerComposeV2, long, value_enum)]
-    compose_engine: ComposeEngine,
 
     #[command(subcommand)]
     subcommand: Subcommand,
@@ -203,6 +190,99 @@ enum LogLevel {
     Warn,
     Error,
     Fatal,
+}
+
+#[derive(clap::Subcommand)]
+enum Subcommand {
+    // Source for some arguments:
+    // https://docs.docker.com/engine/reference/commandline/compose_up/
+    //
+    /// Create or update services
+    ///
+    /// Builds, (re)creates, and starts containers for a service.
+    ///
+    /// Unless they are already running, this command also starts any linked
+    /// services.
+    ///
+    /// The containers are always started in the background and left running
+    /// (detached mode).
+    ///
+    /// If there are existing containers for a service, and the service's
+    /// configuration was changed after the container's creation, then the
+    /// changes are picked up by recreating the containers (preserving mounted
+    /// volumes). Whether the old containers are stopped before or after
+    /// the new containers are started is controlled via
+    /// `services.*.deploy.update_config.order` in a Compose file.
+    ///
+    /// To force recreating all containers, use the `--force-recreate` flag.
+    Deploy {
+        #[command(flatten)]
+        compose_arguments: ComposeArguments,
+
+        /// Build images before starting containers
+        #[arg(long)]
+        build: bool,
+
+        /// This has no effect as detached mode is always on; for migration only
+        #[arg(long, short = 'd')]
+        detach: bool,
+
+        /// Recreate containers even if their configuration hasn't changed
+        #[arg(long)]
+        force_recreate: bool,
+
+        /// Don't build an image, even if it's missing
+        #[arg(long)]
+        no_build: bool,
+
+        /// Don't start the services after creating them
+        #[arg(long)]
+        no_start: bool,
+
+        /// Pull image before running
+        #[arg(long, value_enum)]
+        pull: Option<Pull>,
+
+        /// Pull without printing progress information
+        #[arg(long)]
+        quiet_pull: bool,
+
+        /// Remove containers for services not defined in the Compose file
+        #[arg(long)]
+        remove_orphans: bool,
+
+        /// Recreate anonymous volumes instead of retrieving data from the
+        /// previous containers
+        #[arg(long, short = 'V')]
+        renew_anon_volumes: bool,
+
+        /// Use this timeout in seconds for container shutdown when containers
+        /// are already running
+        #[arg(long, short = 't')]
+        timeout: Option<i64>,
+
+        /// Wait for services to be running|healthy
+        #[arg(long)]
+        wait: bool,
+
+        /// timeout in seconds waiting for application to be running|healthy
+        #[arg(long)]
+        wait_timeout: Option<i64>,
+
+        /// Container engine to use
+        #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
+        container_engine: ContainerEngine,
+
+        /// Compose engine to use; Podman Compose is not supported due to
+        /// missing features
+        #[arg(default_value_t = ComposeEngine::DockerComposeV2, long, value_enum)]
+        compose_engine: ComposeEngine,
+
+        service_names: Vec<String>,
+    },
+
+    #[command(hide = true)]
+    DockerCliPluginMetadata,
 }
 
 // Top-level Compose arguments.
@@ -268,6 +348,13 @@ enum Progress {
 }
 
 #[derive(Clone, ValueEnum)]
+enum Pull {
+    Always,
+    Missing,
+    Never,
+}
+
+#[derive(Clone, ValueEnum)]
 enum ContainerEngine {
     Docker,
     Podman,
@@ -279,94 +366,6 @@ enum ComposeEngine {
     DockerComposeV1,
     #[clap(name = "docker compose")]
     DockerComposeV2,
-}
-
-#[derive(clap::Subcommand)]
-enum Subcommand {
-    // Source for some arguments:
-    // https://docs.docker.com/engine/reference/commandline/compose_up/
-    //
-    /// Create or update services
-    ///
-    /// Builds, (re)creates, and starts containers for a service.
-    ///
-    /// Unless they are already running, this command also starts any linked
-    /// services.
-    ///
-    /// The containers are always started in the background and left running
-    /// (detached mode).
-    ///
-    /// If there are existing containers for a service, and the service's
-    /// configuration was changed after the container's creation, then the
-    /// changes are picked up by recreating the containers (preserving mounted
-    /// volumes). Whether the old containers are stopped before or after
-    /// the new containers are started is controlled via
-    /// `services.*.deploy.update_config.order` in a Compose file.
-    ///
-    /// To force recreating all containers, use the `--force-recreate` flag.
-    Deploy {
-        /// Build images before starting containers
-        #[arg(long)]
-        build: bool,
-
-        /// This has no effect as detached mode is always on; for migration only
-        #[arg(long, short = 'd')]
-        detach: bool,
-
-        /// Recreate containers even if their configuration hasn't changed
-        #[arg(long)]
-        force_recreate: bool,
-
-        /// Don't build an image, even if it's missing
-        #[arg(long)]
-        no_build: bool,
-
-        /// Don't start the services after creating them
-        #[arg(long)]
-        no_start: bool,
-
-        /// Pull image before running
-        #[arg(long, value_enum)]
-        pull: Option<Pull>,
-
-        /// Pull without printing progress information
-        #[arg(long)]
-        quiet_pull: bool,
-
-        /// Remove containers for services not defined in the Compose file
-        #[arg(long)]
-        remove_orphans: bool,
-
-        /// Recreate anonymous volumes instead of retrieving data from the
-        /// previous containers
-        #[arg(long, short = 'V')]
-        renew_anon_volumes: bool,
-
-        /// Use this timeout in seconds for container shutdown when containers
-        /// are already running
-        #[arg(long, short = 't')]
-        timeout: Option<i64>,
-
-        /// Wait for services to be running|healthy
-        #[arg(long)]
-        wait: bool,
-
-        /// timeout in seconds waiting for application to be running|healthy
-        #[arg(long)]
-        wait_timeout: Option<i64>,
-
-        service_names: Vec<String>,
-    },
-
-    #[command(hide = true)]
-    DockerCliPluginMetadata,
-}
-
-#[derive(Clone, ValueEnum)]
-enum Pull {
-    Always,
-    Missing,
-    Never,
 }
 
 fn canonical_argument<T: ValueEnum>(value: T) -> String {

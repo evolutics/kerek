@@ -144,6 +144,58 @@ changes.
 | `wheelsticks deploy --force-recreate x` | Always update service `x`                     |
 | `docker compose config --hash '*'`      | Show service config hashes                    |
 
+### Service update process
+
+Services are updated in increasing alphabetical order.
+
+For each service, containers are stopped then started (`stop-first`, default) or
+started then stopped (`start-first`), respectively, and this is repeated for
+replicas. The following visualizes the process for a service with 3 replicas.
+
+**`stop-first` case:**
+
+```
+               1. stop old
+┄┄┄┄───────────┤
+
+                       2. start new
+                       ├────────────────────────────────────────────┄┄┄┄
+
+                               3. stop old
+┄┄┄┄───────────────────────────┤
+
+                                       4. start new
+                                       ├────────────────────────────┄┄┄┄
+
+                                               5. stop old
+┄┄┄┄───────────────────────────────────────────┤
+
+                                                       6. start new
+                                                       ├────────────┄┄┄┄
+```
+
+**`start-first` case:**
+
+```
+               1. start new
+               ├────────────────────────────────────────────────────┄┄┄┄
+
+                       2. stop old
+┄┄┄┄───────────────────┤
+
+                               3. start new
+                               ├────────────────────────────────────┄┄┄┄
+
+                                       4. stop old
+┄┄┄┄───────────────────────────────────┤
+
+                                               5. start new
+                                               ├────────────────────┄┄┄┄
+
+                                                       6. stop old
+┄┄┄┄───────────────────────────────────────────────────┤
+```
+
 ### Podman support
 
 Pass `--container-engine podman` to use Podman instead of Docker.

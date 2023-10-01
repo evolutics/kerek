@@ -105,11 +105,11 @@ with it as follows:
 
 ```bash
 cd example
-wheelsticks deploy
+wheelsticks deploy --wait
 curl localhost:8080 # … prints "Hi from A"
 
 export GREET_VERSION=B
-wheelsticks deploy
+wheelsticks deploy --wait
 curl localhost:8080 # … prints "Hi from B"
 
 docker compose down

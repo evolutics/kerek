@@ -148,8 +148,8 @@ changes.
 
 Pass `--container-engine podman` to use Podman instead of Docker.
 
-Podman Compose is not supported as it currently lacks the functionality to
-calculate service config hashes (like `docker compose config --hash '*'`).
+Podman Compose is not supported as it currently lacks some needed features like
+the calculation of service config hashes (`docker compose config --hash '*'`).
 
 ## Alternatives
 

@@ -52,15 +52,16 @@ Compose workflows.
 - Docker or Podman
 - Docker Compose
 
-### Build
+### Installing
 
-Pre-compiled executables are coming soon, until then run
+See [releases](https://github.com/evolutics/wheelsticks/releases) for
+pre-compiled executables.
+
+Alternatively, build from source with
 
 ```bash
 cargo install --git https://github.com/evolutics/wheelsticks.git
 ```
-
-The built executable is installed into the folder `~/.cargo/bin` by default.
 
 ### Docker CLI plugin
 

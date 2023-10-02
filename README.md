@@ -146,7 +146,7 @@ changes.
 
 ### Service update process
 
-Services are updated in increasing alphabetical order.
+Services are updated in alphabetical order.
 
 For each service, containers are stopped then started (`stop-first`, default) or
 started then stopped (`start-first`), respectively, and this is repeated for

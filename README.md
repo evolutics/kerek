@@ -142,7 +142,7 @@ changes.
 | `wheelsticks deploy x`                  | Update service `x` if its config hash changed |
 | `wheelsticks deploy --force-recreate`   | Always update all services                    |
 | `wheelsticks deploy --force-recreate x` | Always update service `x`                     |
-| `docker compose config --hash '*'`      | Show service config hashes                    |
+| `docker compose config --hash '*'`      | Show service config hashes for Compose file   |
 
 ### Service update process
 

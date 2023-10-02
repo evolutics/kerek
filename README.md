@@ -12,9 +12,9 @@ the old container is stopped _before_ a new container is started
 (**`stop-first`** case):
 
 ```
-    old container          stop
+    Old container          Stop
 ┄┄┄┄───────────────────────┤
-                                           start       new container
+                                           Start       New container
                                            ├────────────────────────┄┄┄┄
 ```
 
@@ -25,9 +25,9 @@ Imagine that we could make the container lifetimes overlap instead
 (**`start-first`** case):
 
 ```
-    old container                          stop
+    Old container                          Stop
 ┄┄┄┄───────────────────────────────────────┤
-                           start                       new container
+                           Start                       New container
                            ├────────────────────────────────────────┄┄┄┄
 ```
 
@@ -156,44 +156,44 @@ replicas. The following visualizes the process for a service with 3 replicas.
 **`stop-first` case:**
 
 ```
-               1. stop old
+               1. Stop old
 ┄┄┄┄───────────┤
 
-                       2. start new
+                       2. Start new
                        ├────────────────────────────────────────────┄┄┄┄
 
-                               3. stop old
+                               3. Stop old
 ┄┄┄┄───────────────────────────┤
 
-                                       4. start new
+                                       4. Start new
                                        ├────────────────────────────┄┄┄┄
 
-                                               5. stop old
+                                               5. Stop old
 ┄┄┄┄───────────────────────────────────────────┤
 
-                                                       6. start new
+                                                       6. Start new
                                                        ├────────────┄┄┄┄
 ```
 
 **`start-first` case:**
 
 ```
-               1. start new
+               1. Start new
                ├────────────────────────────────────────────────────┄┄┄┄
 
-                       2. stop old
+                       2. Stop old
 ┄┄┄┄───────────────────┤
 
-                               3. start new
+                               3. Start new
                                ├────────────────────────────────────┄┄┄┄
 
-                                       4. stop old
+                                       4. Stop old
 ┄┄┄┄───────────────────────────────────┤
 
-                                               5. start new
+                                               5. Start new
                                                ├────────────────────┄┄┄┄
 
-                                                       6. stop old
+                                                       6. Stop old
 ┄┄┄┄───────────────────────────────────────────────────┤
 ```
 

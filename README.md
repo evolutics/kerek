@@ -123,7 +123,7 @@ while true; do curl --fail --max-time 0.2 localhost:8080; sleep 0.01s; done
 
 ### Conditions when services are updated
 
-By default, services are updated only if their service config hash changes. This
+By default, a service is updated only if its service config hash changes. This
 hash is calculated over all service fields in the Compose file except `build`,
 `deploy.replicas`, `pull_policy`, and `scale`
 (see [source](https://github.com/docker/compose/blob/main/pkg/compose/hash.go)).

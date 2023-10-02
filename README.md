@@ -38,7 +38,7 @@ The
 [Compose specification](https://github.com/compose-spec/compose-spec/blob/master/deploy.md)
 in fact defines options to distinguish above two cases: `stop-first` (default)
 and `start-first`. But support for this part of the specification is optional,
-and plain Docker Compose always applies `stop-first` irrespective of what's in
+and plain Docker Compose always applies `stop-first` irrespective of what is in
 your Compose files.
 
 However, Wheelsticks supports both options. Just run `wheelsticks deploy` in

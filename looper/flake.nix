@@ -19,7 +19,7 @@
           (with pkgs; [
             curl
           ])
-          ++ [travel-kit.defaultApp.${system}];
+          ++ [travel-kit.packages.${system}.default];
       };
     });
 }

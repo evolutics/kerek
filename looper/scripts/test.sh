@@ -5,7 +5,7 @@ set -o nounset
 set -o pipefail
 
 check_general_cleanliness() {
-  git ls-files -z | xargs -0 travel-kit check --
+  travel-kit
 }
 
 test_rust() {

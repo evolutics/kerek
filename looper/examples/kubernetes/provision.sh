@@ -19,5 +19,6 @@ ssh -F "${KEREK_SSH_CONFIGURATION}" "${KEREK_SSH_HOST}" -- \
 
 kubectl config set-cluster default --server "https://${KEREK_IP_ADDRESS}:6443"
 
-# TODO: Wait properly until service account "default" is available.
-sleep 10s
+while ! kubectl get serviceaccount/default; do
+  sleep 1s
+done

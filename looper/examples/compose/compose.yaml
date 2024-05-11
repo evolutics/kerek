@@ -2,6 +2,6 @@ services:
   web:
     healthcheck:
       test: "curl --fail localhost:8080 || exit 1"
-    image: k8s.gcr.io/echoserver:1.10
+    image: registry.k8s.io/echoserver:1.10
     ports:
       - "80:8080"

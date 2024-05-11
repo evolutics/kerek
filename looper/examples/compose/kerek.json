@@ -8,6 +8,9 @@
     "acceptance": ["../scripts/acceptance_test.sh"]
   },
   "environment_variables": {
+    "staging": {
+      "KEREK_VM_ID": "example_compose_staging"
+    },
     "production": {
       "KEREK_IP_ADDRESS": "192.168.60.159",
       "KEREK_SSH_HOST": "production"

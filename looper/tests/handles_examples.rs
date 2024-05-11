@@ -4,8 +4,8 @@ use std::path;
 use std::process;
 
 #[test]
-fn default() -> anyhow::Result<()> {
-    test("default")
+fn compose() -> anyhow::Result<()> {
+    test("compose")
 }
 
 #[test]

@@ -5,8 +5,8 @@ set -o nounset
 set -o pipefail
 
 provision() {
-  wheelsticks provision --ssh-configuration "${KEREK_SSH_CONFIGURATION}" -- \
-    "${KEREK_SSH_HOST}"
+  ssh -F "${KEREK_SSH_CONFIGURATION}" "${KEREK_SSH_HOST}" \
+    <"${KEREK_CACHE_FOLDER}/provision_on_remote.sh"
 }
 
 build() {

@@ -10,6 +10,10 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
 
     for (file, contents) in [
         (
+            &configuration.cache.folder.join("provision_on_remote.sh"),
+            include_str!("assets/provision_on_remote.sh"),
+        ),
+        (
             &configuration.cache.scripts,
             include_str!("assets/scripts.sh"),
         ),

@@ -10,10 +10,13 @@ provision() {
 }
 
 build() {
-  wheelsticks build
+  docker compose build
 }
 
 deploy() {
+  # TODO: Transfer built images via SSH as in
+  # `docker save -- … | docker --host "ssh://${KEREK_SSH_HOST}" load`.
+
   local -r custom_ssh_folder="${PWD}/${KEREK_CACHE_FOLDER}/custom_ssh"
   chmod +x -- "${custom_ssh_folder}/ssh"
   local -r real_ssh="$(which ssh)"

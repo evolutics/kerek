@@ -1,3 +1,3 @@
 fn main() -> anyhow::Result<()> {
-    vergen::vergen(vergen::Config::default())
+    vergen::EmitBuilder::builder().git_sha(false).emit()
 }

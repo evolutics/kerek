@@ -99,7 +99,7 @@ fn convert(main: UserFacingMain) -> Main {
     let vagrantfile = main.vagrantfile;
     let life_cycle = get_life_cycle(&cache, main.life_cycle);
     let tests = get_tests(&cache, main.tests);
-    let variables = get_variables();
+    let variables = get_variables(&cache);
     let staging = get_staging(&cache, main.environment_variables.staging);
     let production = get_production(main.environment_variables.production);
 
@@ -157,8 +157,12 @@ fn get_tests(cache: &Cache, tests: UserFacingTests) -> Tests {
     }
 }
 
-fn get_variables() -> collections::HashMap<ffi::OsString, ffi::OsString> {
-    [("KEREK_GIT_BRANCH".into(), "origin/main".into())].into()
+fn get_variables(cache: &Cache) -> collections::HashMap<ffi::OsString, ffi::OsString> {
+    [
+        ("KEREK_CACHE_FOLDER".into(), cache.folder.clone().into()),
+        ("KEREK_GIT_BRANCH".into(), "origin/main".into()),
+    ]
+    .into()
 }
 
 fn get_staging(

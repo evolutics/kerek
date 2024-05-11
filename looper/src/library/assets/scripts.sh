@@ -14,8 +14,12 @@ build() {
 }
 
 deploy() {
-  wheelsticks deploy --ssh-configuration "${KEREK_SSH_CONFIGURATION}" -- \
-    "${KEREK_SSH_HOST}"
+  local -r custom_ssh_folder="${PWD}/${KEREK_CACHE_FOLDER}/custom_ssh"
+  chmod +x -- "${custom_ssh_folder}/ssh"
+  local -r real_ssh="$(which ssh)"
+
+  PATH="${custom_ssh_folder}:${PATH}" REAL_SSH="${real_ssh}" docker --host \
+    "ssh://${KEREK_SSH_HOST}" compose up --detach --remove-orphans --wait
 }
 
 move_to_next_version() {

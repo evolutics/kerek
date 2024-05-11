@@ -7,9 +7,12 @@ edition = "2021"
 [dependencies]
 anyhow = "1"
 clap = { version = "4", features = [
+  "color",
   "derive",
   "error-context",
   "help",
+  "std",
+  "suggestions",
   "usage",
   "wrap_help",
 ] }

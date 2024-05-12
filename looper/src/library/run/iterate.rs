@@ -47,7 +47,7 @@ fn deploy(
     )
     .with_context(|| {
         let environment = &environment.id;
-        format!("Unable to deploy to {environment:?}.")
+        format!("Unable to deploy to environment {environment}.")
     })
 }
 
@@ -63,7 +63,7 @@ fn run_smoke_tests(
     )
     .with_context(|| {
         let environment = &environment.id;
-        format!("Smoke tests for {environment:?} failed.")
+        format!("Smoke tests failed for environment {environment}.")
     })
 }
 
@@ -79,7 +79,7 @@ fn run_acceptance_tests(
     )
     .with_context(|| {
         let environment = &environment.id;
-        format!("Acceptance tests for {environment:?} failed.")
+        format!("Acceptance tests failed for environment {environment}.")
     })
 }
 

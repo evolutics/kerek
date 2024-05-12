@@ -1,7 +1,5 @@
 services:
   web:
-    healthcheck:
-      test: "curl --fail localhost:8080 || exit 1"
-    image: registry.k8s.io/echoserver:1.10
+    image: docker.io/hashicorp/http-echo:1.0
     ports:
-      - "80:8080"
+      - "80:5678"

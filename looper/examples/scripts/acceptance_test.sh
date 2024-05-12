@@ -6,7 +6,6 @@ set -o pipefail
 
 echo 'Acceptance tests' >>log.txt
 
-result="$(curl --data 'Boo Far' --fail --show-error \
-  http://"${KEREK_IP_ADDRESS}")"
+result="$(curl --fail --show-error http://"${KEREK_IP_ADDRESS}")"
 readonly result
-[[ "${result}" == *'Boo Far'* ]]
+[[ "${result}" == *'hello-world'* ]]

@@ -7,6 +7,8 @@ use std::fs;
 use std::process;
 
 pub fn go(configuration: &configuration::Main, with_vm: bool) -> anyhow::Result<()> {
+    crate::log!("Setting up cache.");
+
     create_cache_folder(configuration)?;
     if with_vm {
         start_cache_vm(configuration)?;
@@ -69,6 +71,7 @@ fn start_cache_vm(configuration: &configuration::Main) -> anyhow::Result<()> {
             .envs(&configuration.variables)
             .envs(&configuration.staging.variables),
     )
+    .context("Unable to start cache VM.")
 }
 
 fn dump_cache_vm_ssh_configuration(configuration: &configuration::Main) -> anyhow::Result<()> {
@@ -85,4 +88,5 @@ fn dump_cache_vm_ssh_configuration(configuration: &configuration::Main) -> anyho
             .envs(&configuration.staging.variables)
             .stdout(file),
     )
+    .context("Unable to dump cache VM SSH configuration.")
 }

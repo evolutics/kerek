@@ -5,6 +5,8 @@ use std::fs;
 use std::process;
 
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
+    crate::log!("Tearing down cache.");
+
     delete_cache_vm_if_exists(configuration)?;
     delete_cache_folder_if_exists(configuration)
 }
@@ -19,6 +21,7 @@ fn delete_cache_vm_if_exists(configuration: &configuration::Main) -> anyhow::Res
                 .envs(&configuration.variables)
                 .envs(&configuration.staging.variables),
         )
+        .context("Unable to delete cache VM.")
     } else {
         Ok(())
     }

@@ -18,6 +18,7 @@ pub fn go(configuration: &configuration::Main, is_dry_run: bool) -> anyhow::Resu
 }
 
 fn run_base_tests(configuration: &configuration::Main) -> anyhow::Result<()> {
+    crate::log!("Running base tests.");
     command::status(
         process::Command::new(&configuration.tests.base[0])
             .args(&configuration.tests.base[1..])
@@ -27,6 +28,7 @@ fn run_base_tests(configuration: &configuration::Main) -> anyhow::Result<()> {
 }
 
 fn build(configuration: &configuration::Main) -> anyhow::Result<()> {
+    crate::log!("Building.");
     command::status(
         process::Command::new(&configuration.life_cycle.build[0])
             .args(&configuration.life_cycle.build[1..])
@@ -39,51 +41,49 @@ fn deploy(
     configuration: &configuration::Main,
     environment: &configuration::Environment,
 ) -> anyhow::Result<()> {
+    let environment_id = &environment.id;
+    crate::log!("Deploying to environment {environment_id}.");
     command::status(
         process::Command::new(&configuration.life_cycle.deploy[0])
             .args(&configuration.life_cycle.deploy[1..])
             .envs(&configuration.variables)
             .envs(&environment.variables),
     )
-    .with_context(|| {
-        let environment = &environment.id;
-        format!("Unable to deploy to environment {environment}.")
-    })
+    .with_context(|| format!("Unable to deploy to environment {environment_id}."))
 }
 
 fn run_smoke_tests(
     configuration: &configuration::Main,
     environment: &configuration::Environment,
 ) -> anyhow::Result<()> {
+    let environment_id = &environment.id;
+    crate::log!("Running smoke tests for environment {environment_id}.");
     command::status(
         process::Command::new(&configuration.tests.smoke[0])
             .args(&configuration.tests.smoke[1..])
             .envs(&configuration.variables)
             .envs(&environment.variables),
     )
-    .with_context(|| {
-        let environment = &environment.id;
-        format!("Smoke tests failed for environment {environment}.")
-    })
+    .with_context(|| format!("Smoke tests failed for environment {environment_id}."))
 }
 
 fn run_acceptance_tests(
     configuration: &configuration::Main,
     environment: &configuration::Environment,
 ) -> anyhow::Result<()> {
+    let environment_id = &environment.id;
+    crate::log!("Running acceptance tests for environment {environment_id}.");
     command::status(
         process::Command::new(&configuration.tests.acceptance[0])
             .args(&configuration.tests.acceptance[1..])
             .envs(&configuration.variables)
             .envs(&environment.variables),
     )
-    .with_context(|| {
-        let environment = &environment.id;
-        format!("Acceptance tests failed for environment {environment}.")
-    })
+    .with_context(|| format!("Acceptance tests failed for environment {environment_id}."))
 }
 
 fn move_to_next_version(configuration: &configuration::Main) -> anyhow::Result<()> {
+    crate::log!("Moving to next version.");
     command::status(
         process::Command::new(&configuration.life_cycle.move_to_next_version[0])
             .args(&configuration.life_cycle.move_to_next_version[1..])

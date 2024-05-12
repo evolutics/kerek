@@ -17,17 +17,17 @@ deploy() {
   # TODO: Transfer built images via SSH as in
   # `docker save -- … | docker --host "ssh://${KEREK_SSH_HOST}" load`.
 
-  run_with_custom_ssh docker compose up --detach --no-build --remove-orphans \
-    --wait
+  run_with_ssh_docker_host docker compose up --detach --no-build \
+    --remove-orphans --wait
 }
 
-run_with_custom_ssh() {
-  local -r custom_ssh_folder="${PWD}/${KEREK_CACHE_FOLDER}/custom_ssh"
-  chmod +x -- "${custom_ssh_folder}/ssh"
+run_with_ssh_docker_host() {
+  local -r configured_ssh_folder="${PWD}/${KEREK_CACHE_FOLDER}/configured_ssh"
+  chmod +x -- "${configured_ssh_folder}/ssh"
   local -r real_ssh="$(which ssh)"
 
-  DOCKER_HOST="ssh://${KEREK_SSH_HOST}" PATH="${custom_ssh_folder}:${PATH}" \
-    REAL_SSH="${real_ssh}" "$@"
+  DOCKER_HOST="ssh://${KEREK_SSH_HOST}" \
+    PATH="${configured_ssh_folder}:${PATH}" REAL_SSH="${real_ssh}" "$@"
 }
 
 move_to_next_version() {

@@ -4,9 +4,9 @@ use std::borrow;
 use std::fs;
 
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
-    let custom_ssh_cache_folder = configuration.cache.folder.join("custom_ssh");
+    let configured_ssh_cache_folder = configuration.cache.folder.join("configured_ssh");
 
-    for folder in [&configuration.cache.folder, &custom_ssh_cache_folder] {
+    for folder in [&configuration.cache.folder, &configured_ssh_cache_folder] {
         fs::create_dir_all(folder)
             .with_context(|| format!("Unable to create cache folder: {folder:?}"))?;
     }
@@ -25,7 +25,7 @@ pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
             &get_vagrantfile_contents(configuration)?,
         ),
         (
-            &custom_ssh_cache_folder.join("ssh"),
+            &configured_ssh_cache_folder.join("ssh"),
             include_str!("assets/ssh.sh"),
         ),
     ] {

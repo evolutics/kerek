@@ -1,9 +1,21 @@
+use super::command;
 use super::configuration;
 use anyhow::Context;
 use std::borrow;
+use std::ffi;
 use std::fs;
+use std::process;
 
-pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
+pub fn go(configuration: &configuration::Main, with_vm: bool) -> anyhow::Result<()> {
+    create_cache_folder(configuration)?;
+    if with_vm {
+        start_cache_vm(configuration)?;
+        dump_cache_vm_ssh_configuration(configuration)?;
+    }
+    Ok(())
+}
+
+fn create_cache_folder(configuration: &configuration::Main) -> anyhow::Result<()> {
     let configured_ssh_cache_folder = configuration.cache.folder.join("configured_ssh");
 
     for folder in [&configuration.cache.folder, &configured_ssh_cache_folder] {
@@ -47,4 +59,30 @@ fn get_vagrantfile_contents(
             contents.into()
         }
     })
+}
+
+fn start_cache_vm(configuration: &configuration::Main) -> anyhow::Result<()> {
+    command::status(
+        process::Command::new("vagrant")
+            .arg("up")
+            .current_dir(&configuration.cache.folder)
+            .envs(&configuration.variables)
+            .envs(&configuration.staging.variables),
+    )
+}
+
+fn dump_cache_vm_ssh_configuration(configuration: &configuration::Main) -> anyhow::Result<()> {
+    let path = &configuration.cache.ssh_configuration;
+    let file = fs::File::create(path)
+        .with_context(|| format!("Unable to create SSH configuration file: {path:?}"))?;
+    command::status(
+        process::Command::new("vagrant")
+            .arg("ssh-config")
+            .arg("--host")
+            .arg(&configuration.staging.variables[ffi::OsStr::new("KEREK_SSH_HOST")])
+            .current_dir(&configuration.cache.folder)
+            .envs(&configuration.variables)
+            .envs(&configuration.staging.variables)
+            .stdout(file),
+    )
 }

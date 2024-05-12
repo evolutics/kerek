@@ -5,6 +5,6 @@ use std::path;
 
 pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
     let configuration = configuration::get(configuration)?;
-    set_up_cache::go(&configuration)?;
+    set_up_cache::go(&configuration, false)?;
     provision::go(&configuration, &configuration.production)
 }

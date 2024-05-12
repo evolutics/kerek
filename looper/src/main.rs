@@ -42,6 +42,15 @@ enum Subcommand {
     Run,
 }
 
+#[macro_export]
+macro_rules! log {
+    ($($argument:tt)*) => {{
+        let context = env!("CARGO_PKG_NAME");
+        let contents = format!($($argument)*);
+        eprintln!("{context}: {contents}");
+    }};
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

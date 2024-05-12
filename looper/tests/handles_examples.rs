@@ -5,15 +5,42 @@ use std::process;
 
 #[test]
 fn compose() -> anyhow::Result<()> {
-    test("compose")
+    test(
+        "compose",
+        "Env tests: staging
+Env tests: production
+Move to next version
+Env tests: staging
+---
+Env tests: staging
+",
+    )
 }
 
 #[test]
 fn kubernetes() -> anyhow::Result<()> {
-    test("kubernetes")
+    test(
+        "kubernetes",
+        "Provision: production
+Provision: staging
+Build
+Deploy: staging
+Env tests: staging
+Deploy: production
+Env tests: production
+Move to next version
+Build
+Deploy: staging
+Env tests: staging
+---
+Build
+Deploy: staging
+Env tests: staging
+",
+    )
 }
 
-fn test(example: &str) -> anyhow::Result<()> {
+fn test(example: &str, expected_log: &str) -> anyhow::Result<()> {
     let folder = ["examples", example].iter().collect::<path::PathBuf>();
     reset_fake_production(&folder)?;
     let log_file = folder.join("log.txt");
@@ -24,17 +51,7 @@ fn test(example: &str) -> anyhow::Result<()> {
     assert!(!execute_subcommand("run", &folder)?.success());
     assert!(execute_subcommand("dry-run", &folder)?.success());
 
-    assert_eq!(
-        fs::read_to_string(log_file)?,
-        "Env tests: staging
-Env tests: production
-Move to next version
-Env tests: staging
----
-Env tests: staging
-",
-    );
-
+    assert_eq!(fs::read_to_string(log_file)?, expected_log);
     Ok(())
 }
 

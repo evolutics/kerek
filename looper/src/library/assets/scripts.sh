@@ -21,8 +21,8 @@ deploy() {
   chmod +x -- "${custom_ssh_folder}/ssh"
   local -r real_ssh="$(which ssh)"
 
-  PATH="${custom_ssh_folder}:${PATH}" REAL_SSH="${real_ssh}" docker --host \
-    "ssh://${KEREK_SSH_HOST}" compose up --detach --remove-orphans --wait
+  DOCKER_HOST="ssh://${KEREK_SSH_HOST}" PATH="${custom_ssh_folder}:${PATH}" \
+    REAL_SSH="${real_ssh}" docker compose up --detach --remove-orphans --wait
 }
 
 move_to_next_version() {

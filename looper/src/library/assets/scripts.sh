@@ -17,6 +17,7 @@ deploy() {
   local images
   mapfile -t images < <(docker compose config --images)
   readonly images
+
   docker save -- "${images[@]}" | run_with_ssh_docker_host docker load
 
   run_with_ssh_docker_host docker compose up --detach --no-build --pull never \

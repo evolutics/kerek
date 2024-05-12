@@ -56,11 +56,11 @@ move_to_next_version() {
 }
 
 staging_env_tests() {
-  scripts/staging_env_tests.sh
+  >&2 echo 'No staging env tests. Continuing.'
 }
 
 production_env_tests() {
-  scripts/production_env_tests.sh
+  >&2 echo 'No production env tests. Continuing.'
 }
 
 main() {

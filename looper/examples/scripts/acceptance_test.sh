@@ -6,6 +6,6 @@ set -o pipefail
 
 echo 'Acceptance tests' >>log.txt
 
-result="$(curl --fail --show-error http://"${KEREK_IP_ADDRESS}")"
+result="$(curl --fail-with-body http://"${KEREK_IP_ADDRESS}")"
 readonly result
 [[ "${result}" == *'hello-world'* ]]

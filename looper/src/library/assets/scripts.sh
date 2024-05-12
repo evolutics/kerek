@@ -5,21 +5,26 @@ set -o nounset
 set -o pipefail
 
 provision() {
+  >&2 echo 'Provisioning remote for Podman with Docker connections.'
   ssh -F "${KEREK_SSH_CONFIGURATION}" "${KEREK_SSH_HOST}" \
     <"${KEREK_CACHE_FOLDER}/provision_on_remote.sh"
 }
 
 build() {
+  >&2 echo 'Building with Docker Compose.'
   docker compose build
 }
 
 deploy() {
+  >&2 echo 'Getting image names from Compose configuration.'
   local images
   mapfile -t images < <(docker compose config --images)
   readonly images
 
+  >&2 echo "Transferring ${#images[@]} images: ${images[*]}"
   docker save -- "${images[@]}" | run_with_ssh_docker_host docker load
 
+  >&2 echo 'Deploying containers on remote.'
   run_with_ssh_docker_host docker compose up --detach --no-build --pull never \
     --remove-orphans --wait
 }
@@ -41,7 +46,7 @@ move_to_next_version() {
       HEAD.."${KEREK_GIT_BRANCH}" | tail -1)"
 
     if [[ -n "${child_commit}" ]]; then
-      echo "Checking out Git commit ${child_commit}."
+      >&2 echo "Checking out Git commit ${child_commit}."
       git checkout "${child_commit}"
       break
     fi

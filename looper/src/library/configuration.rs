@@ -17,7 +17,6 @@ pub struct Main {
     pub cache: Cache,
     pub vagrantfile: Option<path::PathBuf>,
     pub life_cycle: LifeCycle,
-    pub tests: Tests,
     pub variables: collections::HashMap<ffi::OsString, ffi::OsString>,
     pub staging: Environment,
     pub production: Environment,
@@ -37,14 +36,9 @@ pub struct LifeCycle {
     pub move_to_next_version: Vec<ffi::OsString>,
 }
 
-pub struct Tests {
-    pub base: Vec<ffi::OsString>,
-    pub smoke: Vec<ffi::OsString>,
-    pub acceptance: Vec<ffi::OsString>,
-}
-
 pub struct Environment {
     pub id: String,
+    pub env_tests: Vec<ffi::OsString>,
     pub variables: collections::HashMap<ffi::OsString, ffi::OsString>,
 }
 
@@ -56,9 +50,7 @@ struct UserFacingMain {
     #[serde(default)]
     pub life_cycle: UserFacingLifeCycle,
     #[serde(default)]
-    pub tests: UserFacingTests,
-    #[serde(default)]
-    pub environment_variables: UserFacingEnvironmentVariables,
+    pub environments: UserFacingEnvironments,
 }
 
 #[derive(Default, serde::Deserialize)]
@@ -76,38 +68,34 @@ struct UserFacingLifeCycle {
 
 #[derive(Default, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
-struct UserFacingTests {
+struct UserFacingEnvironments {
     #[serde(default)]
-    pub base: Vec<String>,
+    pub staging: UserFacingEnvironment,
     #[serde(default)]
-    pub smoke: Vec<String>,
-    #[serde(default)]
-    pub acceptance: Vec<String>,
+    pub production: UserFacingEnvironment,
 }
 
 #[derive(Default, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
-struct UserFacingEnvironmentVariables {
+struct UserFacingEnvironment {
     #[serde(default)]
-    pub staging: collections::HashMap<String, String>,
+    pub env_tests: Vec<String>,
     #[serde(default)]
-    pub production: collections::HashMap<String, String>,
+    pub variables: collections::HashMap<String, String>,
 }
 
 fn convert(main: UserFacingMain) -> Main {
     let cache = get_cache(main.cache_folder.unwrap_or_else(|| ".kerek".into()));
     let vagrantfile = main.vagrantfile;
     let life_cycle = get_life_cycle(&cache, main.life_cycle);
-    let tests = get_tests(&cache, main.tests);
     let variables = get_variables(&cache);
-    let staging = get_staging(&cache, main.environment_variables.staging);
-    let production = get_production(main.environment_variables.production);
+    let staging = get_staging(&cache, main.environments.staging);
+    let production = get_production(&cache, main.environments.production);
 
     Main {
         cache,
         vagrantfile,
         life_cycle,
-        tests,
         variables,
         staging,
         production,
@@ -149,14 +137,6 @@ fn command_or_default(command: Vec<String>, cache: &Cache, default: &str) -> Vec
     }
 }
 
-fn get_tests(cache: &Cache, tests: UserFacingTests) -> Tests {
-    Tests {
-        base: command_or_default(tests.base, cache, "base_test"),
-        smoke: command_or_default(tests.smoke, cache, "smoke_test"),
-        acceptance: command_or_default(tests.acceptance, cache, "acceptance_test"),
-    }
-}
-
 fn get_variables(cache: &Cache) -> collections::HashMap<ffi::OsString, ffi::OsString> {
     [
         ("KEREK_CACHE_FOLDER".into(), cache.folder.clone().into()),
@@ -165,13 +145,11 @@ fn get_variables(cache: &Cache) -> collections::HashMap<ffi::OsString, ffi::OsSt
     .into()
 }
 
-fn get_staging(
-    cache: &Cache,
-    custom_variables: collections::HashMap<String, String>,
-) -> Environment {
+fn get_staging(cache: &Cache, environment: UserFacingEnvironment) -> Environment {
     with_custom_variables(
         Environment {
             id: "staging".into(),
+            env_tests: command_or_default(environment.env_tests, cache, "staging_env_tests"),
             variables: [
                 ("KEREK_IP_ADDRESS".into(), "192.168.60.158".into()),
                 (
@@ -183,7 +161,7 @@ fn get_staging(
             ]
             .into(),
         },
-        custom_variables,
+        environment.variables,
     )
 }
 
@@ -204,10 +182,11 @@ fn with_custom_variables(
     }
 }
 
-fn get_production(custom_variables: collections::HashMap<String, String>) -> Environment {
+fn get_production(cache: &Cache, environment: UserFacingEnvironment) -> Environment {
     with_custom_variables(
         Environment {
             id: "production".into(),
+            env_tests: command_or_default(environment.env_tests, cache, "production_env_tests"),
             variables: [(
                 "KEREK_SSH_CONFIGURATION".into(),
                 ["safe", "ssh_configuration"]
@@ -217,6 +196,6 @@ fn get_production(custom_variables: collections::HashMap<String, String>) -> Env
             )]
             .into(),
         },
-        custom_variables,
+        environment.variables,
     )
 }

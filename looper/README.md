@@ -16,25 +16,19 @@ $ kerek run                                                 ┆
           │         │ Provision                             ┆
           │         ●╶──────────────────╮                   ┆
           │         │                   ┆                   ┆
-          │         │ Base tests        ┆                   ┆
-          │         ●                   ┆                   ┆
-          │         │                   ┆                   ┆
           │         │ Build             ┆                   ┆
           │         ●                   ┆                   ┆
           │         │                   ┆                   ┆
           │         │ Deploy            ┆                   ┆
           │         ●╶──────────────────┤                   ┆
           │         │                   ┆                   ┆
-          │         │ Smoke tests       ┆                   ┆
-          │         ●╶──────────────────┤                   ┆
-          │         │                   ┆                   ┆
-          │         │ Acceptance tests  ┆                   ┆
+          │         │ Staging env tests ┆                   ┆
           │         ●╶──────────────────┤                   ┆
           │         │                   ┆                   ┆
           │         │ Deploy            ┆                   ┆
           │         ●╶──────────────────────────────────────┤
           │         │                   ┆                   ┆
-          │         │ Smoke tests       ┆                   ┆
+          │         │ Production env tests                  ┆
           │         ●╶──────────────────────────────────────┤
           │         │                   ┆                   ┆
           │         │ Move to next version                  ┆

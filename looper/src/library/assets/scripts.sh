@@ -55,16 +55,12 @@ move_to_next_version() {
   done
 }
 
-base_test() {
-  scripts/base_test.sh
+staging_env_tests() {
+  scripts/staging_env_tests.sh
 }
 
-smoke_test() {
-  scripts/smoke_test.sh
-}
-
-acceptance_test() {
-  scripts/acceptance_test.sh
+production_env_tests() {
+  scripts/production_env_tests.sh
 }
 
 main() {

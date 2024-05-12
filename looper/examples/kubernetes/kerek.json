@@ -5,21 +5,22 @@
     "deploy": ["skaffold", "deploy"],
     "move_to_next_version": ["../scripts/move_to_next_version.sh"]
   },
-  "tests": {
-    "base": ["../scripts/base_test.sh"],
-    "smoke": ["../scripts/smoke_test.sh"],
-    "acceptance": ["../scripts/acceptance_test.sh"]
-  },
-  "environment_variables": {
+  "environments": {
     "staging": {
-      "KEREK_IP_ADDRESS": "192.168.60.160",
-      "KEREK_VM_ID": "example_kubernetes_staging",
-      "KUBECONFIG": "staging_kubeconfig"
+      "env_tests": ["../scripts/env_tests.sh"],
+      "variables": {
+        "KEREK_IP_ADDRESS": "192.168.60.160",
+        "KEREK_VM_ID": "example_kubernetes_staging",
+        "KUBECONFIG": "staging_kubeconfig"
+      }
     },
     "production": {
-      "KEREK_IP_ADDRESS": "192.168.60.161",
-      "KEREK_SSH_HOST": "production",
-      "KUBECONFIG": "safe/kubeconfig"
+      "env_tests": ["../scripts/env_tests.sh"],
+      "variables": {
+        "KEREK_IP_ADDRESS": "192.168.60.161",
+        "KEREK_SSH_HOST": "production",
+        "KUBECONFIG": "safe/kubeconfig"
+      }
     }
   }
 }

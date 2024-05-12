@@ -2,18 +2,19 @@
   "life_cycle": {
     "move_to_next_version": ["../scripts/move_to_next_version.sh"]
   },
-  "tests": {
-    "base": ["../scripts/base_test.sh"],
-    "smoke": ["../scripts/smoke_test.sh"],
-    "acceptance": ["../scripts/acceptance_test.sh"]
-  },
-  "environment_variables": {
+  "environments": {
     "staging": {
-      "KEREK_VM_ID": "example_compose_staging"
+      "env_tests": ["../scripts/env_tests.sh"],
+      "variables": {
+        "KEREK_VM_ID": "example_compose_staging"
+      }
     },
     "production": {
-      "KEREK_IP_ADDRESS": "192.168.60.159",
-      "KEREK_SSH_HOST": "production"
+      "env_tests": ["../scripts/env_tests.sh"],
+      "variables": {
+        "KEREK_IP_ADDRESS": "192.168.60.159",
+        "KEREK_SSH_HOST": "production"
+      }
     }
   }
 }

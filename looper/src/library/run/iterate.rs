@@ -4,27 +4,15 @@ use anyhow::Context;
 use std::process;
 
 pub fn go(configuration: &configuration::Main, is_dry_run: bool) -> anyhow::Result<()> {
-    run_base_tests(configuration)?;
     build(configuration)?;
     deploy(configuration, &configuration.staging)?;
-    run_smoke_tests(configuration, &configuration.staging)?;
-    run_acceptance_tests(configuration, &configuration.staging)?;
+    run_env_tests(configuration, &configuration.staging)?;
     if !is_dry_run {
         deploy(configuration, &configuration.production)?;
-        run_smoke_tests(configuration, &configuration.production)?;
+        run_env_tests(configuration, &configuration.production)?;
         move_to_next_version(configuration)?;
     }
     Ok(())
-}
-
-fn run_base_tests(configuration: &configuration::Main) -> anyhow::Result<()> {
-    crate::log!("Running base tests.");
-    command::status(
-        process::Command::new(&configuration.tests.base[0])
-            .args(&configuration.tests.base[1..])
-            .envs(&configuration.variables),
-    )
-    .context("Base tests failed.")
 }
 
 fn build(configuration: &configuration::Main) -> anyhow::Result<()> {
@@ -52,34 +40,19 @@ fn deploy(
     .with_context(|| format!("Unable to deploy to environment {environment_id}."))
 }
 
-fn run_smoke_tests(
+fn run_env_tests(
     configuration: &configuration::Main,
     environment: &configuration::Environment,
 ) -> anyhow::Result<()> {
     let environment_id = &environment.id;
-    crate::log!("Running smoke tests for environment {environment_id}.");
+    crate::log!("Running env tests for environment {environment_id}.");
     command::status(
-        process::Command::new(&configuration.tests.smoke[0])
-            .args(&configuration.tests.smoke[1..])
+        process::Command::new(&environment.env_tests[0])
+            .args(&environment.env_tests[1..])
             .envs(&configuration.variables)
             .envs(&environment.variables),
     )
-    .with_context(|| format!("Smoke tests failed for environment {environment_id}."))
-}
-
-fn run_acceptance_tests(
-    configuration: &configuration::Main,
-    environment: &configuration::Environment,
-) -> anyhow::Result<()> {
-    let environment_id = &environment.id;
-    crate::log!("Running acceptance tests for environment {environment_id}.");
-    command::status(
-        process::Command::new(&configuration.tests.acceptance[0])
-            .args(&configuration.tests.acceptance[1..])
-            .envs(&configuration.variables)
-            .envs(&environment.variables),
-    )
-    .with_context(|| format!("Acceptance tests failed for environment {environment_id}."))
+    .with_context(|| format!("Env tests failed for environment {environment_id}."))
 }
 
 fn move_to_next_version(configuration: &configuration::Main) -> anyhow::Result<()> {

@@ -1,12 +1,16 @@
 use super::super::command;
 use super::super::configuration;
+use super::super::provision;
+use super::super::set_up_cache;
+use super::super::tear_down_cache;
 use super::iterate;
-use super::reset;
 use std::process;
 
 pub fn go(configuration: &configuration::Main, is_dry_run: bool) -> anyhow::Result<()> {
     load_snapshot(configuration).or_else(|_| {
-        reset::go(configuration)?;
+        tear_down_cache::go(configuration)?;
+        set_up_cache::go(configuration, true)?;
+        provision::go(configuration, &configuration.staging)?;
         save_snapshot(configuration)
     })?;
 

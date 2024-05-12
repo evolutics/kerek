@@ -78,6 +78,7 @@ struct UserFacingEnvironments {
 #[derive(Default, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct UserFacingEnvironment {
+    pub id: Option<String>,
     #[serde(default)]
     pub env_tests: Vec<String>,
     #[serde(default)]
@@ -146,9 +147,9 @@ fn get_variables(cache: &Cache) -> collections::HashMap<ffi::OsString, ffi::OsSt
 }
 
 fn get_staging(cache: &Cache, environment: UserFacingEnvironment) -> Environment {
-    with_custom_variables(
+    with_completed_variables(
         Environment {
-            id: "staging".into(),
+            id: environment.id.unwrap_or_else(|| "staging".into()),
             env_tests: command_or_default(environment.env_tests, cache, "staging_env_tests"),
             variables: [
                 ("KEREK_IP_ADDRESS".into(), "192.168.60.158".into()),
@@ -165,11 +166,14 @@ fn get_staging(cache: &Cache, environment: UserFacingEnvironment) -> Environment
     )
 }
 
-fn with_custom_variables(
+fn with_completed_variables(
     environment: Environment,
     custom_variables: collections::HashMap<String, String>,
 ) -> Environment {
     let mut variables = environment.variables;
+
+    variables.insert("KEREK_ENVIRONMENT_ID".into(), environment.id.clone().into());
+
     variables.extend(
         custom_variables
             .into_iter()
@@ -183,9 +187,9 @@ fn with_custom_variables(
 }
 
 fn get_production(cache: &Cache, environment: UserFacingEnvironment) -> Environment {
-    with_custom_variables(
+    with_completed_variables(
         Environment {
-            id: "production".into(),
+            id: environment.id.unwrap_or_else(|| "production".into()),
             env_tests: command_or_default(environment.env_tests, cache, "production_env_tests"),
             variables: [(
                 "KEREK_SSH_CONFIGURATION".into(),

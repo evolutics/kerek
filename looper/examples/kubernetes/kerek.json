@@ -11,6 +11,7 @@
   },
   "environments": {
     "staging": {
+      "id": "acceptance",
       "env_tests": ["../scripts/env_tests.sh"],
       "variables": {
         "KEREK_IP_ADDRESS": "192.168.60.160",
@@ -19,6 +20,7 @@
       }
     },
     "production": {
+      "id": "demo",
       "env_tests": ["../scripts/env_tests.sh"],
       "variables": {
         "KEREK_IP_ADDRESS": "192.168.60.161",

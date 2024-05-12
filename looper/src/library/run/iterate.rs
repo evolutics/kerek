@@ -30,14 +30,14 @@ fn deploy(
     environment: &configuration::Environment,
 ) -> anyhow::Result<()> {
     let environment_id = &environment.id;
-    crate::log!("Deploying to environment {environment_id}.");
+    crate::log!("Deploying to {environment_id} environment.");
     command::status(
         process::Command::new(&configuration.life_cycle.deploy[0])
             .args(&configuration.life_cycle.deploy[1..])
             .envs(&configuration.variables)
             .envs(&environment.variables),
     )
-    .with_context(|| format!("Unable to deploy to environment {environment_id}."))
+    .with_context(|| format!("Unable to deploy to {environment_id} environment."))
 }
 
 fn run_env_tests(
@@ -45,14 +45,14 @@ fn run_env_tests(
     environment: &configuration::Environment,
 ) -> anyhow::Result<()> {
     let environment_id = &environment.id;
-    crate::log!("Running env tests for environment {environment_id}.");
+    crate::log!("Running env tests for {environment_id} environment.");
     command::status(
         process::Command::new(&environment.env_tests[0])
             .args(&environment.env_tests[1..])
             .envs(&configuration.variables)
             .envs(&environment.variables),
     )
-    .with_context(|| format!("Env tests failed for environment {environment_id}."))
+    .with_context(|| format!("Env tests failed for {environment_id} environment."))
 }
 
 fn move_to_next_version(configuration: &configuration::Main) -> anyhow::Result<()> {

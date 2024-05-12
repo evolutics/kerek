@@ -8,12 +8,12 @@ pub fn go(
     environment: &configuration::Environment,
 ) -> anyhow::Result<()> {
     let environment_id = &environment.id;
-    crate::log!("Provisioning environment {environment_id}.");
+    crate::log!("Provisioning {environment_id} environment.");
     command::status(
         process::Command::new(&configuration.life_cycle.provision[0])
             .args(&configuration.life_cycle.provision[1..])
             .envs(&configuration.variables)
             .envs(&environment.variables),
     )
-    .with_context(|| format!("Unable to provision environment {environment_id}."))
+    .with_context(|| format!("Unable to provision {environment_id} environment."))
 }

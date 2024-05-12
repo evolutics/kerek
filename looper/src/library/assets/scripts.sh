@@ -17,7 +17,8 @@ deploy() {
   # TODO: Transfer built images via SSH as in
   # `docker save -- … | docker --host "ssh://${KEREK_SSH_HOST}" load`.
 
-  run_with_custom_ssh docker compose up --detach --remove-orphans --wait
+  run_with_custom_ssh docker compose up --detach --no-build --remove-orphans \
+    --wait
 }
 
 run_with_custom_ssh() {

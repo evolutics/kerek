@@ -11,12 +11,12 @@ use std::process;
 pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
     tear_down_cache::go(configuration)?;
     set_up_cache::go(configuration)?;
-    start_vm(configuration)?;
-    dump_vm_ssh_configuration(configuration)?;
+    start_cache_vm(configuration)?;
+    dump_cache_vm_ssh_configuration(configuration)?;
     provision::go(configuration, &configuration.staging)
 }
 
-fn start_vm(configuration: &configuration::Main) -> anyhow::Result<()> {
+fn start_cache_vm(configuration: &configuration::Main) -> anyhow::Result<()> {
     command::status(
         process::Command::new("vagrant")
             .arg("up")
@@ -26,7 +26,7 @@ fn start_vm(configuration: &configuration::Main) -> anyhow::Result<()> {
     )
 }
 
-fn dump_vm_ssh_configuration(configuration: &configuration::Main) -> anyhow::Result<()> {
+fn dump_cache_vm_ssh_configuration(configuration: &configuration::Main) -> anyhow::Result<()> {
     let path = &configuration.cache.ssh_configuration;
     let file = fs::File::create(path)
         .with_context(|| format!("Unable to create SSH configuration file: {path:?}"))?;

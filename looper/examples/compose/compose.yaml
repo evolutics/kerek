@@ -1,5 +1,5 @@
 services:
   web:
-    image: docker.io/hashicorp/http-echo:1.0
+    image: hashicorp/http-echo:1.0
     ports:
       - "80:5678"

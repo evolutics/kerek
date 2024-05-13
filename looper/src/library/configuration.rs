@@ -33,12 +33,12 @@ pub struct LifeCycle {
     pub provision: Vec<ffi::OsString>,
     pub build: Vec<ffi::OsString>,
     pub deploy: Vec<ffi::OsString>,
+    pub env_tests: Vec<ffi::OsString>,
     pub move_to_next_version: Vec<ffi::OsString>,
 }
 
 pub struct Environment {
     pub id: String,
-    pub env_tests: Vec<ffi::OsString>,
     pub variables: collections::HashMap<ffi::OsString, ffi::OsString>,
 }
 
@@ -63,6 +63,8 @@ struct UserFacingLifeCycle {
     #[serde(default)]
     pub deploy: Vec<String>,
     #[serde(default)]
+    pub env_tests: Vec<String>,
+    #[serde(default)]
     pub move_to_next_version: Vec<String>,
 }
 
@@ -80,8 +82,6 @@ struct UserFacingEnvironments {
 struct UserFacingEnvironment {
     pub id: Option<String>,
     #[serde(default)]
-    pub env_tests: Vec<String>,
-    #[serde(default)]
     pub variables: collections::HashMap<String, String>,
 }
 
@@ -91,7 +91,7 @@ fn convert(main: UserFacingMain) -> Main {
     let life_cycle = get_life_cycle(&cache, main.life_cycle);
     let variables = get_variables(&cache);
     let staging = get_staging(&cache, main.environments.staging);
-    let production = get_production(&cache, main.environments.production);
+    let production = get_production(main.environments.production);
 
     Main {
         cache,
@@ -117,6 +117,7 @@ fn get_life_cycle(cache: &Cache, life_cycle: UserFacingLifeCycle) -> LifeCycle {
         provision: command_or_default(life_cycle.provision, cache, "provision"),
         build: command_or_default(life_cycle.build, cache, "build"),
         deploy: command_or_default(life_cycle.deploy, cache, "deploy"),
+        env_tests: command_or_default(life_cycle.env_tests, cache, "env_tests"),
         move_to_next_version: command_or_default(
             life_cycle.move_to_next_version,
             cache,
@@ -150,7 +151,6 @@ fn get_staging(cache: &Cache, environment: UserFacingEnvironment) -> Environment
     with_completed_variables(
         Environment {
             id: environment.id.unwrap_or_else(|| "staging".into()),
-            env_tests: command_or_default(environment.env_tests, cache, "staging_env_tests"),
             variables: [
                 ("KEREK_IP_ADDRESS".into(), "192.168.60.158".into()),
                 (
@@ -186,11 +186,10 @@ fn with_completed_variables(
     }
 }
 
-fn get_production(cache: &Cache, environment: UserFacingEnvironment) -> Environment {
+fn get_production(environment: UserFacingEnvironment) -> Environment {
     with_completed_variables(
         Environment {
             id: environment.id.unwrap_or_else(|| "production".into()),
-            env_tests: command_or_default(environment.env_tests, cache, "production_env_tests"),
             variables: [(
                 "KEREK_SSH_CONFIGURATION".into(),
                 ["safe", "ssh_configuration"]

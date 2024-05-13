@@ -47,8 +47,8 @@ fn run_env_tests(
     let environment_id = &environment.id;
     crate::log!("Running env tests for {environment_id} environment.");
     command::status(
-        process::Command::new(&environment.env_tests[0])
-            .args(&environment.env_tests[1..])
+        process::Command::new(&configuration.life_cycle.env_tests[0])
+            .args(&configuration.life_cycle.env_tests[1..])
             .envs(&configuration.variables)
             .envs(&environment.variables),
     )

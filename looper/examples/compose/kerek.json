@@ -1,16 +1,15 @@
 {
   "life_cycle": {
+    "env_tests": ["../scripts/env_tests.sh"],
     "move_to_next_version": ["../scripts/move_to_next_version.sh"]
   },
   "environments": {
     "staging": {
-      "env_tests": ["../scripts/env_tests.sh"],
       "variables": {
         "KEREK_VM_ID": "example_compose_staging"
       }
     },
     "production": {
-      "env_tests": ["../scripts/env_tests.sh"],
       "variables": {
         "KEREK_IP_ADDRESS": "192.168.60.159",
         "KEREK_SSH_HOST": "production"

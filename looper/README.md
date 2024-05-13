@@ -22,13 +22,13 @@ $ kerek run                                                 ┆
           │         │ Deploy            ┆                   ┆
           │         ●╶──────────────────┤                   ┆
           │         │                   ┆                   ┆
-          │         │ Staging env tests ┆                   ┆
+          │         │ Env tests         ┆                   ┆
           │         ●╶──────────────────┤                   ┆
           │         │                   ┆                   ┆
           │         │ Deploy            ┆                   ┆
           │         ●╶──────────────────────────────────────┤
           │         │                   ┆                   ┆
-          │         │ Production env tests                  ┆
+          │         │ Env tests         ┆                   ┆
           │         ●╶──────────────────────────────────────┤
           │         │                   ┆                   ┆
           │         │ Move to next version                  ┆

@@ -55,12 +55,8 @@ move_to_next_version() {
   done
 }
 
-staging_env_tests() {
-  >&2 echo 'No staging env tests. Continuing.'
-}
-
-production_env_tests() {
-  >&2 echo 'No production env tests. Continuing.'
+env_tests() {
+  >&2 echo 'No env tests. Continuing.'
 }
 
 main() {

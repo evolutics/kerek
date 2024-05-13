@@ -1,8 +1,14 @@
 use crate::library::configuration;
-use crate::library::r#loop;
+use crate::library::run;
 use std::path;
 
 pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
     let configuration = configuration::get(configuration)?;
-    r#loop::go(&configuration, r#loop::Mode::RunOnce)
+    run::go(
+        &configuration,
+        run::Options {
+            is_dry_run: false,
+            is_vm_snapshot_asserted: false,
+        },
+    )
 }

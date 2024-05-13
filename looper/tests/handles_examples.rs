@@ -23,8 +23,7 @@ fn log_only() -> anyhow::Result<()> {
 
     assert_eq!(
         fs::read_to_string(log_file)?,
-        "Provision: staging
-Build
+        "Build
 Deploy: staging
 Env tests: staging
 Deploy: production

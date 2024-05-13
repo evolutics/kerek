@@ -1,6 +1,6 @@
 {
   "life_cycle": {
-    "provision": ["./log.sh", "Provision"],
+    "provision": ["true"],
     "build": ["./log.sh", "Build"],
     "deploy": ["./log.sh", "Deploy"],
     "env_tests": ["./log.sh", "Env tests"],

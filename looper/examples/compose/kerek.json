@@ -1,7 +1,6 @@
 {
   "life_cycle": {
-    "env_tests": ["../scripts/env_tests.sh"],
-    "move_to_next_version": ["../scripts/move_to_next_version.sh"]
+    "env_tests": ["../env_tests.sh"]
   },
   "environments": {
     "staging": {

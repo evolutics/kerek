@@ -1,14 +1,9 @@
 {
   "life_cycle": {
     "provision": ["./provision.sh"],
-    "build": ["bash", "-c", "echo 'Build' >>log.txt"],
-    "deploy": [
-      "bash",
-      "-c",
-      "echo \"Deploy: ${KEREK_SSH_HOST}\" >>log.txt && skaffold deploy"
-    ],
-    "env_tests": ["../scripts/env_tests.sh"],
-    "move_to_next_version": ["../scripts/move_to_next_version.sh"]
+    "build": ["true"],
+    "deploy": ["skaffold", "deploy"],
+    "env_tests": ["../env_tests.sh"]
   },
   "environments": {
     "staging": {

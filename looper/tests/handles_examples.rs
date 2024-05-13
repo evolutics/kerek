@@ -5,24 +5,25 @@ use std::process;
 
 #[test]
 fn compose() -> anyhow::Result<()> {
-    test(
-        "compose",
-        "Env tests: staging
-Env tests: production
-Move to next version
-Env tests: staging
----
-Env tests: staging
-",
-    )
+    test_one_offs("compose")
 }
 
 #[test]
 fn kubernetes() -> anyhow::Result<()> {
-    test(
-        "kubernetes",
-        "Provision: production
-Provision: staging
+    test_one_offs("kubernetes")
+}
+
+#[test]
+fn log_only() -> anyhow::Result<()> {
+    let folder = path::Path::new("examples/log_only");
+    let log_file = folder.join("log.txt");
+    fs::write(&log_file, "")?;
+
+    assert!(!execute_subcommand("loop", folder)?.success());
+
+    assert_eq!(
+        fs::read_to_string(log_file)?,
+        "Provision: staging
 Build
 Deploy: staging
 Env tests: staging
@@ -32,26 +33,23 @@ Move to next version
 Build
 Deploy: staging
 Env tests: staging
----
-Build
-Deploy: staging
-Env tests: staging
+Deploy: production
+Env tests: production
+Move to next version
+Break
 ",
-    )
+    );
+    Ok(())
 }
 
-fn test(example: &str, expected_log: &str) -> anyhow::Result<()> {
+fn test_one_offs(example: &str) -> anyhow::Result<()> {
     let folder = ["examples", example].iter().collect::<path::PathBuf>();
     reset_fake_production(&folder)?;
-    let log_file = folder.join("log.txt");
-    fs::write(&log_file, "")?;
 
     assert!(execute_subcommand("clean", &folder)?.success());
     assert!(execute_subcommand("provision", &folder)?.success());
-    assert!(!execute_subcommand("loop", &folder)?.success());
+    assert!(execute_subcommand("run", &folder)?.success());
     assert!(execute_subcommand("dry-run", &folder)?.success());
-
-    assert_eq!(fs::read_to_string(log_file)?, expected_log);
     Ok(())
 }
 

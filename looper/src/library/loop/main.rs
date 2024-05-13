@@ -5,9 +5,10 @@ use super::super::set_up_cache;
 use super::super::tear_down_cache;
 use super::iterate;
 use anyhow::Context;
+use std::cmp;
 use std::process;
 
-pub fn go(configuration: &configuration::Main, is_dry_run: bool) -> anyhow::Result<()> {
+pub fn go(configuration: &configuration::Main, mode: Mode) -> anyhow::Result<()> {
     match load_vm_snapshot(configuration) {
         Err(_) => {
             crate::log!("No current VM snapshot exists, hence resetting.");
@@ -22,13 +23,23 @@ pub fn go(configuration: &configuration::Main, is_dry_run: bool) -> anyhow::Resu
 
     for iteration in 0.. {
         crate::log!("Executing iteration number {iteration}.");
-        iterate::go(configuration, is_dry_run)?;
-        if is_dry_run {
+
+        iterate::go(configuration, mode == Mode::DryRunOnce)?;
+        if mode != Mode::Loop {
             break;
         }
+
+        move_to_next_version(configuration)?;
         load_vm_snapshot(configuration)?;
     }
     Ok(())
+}
+
+#[derive(cmp::PartialEq)]
+pub enum Mode {
+    DryRunOnce,
+    Loop,
+    RunOnce,
 }
 
 const VERSIONED_VM_SNAPSHOT_NAME: &str = env!("VERGEN_GIT_SHA");
@@ -62,4 +73,14 @@ fn save_vm_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
             .envs(&configuration.staging.variables),
     )
     .with_context(|| format!("Unable to save VM snapshot: {VERSIONED_VM_SNAPSHOT_NAME:?}"))
+}
+
+fn move_to_next_version(configuration: &configuration::Main) -> anyhow::Result<()> {
+    crate::log!("Moving to next version.");
+    command::status(
+        process::Command::new(&configuration.life_cycle.move_to_next_version[0])
+            .args(&configuration.life_cycle.move_to_next_version[1..])
+            .envs(&configuration.variables),
+    )
+    .context("Unable to move to next version.")
 }

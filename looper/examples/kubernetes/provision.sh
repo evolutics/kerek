@@ -4,8 +4,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-echo "Provision: ${KEREK_SSH_HOST}" >>log.txt
-
 ssh -F "${KEREK_SSH_CONFIGURATION}" "${KEREK_SSH_HOST}" \
   KEREK_IP_ADDRESS="${KEREK_IP_ADDRESS}" 'bash -s' <<'EOF'
 export INSTALL_K3S_EXEC="--disable traefik --tls-san ${KEREK_IP_ADDRESS}"

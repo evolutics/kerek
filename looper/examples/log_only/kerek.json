@@ -1,0 +1,16 @@
+{
+  "life_cycle": {
+    "provision": ["./log.sh", "Provision"],
+    "build": ["./log.sh", "Build"],
+    "deploy": ["./log.sh", "Deploy"],
+    "env_tests": ["./log.sh", "Env tests"],
+    "move_to_next_version": ["./log.sh", "Move to next version"]
+  },
+  "environments": {
+    "staging": {
+      "variables": {
+        "KEREK_IP_ADDRESS": "192.168.60.162"
+      }
+    }
+  }
+}

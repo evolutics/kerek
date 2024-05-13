@@ -7,6 +7,7 @@ use subcommand::clean;
 use subcommand::dry_run;
 use subcommand::provision;
 use subcommand::r#loop;
+use subcommand::run;
 
 fn main() -> anyhow::Result<()> {
     let arguments = Arguments::parse();
@@ -16,6 +17,7 @@ fn main() -> anyhow::Result<()> {
         Subcommand::DryRun => dry_run::go(arguments.configuration),
         Subcommand::Loop => r#loop::go(arguments.configuration),
         Subcommand::Provision => provision::go(arguments.configuration),
+        Subcommand::Run => run::go(arguments.configuration),
     }
 }
 
@@ -40,6 +42,8 @@ enum Subcommand {
     Loop,
     /// Applies provision script to production.
     Provision,
+    /// Builds, tests, deploys once.
+    Run,
 }
 
 #[macro_export]

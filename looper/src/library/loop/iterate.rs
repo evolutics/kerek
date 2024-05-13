@@ -10,7 +10,6 @@ pub fn go(configuration: &configuration::Main, is_dry_run: bool) -> anyhow::Resu
     if !is_dry_run {
         deploy(configuration, &configuration.production)?;
         run_env_tests(configuration, &configuration.production)?;
-        move_to_next_version(configuration)?;
     }
     Ok(())
 }
@@ -53,14 +52,4 @@ fn run_env_tests(
             .envs(&environment.variables),
     )
     .with_context(|| format!("Env tests failed for {environment_id} environment."))
-}
-
-fn move_to_next_version(configuration: &configuration::Main) -> anyhow::Result<()> {
-    crate::log!("Moving to next version.");
-    command::status(
-        process::Command::new(&configuration.life_cycle.move_to_next_version[0])
-            .args(&configuration.life_cycle.move_to_next_version[1..])
-            .envs(&configuration.variables),
-    )
-    .context("Unable to move to next version.")
 }

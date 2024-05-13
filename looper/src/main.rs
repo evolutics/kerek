@@ -6,7 +6,7 @@ use std::path;
 use subcommand::clean;
 use subcommand::dry_run;
 use subcommand::provision;
-use subcommand::run;
+use subcommand::r#loop;
 
 fn main() -> anyhow::Result<()> {
     let arguments = Arguments::parse();
@@ -14,8 +14,8 @@ fn main() -> anyhow::Result<()> {
     match arguments.subcommand {
         Subcommand::Clean => clean::go(arguments.configuration),
         Subcommand::DryRun => dry_run::go(arguments.configuration),
+        Subcommand::Loop => r#loop::go(arguments.configuration),
         Subcommand::Provision => provision::go(arguments.configuration),
-        Subcommand::Run => run::go(arguments.configuration),
     }
 }
 
@@ -36,10 +36,10 @@ enum Subcommand {
     Clean,
     /// Builds, tests, deploys once to staging only.
     DryRun,
+    /// Builds, tests, deploys in a loop.
+    Loop,
     /// Applies provision script to production.
     Provision,
-    /// Builds, tests, deploys in a loop.
-    Run,
 }
 
 #[macro_export]

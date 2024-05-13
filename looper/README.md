@@ -10,7 +10,7 @@ Build, test, deploy your app on each commit.
                     binary              staging VM          environment
                                                             ╷
                                                             ┆
-$ kerek run                                                 ┆
+$ kerek loop                                                ┆
 ●╶────────╭───╴>╶───╮                                       ┆
           │         │                                       ┆
           │         │ Provision                             ┆

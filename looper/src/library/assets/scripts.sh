@@ -38,6 +38,10 @@ run_with_ssh_docker_host() {
     PATH="${configured_ssh_folder}:${PATH}" REAL_SSH="${real_ssh}" "$@"
 }
 
+env_tests() {
+  >&2 echo 'No env tests. Continuing.'
+}
+
 move_to_next_version() {
   while true; do
     git fetch --prune
@@ -53,10 +57,6 @@ move_to_next_version() {
 
     sleep "$(("${RANDOM}" % 20))s"
   done
-}
-
-env_tests() {
-  >&2 echo 'No env tests. Continuing.'
 }
 
 main() {

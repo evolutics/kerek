@@ -9,20 +9,10 @@ use std::cmp;
 use std::process;
 
 pub fn go(configuration: &configuration::Main, mode: Mode) -> anyhow::Result<()> {
-    match load_vm_snapshot(configuration) {
-        Err(_) => {
-            crate::log!("No current VM snapshot exists, hence resetting.");
-            tear_down_cache::go(configuration)?;
-            set_up_cache::go(configuration, true)?;
-            provision::go(configuration, &configuration.staging)?;
-            save_vm_snapshot(configuration)?;
-        }
-
-        Ok(()) => crate::log!("Current VM snapshot loaded."),
-    };
-
     for iteration in 0.. {
         crate::log!("Executing iteration number {iteration}.");
+
+        reset(configuration, iteration == 0)?;
 
         iterate::go(configuration, mode == Mode::DryRunOnce)?;
         if mode != Mode::Loop {
@@ -30,7 +20,6 @@ pub fn go(configuration: &configuration::Main, mode: Mode) -> anyhow::Result<()>
         }
 
         move_to_next_version(configuration)?;
-        load_vm_snapshot(configuration)?;
     }
     Ok(())
 }
@@ -43,6 +32,19 @@ pub enum Mode {
 }
 
 const VERSIONED_VM_SNAPSHOT_NAME: &str = env!("VERGEN_GIT_SHA");
+
+fn reset(configuration: &configuration::Main, is_first_iteration: bool) -> anyhow::Result<()> {
+    match load_vm_snapshot(configuration) {
+        Err(_) if is_first_iteration => {
+            crate::log!("No current VM snapshot exists, hence resetting from scratch.");
+            tear_down_cache::go(configuration)?;
+            set_up_cache::go(configuration, true)?;
+            provision::go(configuration, &configuration.staging)?;
+            save_vm_snapshot(configuration)
+        }
+        result => result,
+    }
+}
 
 fn load_vm_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
     crate::log!("Loading VM snapshot: {VERSIONED_VM_SNAPSHOT_NAME:?}");

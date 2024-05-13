@@ -22,7 +22,7 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
         move_to_next_version(&configuration)?;
     }
 
-    Ok(())
+    unreachable!("Loop should not complete.")
 }
 
 fn move_to_next_version(configuration: &configuration::Main) -> anyhow::Result<()> {

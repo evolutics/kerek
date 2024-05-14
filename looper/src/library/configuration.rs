@@ -158,7 +158,6 @@ fn get_staging(cache: &Cache, environment: UserFacingEnvironment) -> Environment
                     (&cache.ssh_configuration).into(),
                 ),
                 ("KEREK_SSH_HOST".into(), "staging".into()),
-                ("KEREK_VM_ID".into(), "staging".into()),
             ]
             .into(),
         },

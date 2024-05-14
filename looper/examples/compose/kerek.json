@@ -4,9 +4,7 @@
   },
   "environments": {
     "staging": {
-      "variables": {
-        "KEREK_VM_ID": "example_compose_staging"
-      }
+      "id": "stage"
     },
     "production": {
       "variables": {

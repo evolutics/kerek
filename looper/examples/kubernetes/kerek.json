@@ -10,7 +10,6 @@
       "id": "acceptance",
       "variables": {
         "KEREK_IP_ADDRESS": "192.168.60.160",
-        "KEREK_VM_ID": "example_kubernetes_staging",
         "KUBECONFIG": "staging_kubeconfig"
       }
     },

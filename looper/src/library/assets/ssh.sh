@@ -6,4 +6,4 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-"${REAL_SSH}" -F "${KEREK_SSH_CONFIGURATION}" "$@"
+"${KEREK_REAL_SSH}" -F "${KEREK_SSH_CONFIGURATION}" "$@"

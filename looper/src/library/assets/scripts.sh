@@ -34,8 +34,8 @@ run_with_ssh_docker_host() {
   chmod +x -- "${configured_ssh_folder}/ssh"
   local -r real_ssh="$(which ssh)"
 
-  DOCKER_HOST="ssh://${KEREK_SSH_HOST}" \
-    PATH="${configured_ssh_folder}:${PATH}" REAL_SSH="${real_ssh}" "$@"
+  DOCKER_HOST="ssh://${KEREK_SSH_HOST}" KEREK_REAL_SSH="${real_ssh}" \
+    PATH="${configured_ssh_folder}:${PATH}" "$@"
 }
 
 env_tests() {

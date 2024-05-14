@@ -2,7 +2,6 @@ use super::command;
 use super::configuration;
 use anyhow::Context;
 use std::borrow;
-use std::ffi;
 use std::fs;
 use std::process;
 
@@ -82,7 +81,7 @@ fn dump_cache_vm_ssh_configuration(configuration: &configuration::Main) -> anyho
         process::Command::new("vagrant")
             .arg("ssh-config")
             .arg("--host")
-            .arg(&configuration.staging.variables[ffi::OsStr::new("KEREK_SSH_HOST")])
+            .arg(&configuration.staging.id)
             .current_dir(&configuration.cache.folder)
             .envs(&configuration.variables)
             .envs(&configuration.staging.variables)

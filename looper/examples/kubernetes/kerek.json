@@ -14,10 +14,8 @@
       }
     },
     "production": {
-      "id": "demo",
       "variables": {
         "KEREK_IP_ADDRESS": "192.168.60.161",
-        "KEREK_SSH_HOST": "production",
         "KUBECONFIG": "safe/kubeconfig"
       }
     }

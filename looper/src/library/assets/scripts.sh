@@ -6,7 +6,7 @@ set -o pipefail
 
 provision() {
   >&2 echo 'Provisioning remote for Podman with Docker connections.'
-  ssh -F "${KEREK_SSH_CONFIGURATION}" "${KEREK_SSH_HOST}" \
+  ssh -F "${KEREK_SSH_CONFIGURATION}" "${KEREK_ENVIRONMENT_ID}" \
     <"${KEREK_CACHE_FOLDER}/provision_on_remote.sh"
 }
 
@@ -34,7 +34,7 @@ run_with_ssh_docker_host() {
   chmod +x -- "${configured_ssh_folder}/ssh"
   local -r real_ssh="$(which ssh)"
 
-  DOCKER_HOST="ssh://${KEREK_SSH_HOST}" KEREK_REAL_SSH="${real_ssh}" \
+  DOCKER_HOST="ssh://${KEREK_ENVIRONMENT_ID}" KEREK_REAL_SSH="${real_ssh}" \
     PATH="${configured_ssh_folder}:${PATH}" "$@"
 }
 

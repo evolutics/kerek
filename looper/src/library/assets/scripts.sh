@@ -5,26 +5,26 @@ set -o nounset
 set -o pipefail
 
 provision() {
-  >&2 echo 'Provisioning remote for Podman with Docker connections.'
+  echo 'Provisioning remote for Podman with Docker connections.' >&2
   ssh -F "${KEREK_SSH_CONFIGURATION}" "${KEREK_ENVIRONMENT_ID}" \
     <"${KEREK_CACHE_FOLDER}/provision_on_remote.sh"
 }
 
 build() {
-  >&2 echo 'Building with Docker Compose.'
+  echo 'Building with Docker Compose.' >&2
   docker compose build
 }
 
 deploy() {
-  >&2 echo 'Getting image names from Compose configuration.'
+  echo 'Getting image names from Compose configuration.' >&2
   local images
   mapfile -t images < <(docker compose config --images)
   readonly images
 
-  >&2 echo "Transferring ${#images[@]} images: ${images[*]}"
+  echo "Transferring ${#images[@]} images: ${images[*]}" >&2
   docker save -- "${images[@]}" | run_with_ssh_docker_host docker load
 
-  >&2 echo 'Deploying containers on remote.'
+  echo 'Deploying containers on remote.' >&2
   run_with_ssh_docker_host docker compose up --detach --no-build --pull never \
     --remove-orphans --wait
 }
@@ -39,7 +39,7 @@ run_with_ssh_docker_host() {
 }
 
 env_tests() {
-  >&2 echo 'No env tests. Continuing.'
+  echo 'No env tests. Continuing.' >&2
 }
 
 move_to_next_version() {
@@ -50,7 +50,7 @@ move_to_next_version() {
       HEAD.."${KEREK_GIT_BRANCH}" | tail -1)"
 
     if [[ -n "${child_commit}" ]]; then
-      >&2 echo "Checking out Git commit ${child_commit}."
+      echo "Checking out Git commit ${child_commit}." >&2
       git checkout "${child_commit}"
       break
     fi

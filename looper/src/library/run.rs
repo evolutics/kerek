@@ -79,7 +79,7 @@ fn build(configuration: &configuration::Main) -> anyhow::Result<()> {
             .args(&configuration.life_cycle.build[1..])
             .envs(&configuration.variables),
     )
-    .context("Unable to build.")
+    .context("Unable to build")
 }
 
 fn deploy(
@@ -94,7 +94,7 @@ fn deploy(
             .envs(&configuration.variables)
             .envs(&environment.variables),
     )
-    .with_context(|| format!("Unable to deploy to {environment_id} environment."))
+    .with_context(|| format!("Unable to deploy to {environment_id} environment"))
 }
 
 fn run_env_tests(
@@ -109,5 +109,5 @@ fn run_env_tests(
             .envs(&configuration.variables)
             .envs(&environment.variables),
     )
-    .with_context(|| format!("Env tests failed for {environment_id} environment."))
+    .with_context(|| format!("Env tests failed for {environment_id} environment"))
 }

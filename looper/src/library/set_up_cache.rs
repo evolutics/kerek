@@ -70,7 +70,7 @@ fn start_cache_vm(configuration: &configuration::Main) -> anyhow::Result<()> {
             .envs(&configuration.variables)
             .envs(&configuration.staging.variables),
     )
-    .context("Unable to start cache VM.")
+    .context("Unable to start cache VM")
 }
 
 fn dump_cache_vm_ssh_configuration(configuration: &configuration::Main) -> anyhow::Result<()> {
@@ -87,5 +87,5 @@ fn dump_cache_vm_ssh_configuration(configuration: &configuration::Main) -> anyho
             .envs(&configuration.staging.variables)
             .stdout(file),
     )
-    .context("Unable to dump cache VM SSH configuration.")
+    .context("Unable to dump cache VM SSH configuration")
 }

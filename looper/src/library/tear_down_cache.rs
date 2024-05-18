@@ -21,7 +21,7 @@ fn delete_cache_vm_if_exists(configuration: &configuration::Main) -> anyhow::Res
                 .envs(&configuration.variables)
                 .envs(&configuration.staging.variables),
         )
-        .context("Unable to delete cache VM.")
+        .context("Unable to delete cache VM")
     } else {
         Ok(())
     }

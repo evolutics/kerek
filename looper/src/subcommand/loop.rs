@@ -32,5 +32,5 @@ fn move_to_next_version(configuration: &configuration::Main) -> anyhow::Result<(
             .args(&configuration.life_cycle.move_to_next_version[1..])
             .envs(&configuration.variables),
     )
-    .context("Unable to move to next version.")
+    .context("Unable to move to next version")
 }

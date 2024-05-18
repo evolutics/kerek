@@ -15,5 +15,5 @@ pub fn go(
             .envs(&configuration.variables)
             .envs(&environment.variables),
     )
-    .with_context(|| format!("Unable to provision {environment_id} environment."))
+    .with_context(|| format!("Unable to provision {environment_id} environment"))
 }

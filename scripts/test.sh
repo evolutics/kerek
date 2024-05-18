@@ -4,11 +4,12 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-check_general_cleanliness() {
-  travel-kit
-}
+main() {
+  local -r script_folder="$(dirname "$(readlink --canonicalize "$0")")"
+  cd "$(dirname "${script_folder}")"
 
-test_rust() {
+  travel-kit
+
   rustup component add rustfmt
   cargo fmt --all -- --check
 
@@ -17,14 +18,6 @@ test_rust() {
 
   cargo check
   cargo test
-}
-
-main() {
-  local -r script_folder="$(dirname "$(readlink --canonicalize "$0")")"
-  cd "$(dirname "${script_folder}")"
-
-  check_general_cleanliness
-  test_rust
 }
 
 main "$@"

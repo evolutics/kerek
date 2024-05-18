@@ -232,6 +232,7 @@ enum Subcommand {
         #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
         container_engine: ContainerEngine,
 
+        /// Services to consider
         service_names: Vec<String>,
     },
 
@@ -420,7 +421,6 @@ mod tests {
             node.find_subcommand_mut(subcommand).expect(subcommand)
         });
         let help_message = leaf.render_help();
-        let help_message = help_message.to_string().replace("...  ", "...");
         let help_section = format!("\n\n### `{help_command}`\n\n```\n{help_message}```\n");
 
         assert!(get_readme().contains(&help_section))

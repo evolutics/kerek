@@ -251,7 +251,7 @@ Create or update services
 Usage: wheelsticks deploy [OPTIONS] [SERVICE_NAMES]...
 
 Arguments:
-  [SERVICE_NAMES]...
+  [SERVICE_NAMES]...  Services to consider
 
 Options:
       --ansi <ANSI>

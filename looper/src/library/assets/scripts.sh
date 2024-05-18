@@ -25,20 +25,14 @@ deploy() {
   readonly images
 
   echo "Transferring ${#images[@]} images: ${images[*]}" >&2
-  docker save -- "${images[@]}" | run_with_ssh_docker_host docker load
+  docker save -- "${images[@]}" \
+    | wheelsticks run-with-ssh-config -- "${KEREK_SSH_CONFIGURATION}" docker \
+      --host "ssh://${KEREK_ENVIRONMENT_ID}" load
 
   echo 'Deploying containers on remote.' >&2
-  run_with_ssh_docker_host docker compose up --detach --no-build --pull never \
-    --remove-orphans --wait
-}
-
-run_with_ssh_docker_host() {
-  local -r configured_ssh_folder="${PWD}/${KEREK_CACHE_FOLDER}/configured_ssh"
-  chmod +x -- "${configured_ssh_folder}/ssh"
-  local -r real_ssh="$(which ssh)"
-
-  DOCKER_HOST="ssh://${KEREK_ENVIRONMENT_ID}" KEREK_REAL_SSH="${real_ssh}" \
-    PATH="${configured_ssh_folder}:${PATH}" "$@"
+  wheelsticks run-with-ssh-config -- "${KEREK_SSH_CONFIGURATION}" docker \
+    --host "ssh://${KEREK_ENVIRONMENT_ID}" compose up --detach --no-build \
+    --pull never --remove-orphans --wait
 }
 
 env_tests() {

@@ -222,8 +222,11 @@ Zero-downtime deployments for Docker Compose
 Usage: wheelsticks [OPTIONS] <COMMAND>
 
 Commands:
-  deploy  Create or update services
-  help    Print this message or the help of the given subcommand(s)
+  deploy               Create or update services
+  run-with-ssh-config  Runs command with wrapped `ssh` in `$PATH` that uses
+                           given SSH config
+  help                 Print this message or the help of the given
+                           subcommand(s)
 
 Options:
       --config <CONFIG>        Location of client config files
@@ -311,4 +314,19 @@ Options:
           podman]
   -h, --help
           Print help (see more with '--help')
+```
+
+### `wheelsticks run-with-ssh-config -h`
+
+```
+Runs command with wrapped `ssh` in `$PATH` that uses given SSH config
+
+Usage: wheelsticks run-with-ssh-config <SSH_CONFIG> <COMMAND>...
+
+Arguments:
+  <SSH_CONFIG>  Path to SSH config file
+  <COMMAND>...  Program with arguments to run
+
+Options:
+  -h, --help  Print help (see more with '--help')
 ```

@@ -3,9 +3,11 @@ mod deploy;
 mod docker;
 mod docker_cli_plugin_metadata;
 mod log;
+mod run_with_ssh_config;
 
 use clap::Parser;
 use clap::ValueEnum;
+use std::path;
 
 fn main() -> anyhow::Result<()> {
     let Cli {
@@ -125,6 +127,14 @@ fn main() -> anyhow::Result<()> {
             println!("{metadata}");
             Ok(())
         }
+
+        Subcommand::RunWithSshConfig {
+            command,
+            ssh_config,
+        } => run_with_ssh_config::go(run_with_ssh_config::In {
+            command,
+            ssh_config,
+        }),
     }
 }
 
@@ -238,6 +248,21 @@ enum Subcommand {
 
     #[command(hide = true)]
     DockerCliPluginMetadata,
+
+    /// Runs command with wrapped `ssh` in `$PATH` that uses given SSH config
+    ///
+    /// This may be useful for an SSH connection to a Docker host with a custom
+    /// SSH config file. The Docker CLI supports the form `ssh://…` to specify
+    /// an SSH connection with username, hostname, port, etc. However, a custom
+    /// SSH config file other than `~/.ssh/config` cannot be provided.
+    RunWithSshConfig {
+        /// Path to SSH config file
+        ssh_config: path::PathBuf,
+
+        /// Program with arguments to run
+        #[arg(required = true)]
+        command: Vec<String>,
+    },
 }
 
 // Top-level Compose arguments.
@@ -411,6 +436,7 @@ mod tests {
 
     #[test_case::test_case(&[]; "")]
     #[test_case::test_case(&["deploy"]; "deploy")]
+    #[test_case::test_case(&["run-with-ssh-config"]; "run-with-ssh-config")]
     fn readme_includes_subcommand_help(subcommands: &[&str]) {
         let help_command = [&[env!("CARGO_BIN_NAME")], subcommands, &["-h"]]
             .concat()

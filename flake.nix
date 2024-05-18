@@ -20,6 +20,11 @@
             curl
           ])
           ++ [travel-kit.packages.${system}.default];
+
+        # TODO: Remove once looper is integrated.
+        shellHook = ''
+          export PATH="$PWD/target/debug:$PATH"
+        '';
       };
     });
 }

@@ -17,12 +17,9 @@ pub fn go(configuration: &configuration::Main, with_vm: bool) -> anyhow::Result<
 }
 
 fn create_cache_folder(configuration: &configuration::Main) -> anyhow::Result<()> {
-    let configured_ssh_cache_folder = configuration.cache.folder.join("configured_ssh");
-
-    for folder in [&configuration.cache.folder, &configured_ssh_cache_folder] {
-        fs::create_dir_all(folder)
-            .with_context(|| format!("Unable to create cache folder: {folder:?}"))?;
-    }
+    let folder = &configuration.cache.folder;
+    fs::create_dir_all(folder)
+        .with_context(|| format!("Unable to create cache folder: {folder:?}"))?;
 
     for (file, contents) in [
         (
@@ -36,10 +33,6 @@ fn create_cache_folder(configuration: &configuration::Main) -> anyhow::Result<()
         (
             &configuration.cache.vagrantfile,
             &get_vagrantfile_contents(configuration)?,
-        ),
-        (
-            &configured_ssh_cache_folder.join("ssh"),
-            include_str!("assets/ssh.sh"),
         ),
     ] {
         fs::write(file, contents)

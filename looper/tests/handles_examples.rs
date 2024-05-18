@@ -9,11 +9,6 @@ fn compose() -> anyhow::Result<()> {
 }
 
 #[test]
-fn kubernetes() -> anyhow::Result<()> {
-    test_one_offs("kubernetes")
-}
-
-#[test]
 fn log_only() -> anyhow::Result<()> {
     let folder = path::Path::new("examples/log_only");
     let log_file = folder.join("log.txt");

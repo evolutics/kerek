@@ -25,7 +25,7 @@ pub struct Main {
 pub struct Cache {
     pub folder: path::PathBuf,
     pub scripts: path::PathBuf,
-    pub ssh_configuration: path::PathBuf,
+    pub ssh_config: path::PathBuf,
     pub vagrantfile: path::PathBuf,
 }
 
@@ -106,7 +106,7 @@ fn convert(main: UserFacingMain) -> Main {
 fn get_cache(folder: path::PathBuf) -> Cache {
     Cache {
         scripts: folder.join("scripts.sh"),
-        ssh_configuration: folder.join("ssh_configuration"),
+        ssh_config: folder.join("ssh_config"),
         vagrantfile: folder.join("Vagrantfile"),
         folder,
     }
@@ -153,10 +153,7 @@ fn get_staging(cache: &Cache, environment: UserFacingEnvironment) -> Environment
             id: environment.id.unwrap_or_else(|| "staging".into()),
             variables: [
                 ("KEREK_IP_ADDRESS".into(), "192.168.60.158".into()),
-                (
-                    "KEREK_SSH_CONFIGURATION".into(),
-                    (&cache.ssh_configuration).into(),
-                ),
+                ("KEREK_SSH_CONFIG".into(), (&cache.ssh_config).into()),
             ]
             .into(),
         },
@@ -189,8 +186,8 @@ fn get_production(environment: UserFacingEnvironment) -> Environment {
         Environment {
             id: environment.id.unwrap_or_else(|| "production".into()),
             variables: [(
-                "KEREK_SSH_CONFIGURATION".into(),
-                ["safe", "ssh_configuration"]
+                "KEREK_SSH_CONFIG".into(),
+                ["safe", "ssh_config"]
                     .iter()
                     .collect::<path::PathBuf>()
                     .into(),

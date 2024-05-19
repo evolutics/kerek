@@ -59,20 +59,20 @@ fn reset_fake_production(folder: &path::Path) -> anyhow::Result<()> {
         .status()?
         .success());
     let ssh_host = "production";
-    let ssh_configuration = path::Path::new("safe/ssh_configuration");
+    let ssh_config = path::Path::new("safe/ssh_config");
     assert!(process::Command::new("vagrant")
         .arg("ssh-config")
         .arg("--host")
         .arg(ssh_host)
         .current_dir(folder)
-        .stdout(fs::File::create(folder.join(ssh_configuration))?)
+        .stdout(fs::File::create(folder.join(ssh_config))?)
         .status()?
         .success());
     assert!(process::Command::new("wheelsticks")
         .arg("provision")
         .arg("--force")
         .arg("--ssh-config")
-        .arg(ssh_configuration)
+        .arg(ssh_config)
         .arg(ssh_host)
         .current_dir(folder)
         .status()?

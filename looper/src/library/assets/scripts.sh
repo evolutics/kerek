@@ -6,7 +6,7 @@ set -o pipefail
 
 provision() {
   echo 'Provisioning remote for Podman with Docker connections.' >&2
-  wheelsticks provision --force --ssh-config "${KEREK_SSH_CONFIGURATION}" \
+  wheelsticks provision --force --ssh-config "${KEREK_SSH_CONFIG}" \
     "${KEREK_ENVIRONMENT_ID}"
 }
 
@@ -26,11 +26,11 @@ deploy() {
 
   echo "Transferring ${#images[@]} images: ${images[*]}" >&2
   docker save -- "${images[@]}" \
-    | wheelsticks run-with-ssh-config -- "${KEREK_SSH_CONFIGURATION}" docker \
+    | wheelsticks run-with-ssh-config -- "${KEREK_SSH_CONFIG}" docker \
       --host "ssh://${KEREK_ENVIRONMENT_ID}" load
 
   echo 'Deploying containers on remote.' >&2
-  wheelsticks run-with-ssh-config -- "${KEREK_SSH_CONFIGURATION}" docker \
+  wheelsticks run-with-ssh-config -- "${KEREK_SSH_CONFIG}" docker \
     --host "ssh://${KEREK_ENVIRONMENT_ID}" compose up --detach --no-build \
     --pull never --remove-orphans --wait
 }

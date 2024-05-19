@@ -11,7 +11,7 @@ pub fn go(configuration: &configuration::Main, with_vm: bool) -> anyhow::Result<
     create_cache_folder(configuration)?;
     if with_vm {
         start_cache_vm(configuration)?;
-        dump_cache_vm_ssh_configuration(configuration)?;
+        dump_cache_vm_ssh_config(configuration)?;
     }
     Ok(())
 }
@@ -62,10 +62,10 @@ fn start_cache_vm(configuration: &configuration::Main) -> anyhow::Result<()> {
     .context("Unable to start cache VM")
 }
 
-fn dump_cache_vm_ssh_configuration(configuration: &configuration::Main) -> anyhow::Result<()> {
-    let path = &configuration.cache.ssh_configuration;
+fn dump_cache_vm_ssh_config(configuration: &configuration::Main) -> anyhow::Result<()> {
+    let path = &configuration.cache.ssh_config;
     let file = fs::File::create(path)
-        .with_context(|| format!("Unable to create SSH configuration file: {path:?}"))?;
+        .with_context(|| format!("Unable to create SSH config file: {path:?}"))?;
     command::status(
         process::Command::new("vagrant")
             .arg("ssh-config")
@@ -76,5 +76,5 @@ fn dump_cache_vm_ssh_configuration(configuration: &configuration::Main) -> anyho
             .envs(&configuration.staging.variables)
             .stdout(file),
     )
-    .context("Unable to dump cache VM SSH configuration")
+    .context("Unable to dump cache VM SSH config")
 }

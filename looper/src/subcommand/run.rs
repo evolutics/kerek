@@ -7,8 +7,8 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
     run::go(
         &configuration,
         run::Options {
+            is_cache_reset: true,
             is_dry_run: false,
-            is_vm_snapshot_asserted: false,
         },
     )
 }

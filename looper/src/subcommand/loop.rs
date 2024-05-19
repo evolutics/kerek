@@ -14,8 +14,8 @@ pub fn go(configuration: path::PathBuf) -> anyhow::Result<()> {
         run::go(
             &configuration,
             run::Options {
+                is_cache_reset: iteration == 0,
                 is_dry_run: false,
-                is_vm_snapshot_asserted: iteration != 0,
             },
         )?;
 

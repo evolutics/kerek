@@ -7,7 +7,11 @@ use anyhow::Context;
 use std::process;
 
 pub fn go(configuration: &configuration::Main, options: Options) -> anyhow::Result<()> {
-    reset(configuration, options.is_vm_snapshot_asserted)?;
+    if options.is_cache_reset {
+        tear_down_cache::go(configuration)?;
+        set_up_cache::go(configuration, true)?;
+    }
+    provision::go(configuration, &configuration.staging)?;
 
     build(configuration)?;
     deploy(configuration, &configuration.staging)?;
@@ -22,54 +26,8 @@ pub fn go(configuration: &configuration::Main, options: Options) -> anyhow::Resu
 }
 
 pub struct Options {
+    pub is_cache_reset: bool,
     pub is_dry_run: bool,
-    pub is_vm_snapshot_asserted: bool,
-}
-
-const VERSIONED_VM_SNAPSHOT_NAME: &str = env!("VERGEN_GIT_SHA");
-
-fn reset(configuration: &configuration::Main, is_vm_snapshot_asserted: bool) -> anyhow::Result<()> {
-    match load_vm_snapshot(configuration) {
-        Err(_) if !is_vm_snapshot_asserted => {
-            crate::log!("No current VM snapshot exists, hence resetting from scratch.");
-            tear_down_cache::go(configuration)?;
-            set_up_cache::go(configuration, true)?;
-            provision::go(configuration, &configuration.staging)?;
-            save_vm_snapshot(configuration)
-        }
-        result => result,
-    }
-}
-
-fn load_vm_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
-    crate::log!("Loading VM snapshot: {VERSIONED_VM_SNAPSHOT_NAME:?}");
-    command::status(
-        process::Command::new("vagrant")
-            .arg("snapshot")
-            .arg("restore")
-            .arg("--")
-            .arg(VERSIONED_VM_SNAPSHOT_NAME)
-            .current_dir(&configuration.cache.folder)
-            .envs(&configuration.variables)
-            .envs(&configuration.staging.variables),
-    )
-    .with_context(|| format!("Unable to load VM snapshot: {VERSIONED_VM_SNAPSHOT_NAME:?}"))
-}
-
-fn save_vm_snapshot(configuration: &configuration::Main) -> anyhow::Result<()> {
-    crate::log!("Saving VM snapshot: {VERSIONED_VM_SNAPSHOT_NAME:?}");
-    command::status(
-        process::Command::new("vagrant")
-            .arg("snapshot")
-            .arg("save")
-            .arg("--force")
-            .arg("--")
-            .arg(VERSIONED_VM_SNAPSHOT_NAME)
-            .current_dir(&configuration.cache.folder)
-            .envs(&configuration.variables)
-            .envs(&configuration.staging.variables),
-    )
-    .with_context(|| format!("Unable to save VM snapshot: {VERSIONED_VM_SNAPSHOT_NAME:?}"))
 }
 
 fn build(configuration: &configuration::Main) -> anyhow::Result<()> {

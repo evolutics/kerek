@@ -475,6 +475,6 @@ mod tests {
         let help_message = leaf.render_help();
         let help_section = format!("\n\n### `{help_command}`\n\n```\n{help_message}```\n");
 
-        assert!(get_readme().contains(&help_section))
+        assert!(get_readme().contains(&help_section), "{help_section}")
     }
 }

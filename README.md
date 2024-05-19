@@ -223,7 +223,7 @@ Usage: wheelsticks [OPTIONS] <COMMAND>
 
 Commands:
   deploy               Create or update services
-  provision            Provisions host with container engine via SSH
+  provision            Provisions host with container engine
   run-with-ssh-config  Runs command with wrapped `ssh` in `$PATH` that uses
                            given SSH config
   help                 Print this message or the help of the given
@@ -320,16 +320,14 @@ Options:
 ### `wheelsticks provision -h`
 
 ```
-Provisions host with container engine via SSH
+Provisions host with container engine
 
-Usage: wheelsticks provision [OPTIONS] <SSH_HOST>
-
-Arguments:
-  <SSH_HOST>  Reference to SSH host
+Usage: wheelsticks provision [OPTIONS]
 
 Options:
       --force                    Go ahead without prompting user to confirm
   -F, --ssh-config <SSH_CONFIG>  Path to SSH config file
+      --ssh-host <SSH_HOST>      Reference to SSH host
   -h, --help                     Print help
 ```
 

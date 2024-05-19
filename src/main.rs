@@ -260,18 +260,19 @@ enum Subcommand {
     #[command(hide = true)]
     DockerCliPluginMetadata,
 
-    /// Provisions host with container engine via SSH
+    /// Provisions host with container engine
     Provision {
         /// Go ahead without prompting user to confirm
         #[arg(long)]
         force: bool,
 
         /// Path to SSH config file
-        #[arg(long, short = 'F')]
+        #[arg(long, requires = "ssh_host", short = 'F')]
         ssh_config: Option<String>,
 
         /// Reference to SSH host
-        ssh_host: String,
+        #[arg(long)]
+        ssh_host: Option<String>,
     },
 
     /// Runs command with wrapped `ssh` in `$PATH` that uses given SSH config

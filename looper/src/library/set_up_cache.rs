@@ -68,9 +68,7 @@ fn dump_cache_vm_ssh_config(configuration: &configuration::Main) -> anyhow::Resu
         .with_context(|| format!("Unable to create SSH config file: {path:?}"))?;
     command::status(
         process::Command::new("vagrant")
-            .arg("ssh-config")
-            .arg("--host")
-            .arg(&configuration.staging.id)
+            .args(["ssh-config", "--host", &configuration.staging.id])
             .current_dir(&configuration.cache.folder)
             .envs(&configuration.variables)
             .envs(&configuration.staging.variables)

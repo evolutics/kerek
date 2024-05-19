@@ -15,8 +15,7 @@ fn delete_cache_vm_if_exists(configuration: &configuration::Main) -> anyhow::Res
     if configuration.cache.vagrantfile.exists() {
         command::status(
             process::Command::new("vagrant")
-                .arg("destroy")
-                .arg("--force")
+                .args(["destroy", "--force"])
                 .current_dir(&configuration.cache.folder)
                 .envs(&configuration.variables)
                 .envs(&configuration.staging.variables),

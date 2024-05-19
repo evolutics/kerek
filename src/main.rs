@@ -130,9 +130,11 @@ fn main() -> anyhow::Result<()> {
         }
 
         Subcommand::Provision {
+            force,
             ssh_config,
             ssh_host,
         } => provision::go(provision::In {
+            force,
             ssh_config,
             ssh_host,
         }),
@@ -260,6 +262,10 @@ enum Subcommand {
 
     /// Provisions host with container engine via SSH
     Provision {
+        /// Go ahead without prompting user to confirm
+        #[arg(long)]
+        force: bool,
+
         /// Path to SSH config file
         #[arg(long, short = 'F')]
         ssh_config: Option<String>,

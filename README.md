@@ -328,6 +328,7 @@ Arguments:
   <SSH_HOST>  Reference to SSH host
 
 Options:
+      --force                    Go ahead without prompting user to confirm
   -F, --ssh-config <SSH_CONFIG>  Path to SSH config file
   -h, --help                     Print help
 ```

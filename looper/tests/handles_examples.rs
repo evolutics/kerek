@@ -41,7 +41,6 @@ fn test_one_offs(example: &str) -> anyhow::Result<()> {
     reset_fake_production(&folder)?;
 
     assert!(execute_subcommand("clean", &folder)?.success());
-    assert!(execute_subcommand("provision", &folder)?.success());
     assert!(execute_subcommand("run", &folder)?.success());
     assert!(execute_subcommand("dry-run", &folder)?.success());
     Ok(())
@@ -59,13 +58,23 @@ fn reset_fake_production(folder: &path::Path) -> anyhow::Result<()> {
         .current_dir(folder)
         .status()?
         .success());
-    let ssh_configuration = fs::File::create(folder.join("safe/ssh_configuration"))?;
+    let ssh_host = "production";
+    let ssh_configuration = path::Path::new("safe/ssh_configuration");
     assert!(process::Command::new("vagrant")
         .arg("ssh-config")
         .arg("--host")
-        .arg("production")
+        .arg(ssh_host)
         .current_dir(folder)
-        .stdout(ssh_configuration)
+        .stdout(fs::File::create(folder.join(ssh_configuration))?)
+        .status()?
+        .success());
+    assert!(process::Command::new("wheelsticks")
+        .arg("provision")
+        .arg("--force")
+        .arg("--ssh-config")
+        .arg(ssh_configuration)
+        .arg(ssh_host)
+        .current_dir(folder)
         .status()?
         .success());
     Ok(())

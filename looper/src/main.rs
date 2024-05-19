@@ -5,7 +5,6 @@ use clap::Parser;
 use std::path;
 use subcommand::clean;
 use subcommand::dry_run;
-use subcommand::provision;
 use subcommand::r#loop;
 use subcommand::run;
 
@@ -16,7 +15,6 @@ fn main() -> anyhow::Result<()> {
         Subcommand::Clean => clean::go(arguments.configuration),
         Subcommand::DryRun => dry_run::go(arguments.configuration),
         Subcommand::Loop => r#loop::go(arguments.configuration),
-        Subcommand::Provision => provision::go(arguments.configuration),
         Subcommand::Run => run::go(arguments.configuration),
     }
 }
@@ -40,8 +38,6 @@ enum Subcommand {
     DryRun,
     /// Builds, tests, deploys in a loop.
     Loop,
-    /// Applies provision script to production.
-    Provision,
     /// Builds, tests, deploys once.
     Run,
 }

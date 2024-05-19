@@ -1,6 +1,5 @@
 use super::command;
 use super::configuration;
-use super::provision;
 use super::set_up_cache;
 use super::tear_down_cache;
 use anyhow::Context;
@@ -11,7 +10,7 @@ pub fn go(configuration: &configuration::Main, options: Options) -> anyhow::Resu
         tear_down_cache::go(configuration)?;
         set_up_cache::go(configuration, true)?;
     }
-    provision::go(configuration, &configuration.staging)?;
+    provision(configuration, &configuration.staging)?;
 
     build(configuration)?;
     deploy(configuration, &configuration.staging)?;
@@ -28,6 +27,21 @@ pub fn go(configuration: &configuration::Main, options: Options) -> anyhow::Resu
 pub struct Options {
     pub is_cache_reset: bool,
     pub is_dry_run: bool,
+}
+
+fn provision(
+    configuration: &configuration::Main,
+    environment: &configuration::Environment,
+) -> anyhow::Result<()> {
+    let environment_id = &environment.id;
+    crate::log!("Provisioning {environment_id} environment.");
+    command::status(
+        process::Command::new(&configuration.life_cycle.provision[0])
+            .args(&configuration.life_cycle.provision[1..])
+            .envs(&configuration.variables)
+            .envs(&environment.variables),
+    )
+    .with_context(|| format!("Unable to provision {environment_id} environment"))
 }
 
 fn build(configuration: &configuration::Main) -> anyhow::Result<()> {

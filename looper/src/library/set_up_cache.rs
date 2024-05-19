@@ -5,15 +5,12 @@ use std::borrow;
 use std::fs;
 use std::process;
 
-pub fn go(configuration: &configuration::Main, with_vm: bool) -> anyhow::Result<()> {
+pub fn go(configuration: &configuration::Main) -> anyhow::Result<()> {
     crate::log!("Setting up cache.");
 
     create_cache_folder(configuration)?;
-    if with_vm {
-        start_cache_vm(configuration)?;
-        dump_cache_vm_ssh_config(configuration)?;
-    }
-    Ok(())
+    start_cache_vm(configuration)?;
+    dump_cache_vm_ssh_config(configuration)
 }
 
 fn create_cache_folder(configuration: &configuration::Main) -> anyhow::Result<()> {

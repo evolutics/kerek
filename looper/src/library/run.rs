@@ -8,7 +8,7 @@ use std::process;
 pub fn go(configuration: &configuration::Main, options: Options) -> anyhow::Result<()> {
     if options.is_cache_reset {
         tear_down_cache::go(configuration)?;
-        set_up_cache::go(configuration, true)?;
+        set_up_cache::go(configuration)?;
     }
     provision(configuration, &configuration.staging)?;
 

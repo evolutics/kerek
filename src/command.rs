@@ -106,23 +106,23 @@ mod tests {
     use super::*;
 
     #[test_case::test_case(invalid_program_(), false; "invalid program")]
-    #[test_case::test_case(shell("exit 0"), true; "success")]
-    #[test_case::test_case(shell("exit 1"), false; "failure")]
+    #[test_case::test_case(bash("exit 0"), true; "success")]
+    #[test_case::test_case(bash("exit 1"), false; "failure")]
     fn status_ok_handles(mut command: process::Command, expected: bool) {
         assert_eq!(status_ok(&mut command).is_ok(), expected)
     }
 
     #[test_case::test_case(invalid_program_(), None; "invalid program")]
-    #[test_case::test_case(shell("exit 1"), None; "failure")]
-    #[test_case::test_case(shell("printf '\"Hi\"'"), Some("Hi".into()); "success")]
+    #[test_case::test_case(bash("exit 1"), None; "failure")]
+    #[test_case::test_case(bash("printf '\"Hi\"'"), Some("Hi".into()); "success")]
     fn stdout_json_handles(mut command: process::Command, expected: Option<String>) {
         assert_eq!(stdout_json(&mut command).ok(), expected)
     }
 
     #[test_case::test_case(invalid_program_(), None; "invalid program")]
-    #[test_case::test_case(shell("exit 1"), None; "failure")]
+    #[test_case::test_case(bash("exit 1"), None; "failure")]
     #[test_case::test_case(
-        shell("printf '13 a  b\n 8 x\tyz'"),
+        bash("printf '13 a  b\n 8 x\tyz'"),
         Some(vec![
             ["13".into(), "a".into(), "b".into()],
             ["8".into(), "x".into(), "yz".into()],
@@ -134,8 +134,8 @@ mod tests {
     }
 
     #[test_case::test_case(invalid_program_(), None; "invalid program")]
-    #[test_case::test_case(shell("exit 1"), None; "failure")]
-    #[test_case::test_case(shell("printf Hi"), Some("Hi".into()); "success")]
+    #[test_case::test_case(bash("exit 1"), None; "failure")]
+    #[test_case::test_case(bash("printf Hi"), Some("Hi".into()); "success")]
     fn stdout_utf8_handles(mut command: process::Command, expected: Option<String>) {
         assert_eq!(stdout_utf8(&mut command).ok(), expected)
     }
@@ -144,8 +144,8 @@ mod tests {
         process::Command::new("")
     }
 
-    fn shell(script: &str) -> process::Command {
-        let mut command = process::Command::new("sh");
+    fn bash(script: &str) -> process::Command {
+        let mut command = process::Command::new("bash");
         command.args(["-c", script]);
         command
     }

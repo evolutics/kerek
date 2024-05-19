@@ -1,7 +1,9 @@
 use anyhow::Context;
 use serde::de;
 use std::io;
+use std::io::Write;
 use std::process;
+use std::thread;
 
 pub fn status_ok(command: &mut process::Command) -> anyhow::Result<()> {
     go(command, process::Command::status, |status| {
@@ -11,6 +13,24 @@ pub fn status_ok(command: &mut process::Command) -> anyhow::Result<()> {
             status_error(status)
         }
     })
+}
+
+pub fn stdin_ok(input: &'static [u8], command: &mut process::Command) -> anyhow::Result<()> {
+    go(
+        command.stdin(process::Stdio::piped()),
+        process::Command::spawn,
+        |mut child| {
+            let mut stdin = child.stdin.take().context("Unable to open stdin")?;
+            thread::spawn(move || stdin.write_all(input).context("Unable to write to stdin"));
+            let status = child.wait().context("Unable to wait")?;
+
+            if status.success() {
+                Ok(())
+            } else {
+                status_error(status)
+            }
+        },
+    )
 }
 
 pub fn stdout_json<T: de::DeserializeOwned>(command: &mut process::Command) -> anyhow::Result<T> {
@@ -110,6 +130,13 @@ mod tests {
     #[test_case::test_case(bash("exit 1"), false; "failure")]
     fn status_ok_handles(mut command: process::Command, expected: bool) {
         assert_eq!(status_ok(&mut command).is_ok(), expected)
+    }
+
+    #[test_case::test_case(invalid_program_(), false; "invalid program")]
+    #[test_case::test_case(bash("[[ $(cat -) == 'Hi' ]]"), true; "success")]
+    #[test_case::test_case(bash("[[ $(cat -) != 'Hi' ]]"), false; "failure")]
+    fn stdin_ok_handles(mut command: process::Command, expected: bool) {
+        assert_eq!(stdin_ok("Hi".as_bytes(), &mut command).is_ok(), expected)
     }
 
     #[test_case::test_case(invalid_program_(), None; "invalid program")]

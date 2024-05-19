@@ -3,6 +3,7 @@ mod deploy;
 mod docker;
 mod docker_cli_plugin_metadata;
 mod log;
+mod provision;
 mod run_with_ssh_config;
 
 use clap::Parser;
@@ -128,6 +129,14 @@ fn main() -> anyhow::Result<()> {
             Ok(())
         }
 
+        Subcommand::Provision {
+            ssh_config,
+            ssh_host,
+        } => provision::go(provision::In {
+            ssh_config,
+            ssh_host,
+        }),
+
         Subcommand::RunWithSshConfig {
             command,
             ssh_config,
@@ -248,6 +257,16 @@ enum Subcommand {
 
     #[command(hide = true)]
     DockerCliPluginMetadata,
+
+    /// Provisions host with container engine via SSH
+    Provision {
+        /// Path to SSH config file
+        #[arg(long, short = 'F')]
+        ssh_config: Option<String>,
+
+        /// Reference to SSH host
+        ssh_host: String,
+    },
 
     /// Runs command with wrapped `ssh` in `$PATH` that uses given SSH config
     ///
@@ -436,6 +455,7 @@ mod tests {
 
     #[test_case::test_case(&[]; "")]
     #[test_case::test_case(&["deploy"]; "deploy")]
+    #[test_case::test_case(&["provision"]; "provision")]
     #[test_case::test_case(&["run-with-ssh-config"]; "run-with-ssh-config")]
     fn readme_includes_subcommand_help(subcommands: &[&str]) {
         let help_command = [&[env!("CARGO_BIN_NAME")], subcommands, &["-h"]]

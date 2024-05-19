@@ -6,8 +6,8 @@ set -o pipefail
 
 provision() {
   echo 'Provisioning remote for Podman with Docker connections.' >&2
-  ssh -F "${KEREK_SSH_CONFIGURATION}" "${KEREK_ENVIRONMENT_ID}" \
-    <"${KEREK_CACHE_FOLDER}/provision_on_remote.sh"
+  wheelsticks provision --ssh-config "${KEREK_SSH_CONFIGURATION}" \
+    "${KEREK_ENVIRONMENT_ID}"
 }
 
 build() {

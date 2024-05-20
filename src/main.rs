@@ -292,7 +292,7 @@ enum Subcommand {
 
 // Top-level Compose arguments.
 //
-// Source: https://docs.docker.com/engine/reference/commandline/compose/
+// Source: https://docs.docker.com/reference/cli/docker/compose/
 #[derive(clap::Args)]
 struct ComposeArguments {
     /// Control when to print ANSI control characters
@@ -354,7 +354,7 @@ enum Progress {
 
 // `docker compose up` arguments, where applicable.
 //
-// Source: https://docs.docker.com/engine/reference/commandline/compose_up/
+// Source: https://docs.docker.com/reference/cli/docker/compose/up/
 #[derive(clap::Args)]
 struct ComposeUpArguments {
     /// Build images before starting containers

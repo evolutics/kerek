@@ -5,6 +5,22 @@ use std::io::Write;
 use std::process;
 use std::thread;
 
+#[allow(dead_code)]
+pub fn piped_ok(
+    writer: &mut process::Command,
+    reader: &mut process::Command,
+) -> anyhow::Result<()> {
+    go(
+        writer.stdout(process::Stdio::piped()),
+        process::Command::spawn,
+        |mut child| {
+            let stdout = child.stdout.take().context("Unable to open stdout")?;
+            status_ok(reader.stdin(stdout))?;
+            wait_ok(&mut child)
+        },
+    )
+}
+
 pub fn status_ok(command: &mut process::Command) -> anyhow::Result<()> {
     go(command, process::Command::status, |status| {
         if status.success() {
@@ -22,13 +38,7 @@ pub fn stdin_ok(input: &'static [u8], command: &mut process::Command) -> anyhow:
         |mut child| {
             let mut stdin = child.stdin.take().context("Unable to open stdin")?;
             thread::spawn(move || stdin.write_all(input).context("Unable to write to stdin"));
-            let status = child.wait().context("Unable to wait")?;
-
-            if status.success() {
-                Ok(())
-            } else {
-                status_error(status)
-            }
+            wait_ok(&mut child)
         },
     )
 }
@@ -121,9 +131,32 @@ fn status_error<T>(status: process::ExitStatus) -> anyhow::Result<T> {
     Err(anyhow::anyhow!("{status}"))
 }
 
+fn wait_ok(child: &mut process::Child) -> anyhow::Result<()> {
+    let status = child.wait().context("Unable to wait")?;
+
+    if status.success() {
+        Ok(())
+    } else {
+        status_error(status)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test_case::test_case(invalid_program_(), bash("true"), false; "invalid writer")]
+    #[test_case::test_case(bash("true"), invalid_program_(), false; "invalid reader")]
+    #[test_case::test_case(bash("false"), bash("true"), false; "writer failure")]
+    #[test_case::test_case(bash("true"), bash("false"), false; "reader failure")]
+    #[test_case::test_case(bash("echo 'Hi'"), bash("[[ $(cat) == 'Hi' ]]"), true; "success")]
+    fn piped_ok_handles(
+        mut writer: process::Command,
+        mut reader: process::Command,
+        expected: bool,
+    ) {
+        assert_eq!(piped_ok(&mut writer, &mut reader).is_ok(), expected)
+    }
 
     #[test_case::test_case(invalid_program_(), false; "invalid program")]
     #[test_case::test_case(bash("true"), true; "success")]

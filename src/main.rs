@@ -31,7 +31,7 @@ fn main() -> anyhow::Result<()> {
             compose_arguments,
             compose_engine,
             compose_up_arguments:
-                ComposeUpArguments {
+                ComposeUpArgumentsForDeploy {
                     build,
                     detach,
                     force_recreate,
@@ -195,7 +195,7 @@ enum Subcommand {
         compose_arguments: ComposeArguments,
 
         #[command(flatten)]
-        compose_up_arguments: ComposeUpArguments,
+        compose_up_arguments: ComposeUpArgumentsForDeploy,
 
         /// Compose engine to use; Podman Compose is not supported due to
         /// missing features
@@ -309,7 +309,7 @@ enum Progress {
 //
 // Source: https://docs.docker.com/reference/cli/docker/compose/up/
 #[derive(clap::Args)]
-struct ComposeUpArguments {
+struct ComposeUpArgumentsForDeploy {
     /// Build images before starting containers
     #[arg(long)]
     build: bool,

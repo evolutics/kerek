@@ -1,4 +1,5 @@
 use super::command;
+use super::log;
 use std::io;
 use std::io::Write;
 use std::process;
@@ -33,8 +34,8 @@ pub fn go(
             command
         }
         Host::Vagrant { vm } => {
-            command::status_ok(process::Command::new("vagrant").arg("up").args(vm))?;
-            let mut command = process::Command::new("vagrant");
+            command::status_ok(vagrant().arg("up").args(vm))?;
+            let mut command = vagrant();
             command.args(["ssh", "--command", "bash"]).args(vm).args(
                 ssh_config
                     .iter()
@@ -73,4 +74,14 @@ fn confirm_with_user(question: &str) -> anyhow::Result<()> {
     } else {
         Err(anyhow::anyhow!("Aborted by user"))
     }
+}
+
+fn vagrant() -> process::Command {
+    let mut command = process::Command::new("vagrant");
+    command.args(
+        (log::level() <= log::Level::Debug)
+            .then_some("--debug")
+            .iter(),
+    );
+    command
 }

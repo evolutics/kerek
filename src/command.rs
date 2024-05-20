@@ -133,8 +133,8 @@ mod tests {
     }
 
     #[test_case::test_case(invalid_program_(), false; "invalid program")]
-    #[test_case::test_case(bash("[[ $(cat -) == 'Hi' ]]"), true; "success")]
-    #[test_case::test_case(bash("[[ $(cat -) != 'Hi' ]]"), false; "failure")]
+    #[test_case::test_case(bash("[[ $(cat) == 'Hi' ]]"), true; "success")]
+    #[test_case::test_case(bash("[[ $(cat) != 'Hi' ]]"), false; "failure")]
     fn stdin_ok_handles(mut command: process::Command, expected: bool) {
         assert_eq!(stdin_ok("Hi".as_bytes(), &mut command).is_ok(), expected)
     }

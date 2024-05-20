@@ -116,6 +116,7 @@ struct Cli {
 // Top-level Docker arguments.
 //
 // Source: https://docs.docker.com/reference/cli/docker/
+// TODO: Update arguments based on above source.
 #[derive(clap::Args)]
 struct DockerArguments {
     /// Location of client config files
@@ -246,6 +247,7 @@ enum Subcommand {
 // Top-level Compose arguments.
 //
 // Source: https://docs.docker.com/reference/cli/docker/compose/
+// TODO: Update arguments based on above source.
 #[derive(clap::Args)]
 struct ComposeArguments {
     /// Control when to print ANSI control characters
@@ -308,6 +310,8 @@ enum Progress {
 // `docker compose up` arguments, where applicable.
 //
 // Source: https://docs.docker.com/reference/cli/docker/compose/up/
+// TODO: Document arguments that are not applicable.
+// TODO: Update arguments based on above source.
 #[derive(clap::Args)]
 struct ComposeUpArgumentsForDeploy {
     /// Build images before starting containers

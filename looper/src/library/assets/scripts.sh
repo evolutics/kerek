@@ -13,12 +13,12 @@ provision() {
 build() {
   echo 'Building with Docker Compose.' >&2
   docker compose build
+
+  echo 'Pulling remaining images.' >&2
+  docker compose pull --ignore-buildable
 }
 
 deploy() {
-  echo 'Pulling images that cannot be built.' >&2
-  docker compose pull --ignore-buildable
-
   echo 'Getting image names from Compose configuration.' >&2
   local images
   mapfile -t images < <(docker compose config --images)

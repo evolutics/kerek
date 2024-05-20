@@ -12,24 +12,12 @@ use std::path;
 
 fn main() -> anyhow::Result<()> {
     let Cli {
-        docker_arguments:
-            DockerArguments {
-                config,
-                context,
-                debug,
-                host,
-                log_level,
-                tls,
-                tlscacert,
-                tlscert,
-                tlskey,
-                tlsverify,
-            },
+        docker_arguments,
         subcommand,
     } = Cli::parse();
 
-    log::set_level(match log_level {
-        _ if debug => log::Level::Debug,
+    log::set_level(match docker_arguments.log_level {
+        _ if docker_arguments.debug => log::Level::Debug,
         None => log::Level::Info,
         Some(LogLevel::Debug) => log::Level::Debug,
         Some(LogLevel::Error) => log::Level::Error,
@@ -40,19 +28,7 @@ fn main() -> anyhow::Result<()> {
 
     match subcommand {
         Subcommand::Deploy {
-            compose_arguments:
-                ComposeArguments {
-                    ansi,
-                    compatibility,
-                    dry_run,
-                    env_file,
-                    file,
-                    parallel,
-                    profile,
-                    progress,
-                    project_directory,
-                    project_name,
-                },
+            compose_arguments,
             compose_engine,
             compose_up_arguments:
                 ComposeUpArguments {
@@ -75,38 +51,15 @@ fn main() -> anyhow::Result<()> {
             if detach {
                 log::warn!("Detached mode is always on, no need to set it.");
             }
+            let dry_run = compose_arguments.dry_run;
 
             deploy::go(deploy::In {
                 build,
-                docker_cli: docker::Cli::new(
-                    docker::DockerArguments {
-                        config,
-                        context,
-                        debug,
-                        host,
-                        log_level: log_level.map(canonical_argument),
-                        tls,
-                        tlscacert,
-                        tlscert,
-                        tlskey,
-                        tlsverify,
-                    },
-                    docker::ComposeArguments {
-                        ansi: ansi.map(canonical_argument),
-                        compatibility,
-                        env_file,
-                        file,
-                        parallel: parallel.map(|parallel| parallel.to_string()),
-                        profile,
-                        progress: progress.map(canonical_argument),
-                        project_directory,
-                        project_name,
-                    },
-                    canonical_argument(container_engine),
-                    canonical_argument(compose_engine)
-                        .split_whitespace()
-                        .map(|part| part.into())
-                        .collect(),
+                docker_cli: docker_cli(
+                    docker_arguments,
+                    compose_arguments,
+                    container_engine,
+                    compose_engine,
                 ),
                 dry_run,
                 force_recreate,
@@ -427,6 +380,66 @@ enum ComposeEngine {
 enum ContainerEngine {
     Docker,
     Podman,
+}
+
+fn docker_cli(
+    DockerArguments {
+        config,
+        context,
+        debug,
+        host,
+        log_level,
+        tls,
+        tlscacert,
+        tlscert,
+        tlskey,
+        tlsverify,
+    }: DockerArguments,
+    ComposeArguments {
+        ansi,
+        compatibility,
+        dry_run: _,
+        env_file,
+        file,
+        parallel,
+        profile,
+        progress,
+        project_directory,
+        project_name,
+    }: ComposeArguments,
+    container_engine: ContainerEngine,
+    compose_engine: ComposeEngine,
+) -> docker::Cli {
+    docker::Cli::new(
+        docker::DockerArguments {
+            config,
+            context,
+            debug,
+            host,
+            log_level: log_level.map(canonical_argument),
+            tls,
+            tlscacert,
+            tlscert,
+            tlskey,
+            tlsverify,
+        },
+        docker::ComposeArguments {
+            ansi: ansi.map(canonical_argument),
+            compatibility,
+            env_file,
+            file,
+            parallel: parallel.map(|parallel| parallel.to_string()),
+            profile,
+            progress: progress.map(canonical_argument),
+            project_directory,
+            project_name,
+        },
+        canonical_argument(container_engine),
+        canonical_argument(compose_engine)
+            .split_whitespace()
+            .map(|part| part.into())
+            .collect(),
+    )
 }
 
 fn canonical_argument<T: ValueEnum>(value: T) -> String {

@@ -8,7 +8,6 @@ pub enum Level {
     Info,
     Warn,
     Error,
-    Fatal,
 }
 
 pub fn level() -> Level {

@@ -33,7 +33,7 @@ fn main() -> anyhow::Result<()> {
         None => log::Level::Info,
         Some(LogLevel::Debug) => log::Level::Debug,
         Some(LogLevel::Error) => log::Level::Error,
-        Some(LogLevel::Fatal) => log::Level::Fatal,
+        Some(LogLevel::Fatal) => log::Level::Error,
         Some(LogLevel::Info) => log::Level::Info,
         Some(LogLevel::Warn) => log::Level::Warn,
     })?;

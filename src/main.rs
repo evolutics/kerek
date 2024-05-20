@@ -29,7 +29,6 @@ fn main() -> anyhow::Result<()> {
     match subcommand {
         Subcommand::Deploy {
             compose_arguments,
-            compose_engine,
             compose_up_arguments:
                 ComposeUpArgumentsForDeploy {
                     build,
@@ -45,7 +44,7 @@ fn main() -> anyhow::Result<()> {
                     wait_timeout,
                     wait,
                 },
-            container_engine,
+            engine_arguments,
             service_names,
         } => {
             if detach {
@@ -55,12 +54,7 @@ fn main() -> anyhow::Result<()> {
 
             deploy::go(deploy::In {
                 build,
-                docker_cli: docker_cli(
-                    docker_arguments,
-                    compose_arguments,
-                    container_engine,
-                    compose_engine,
-                ),
+                docker_cli: docker_cli(docker_arguments, compose_arguments, engine_arguments),
                 dry_run,
                 force_recreate,
                 no_build,
@@ -198,14 +192,8 @@ enum Subcommand {
         #[command(flatten)]
         compose_up_arguments: ComposeUpArgumentsForDeploy,
 
-        /// Compose engine to use; Podman Compose is not supported due to
-        /// missing features
-        #[arg(default_value_t = ComposeEngine::DockerComposeV2, long, value_enum)]
-        compose_engine: ComposeEngine,
-
-        /// Container engine to use
-        #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
-        container_engine: ContainerEngine,
+        #[command(flatten)]
+        engine_arguments: EngineArguments,
 
         /// Services to consider
         service_names: Vec<String>,
@@ -372,6 +360,18 @@ enum Pull {
     Never,
 }
 
+#[derive(clap::Args)]
+struct EngineArguments {
+    /// Compose engine to use; Podman Compose is not supported due to missing
+    /// features
+    #[arg(default_value_t = ComposeEngine::DockerComposeV2, long, value_enum)]
+    compose_engine: ComposeEngine,
+
+    /// Container engine to use
+    #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
+    container_engine: ContainerEngine,
+}
+
 #[derive(Clone, ValueEnum)]
 enum ComposeEngine {
     #[clap(name = "docker-compose")]
@@ -411,8 +411,10 @@ fn docker_cli(
         project_directory,
         project_name,
     }: ComposeArguments,
-    container_engine: ContainerEngine,
-    compose_engine: ComposeEngine,
+    EngineArguments {
+        compose_engine,
+        container_engine,
+    }: EngineArguments,
 ) -> docker::Cli {
     docker::Cli::new(
         docker::DockerArguments {

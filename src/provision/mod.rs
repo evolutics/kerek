@@ -1,5 +1,4 @@
 use super::command;
-use std::borrow;
 use std::io;
 use std::io::Write;
 use std::process;
@@ -7,25 +6,40 @@ use std::process;
 pub fn go(
     In {
         force,
+        host,
         ssh_config,
-        ssh_host,
     }: In,
 ) -> anyhow::Result<()> {
     if !force {
-        let host = match &ssh_host {
-            None => borrow::Cow::from("your localhost"),
-            Some(ssh_host) => format!("host {ssh_host:?}").into(),
-        };
-        confirm_with_user(&format!("About to provision {host}! Are you sure?"))?;
+        confirm_with_user(&format!("About to provision {host:?}! Are you sure?"))?;
     }
 
-    let mut command = match ssh_host {
-        None => process::Command::new("bash"),
-        Some(ssh_host) => {
+    let host = match host.split_once("://") {
+        None if host == "localhost" => Host::Localhost,
+        Some(("ssh", host)) => Host::Ssh { host },
+        Some(("vagrant", vm)) => Host::Vagrant {
+            vm: (!vm.is_empty()).then_some(vm),
+        },
+        _ => Host::Ssh { host: &host },
+    };
+
+    let mut command = match host {
+        Host::Localhost => process::Command::new("bash"),
+        Host::Ssh { host } => {
             let mut command = process::Command::new("ssh");
             command
                 .args(ssh_config.iter().flat_map(|ssh_config| ["-F", ssh_config]))
-                .args([&ssh_host, "bash"]);
+                .args([host, "bash"]);
+            command
+        }
+        Host::Vagrant { vm } => {
+            command::status_ok(process::Command::new("vagrant").arg("up").args(vm))?;
+            let mut command = process::Command::new("vagrant");
+            command.args(["ssh", "--command", "bash"]).args(vm).args(
+                ssh_config
+                    .iter()
+                    .flat_map(|ssh_config| ["--", "-F", ssh_config]),
+            );
             command
         }
     };
@@ -35,8 +49,14 @@ pub fn go(
 
 pub struct In {
     pub force: bool,
+    pub host: String,
     pub ssh_config: Option<String>,
-    pub ssh_host: Option<String>,
+}
+
+enum Host<'a> {
+    Localhost,
+    Ssh { host: &'a str },
+    Vagrant { vm: Option<&'a str> },
 }
 
 fn confirm_with_user(question: &str) -> anyhow::Result<()> {

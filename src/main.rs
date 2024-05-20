@@ -131,12 +131,12 @@ fn main() -> anyhow::Result<()> {
 
         Subcommand::Provision {
             force,
+            host,
             ssh_config,
-            ssh_host,
         } => provision::go(provision::In {
             force,
+            host,
             ssh_config,
-            ssh_host,
         }),
 
         Subcommand::RunWithSshConfig {
@@ -267,12 +267,11 @@ enum Subcommand {
         force: bool,
 
         /// Path to SSH config file
-        #[arg(long, requires = "ssh_host", short = 'F')]
+        #[arg(long, short = 'F')]
         ssh_config: Option<String>,
 
-        /// Reference to SSH host
-        #[arg(long)]
-        ssh_host: Option<String>,
+        /// Reference like "localhost", "[ssh://]<host>", "vagrant://[<vm>]"
+        host: String,
     },
 
     /// Runs command with wrapped `ssh` in `$PATH` that uses given SSH config

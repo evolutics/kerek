@@ -68,7 +68,7 @@ fn reset_fake_production(folder: &path::Path) -> anyhow::Result<()> {
     assert!(process::Command::new("wheelsticks")
         .args(["provision", "--force", "--ssh-config"])
         .arg(ssh_config)
-        .args(["--ssh-host", ssh_host])
+        .args(["--", ssh_host])
         .current_dir(folder)
         .status()?
         .success());

@@ -322,12 +322,14 @@ Options:
 ```
 Provisions host with container engine
 
-Usage: wheelsticks provision [OPTIONS]
+Usage: wheelsticks provision [OPTIONS] <HOST>
+
+Arguments:
+  <HOST>  Reference like "localhost", "[ssh://]<host>", "vagrant://[<vm>]"
 
 Options:
       --force                    Go ahead without prompting user to confirm
   -F, --ssh-config <SSH_CONFIG>  Path to SSH config file
-      --ssh-host <SSH_HOST>      Reference to SSH host
   -h, --help                     Print help
 ```
 

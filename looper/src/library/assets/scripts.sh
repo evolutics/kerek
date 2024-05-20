@@ -6,8 +6,8 @@ set -o pipefail
 
 provision() {
   echo 'Provisioning remote for Podman with Docker connections.' >&2
-  wheelsticks provision --force --ssh-config "${KEREK_SSH_CONFIG}" \
-    --ssh-host "${KEREK_ENVIRONMENT_ID}"
+  wheelsticks provision --force --ssh-config "${KEREK_SSH_CONFIG}" -- \
+    "${KEREK_ENVIRONMENT_ID}"
 }
 
 build() {

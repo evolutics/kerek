@@ -226,6 +226,7 @@ Commands:
   provision            Provisions host with container engine
   run-with-ssh-config  Runs command with wrapped `ssh` in `$PATH` that uses
                            given SSH config
+  transfer-images      Copies images from default to specified Docker host
   help                 Print this message or the help of the given
                            subcommand(s)
 
@@ -346,4 +347,48 @@ Arguments:
 
 Options:
   -h, --help  Print help (see more with '--help')
+```
+
+### `wheelsticks transfer-images -h`
+
+```
+Copies images from default to specified Docker host
+
+Usage: wheelsticks transfer-images [OPTIONS] [IMAGES]...
+
+Arguments:
+  [IMAGES]...  Images to copy; if empty, use images from Compose configuration
+
+Options:
+      --ansi <ANSI>
+          Control when to print ANSI control characters [possible values: never,
+          always, auto]
+      --compatibility
+          Run compose in backward compatibility mode
+      --dry-run
+          Execute command in dry run mode
+      --env-file <ENV_FILE>
+          Specify an alternate environment file
+  -f, --file <FILE>
+          Compose configuration files
+      --parallel <PARALLEL>
+          Control max parallelism, -1 for unlimited
+      --profile <PROFILE>
+          Specify a profile to enable
+      --progress <PROGRESS>
+          Set type of progress output [possible values: auto, tty, plain, quiet]
+      --project-directory <PROJECT_DIRECTORY>
+          Specify an alternate working directory (default: the path of the,
+          first specified, Compose file)
+  -p, --project-name <PROJECT_NAME>
+          Project name
+      --compose-engine <COMPOSE_ENGINE>
+          Compose engine to use; Podman Compose is not supported due to missing
+          features [default: "docker compose"] [possible values: docker-compose,
+          "docker compose"]
+      --container-engine <CONTAINER_ENGINE>
+          Container engine to use [default: docker] [possible values: docker,
+          podman]
+  -h, --help
+          Print help (see more with '--help')
 ```

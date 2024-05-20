@@ -48,10 +48,14 @@ impl Cli {
     }
 
     pub fn docker(&self) -> process::Command {
-        self.with_docker_arguments(process::Command::new(&self.container_engine))
+        self.with_docker_arguments(process::Command::new(&self.container_engine), false)
     }
 
-    fn with_docker_arguments(&self, mut command: process::Command) -> process::Command {
+    fn with_docker_arguments(
+        &self,
+        mut command: process::Command,
+        default_daemon: bool,
+    ) -> process::Command {
         let DockerArguments {
             config,
             context,
@@ -67,9 +71,18 @@ impl Cli {
 
         command
             .args(config.iter().flat_map(|config| ["--config", config]))
-            .args(context.iter().flat_map(|context| ["--context", context]))
+            .args(
+                context
+                    .iter()
+                    .filter(|_| !default_daemon)
+                    .flat_map(|context| ["--context", context]),
+            )
             .args(debug.then_some("--debug").iter())
-            .args(host.iter().flat_map(|host| ["--host", host]))
+            .args(
+                host.iter()
+                    .filter(|_| !default_daemon)
+                    .flat_map(|host| ["--host", host]),
+            )
             .args(
                 log_level
                     .iter()
@@ -90,7 +103,7 @@ impl Cli {
 
     pub fn docker_compose(&self) -> process::Command {
         let mut command = process::Command::new(&self.compose_engine[0]);
-        command = self.with_docker_arguments(command);
+        command = self.with_docker_arguments(command, false);
         command.args(&self.compose_engine[1..]);
 
         let ComposeArguments {
@@ -137,5 +150,9 @@ impl Cli {
             );
 
         command
+    }
+
+    pub fn docker_default_daemon(&self) -> process::Command {
+        self.with_docker_arguments(process::Command::new(&self.container_engine), true)
     }
 }

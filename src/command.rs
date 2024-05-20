@@ -5,7 +5,6 @@ use std::io::Write;
 use std::process;
 use std::thread;
 
-#[allow(dead_code)]
 pub fn piped_ok(
     writer: &mut process::Command,
     reader: &mut process::Command,

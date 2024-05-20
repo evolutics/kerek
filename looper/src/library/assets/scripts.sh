@@ -19,15 +19,9 @@ build() {
 }
 
 deploy() {
-  echo 'Getting image names from Compose configuration.' >&2
-  local images
-  mapfile -t images < <(docker compose config --images)
-  readonly images
-
-  echo "Transferring ${#images[@]} images: ${images[*]}" >&2
-  docker save -- "${images[@]}" \
-    | wheelsticks run-with-ssh-config -- "${KEREK_SSH_CONFIG}" docker \
-      --host "ssh://${KEREK_ENVIRONMENT_ID}" load
+  echo 'Transferring images.' >&2
+  wheelsticks run-with-ssh-config -- "${KEREK_SSH_CONFIG}" wheelsticks \
+    --host "ssh://${KEREK_ENVIRONMENT_ID}" transfer-images
 
   echo 'Deploying containers on remote.' >&2
   wheelsticks run-with-ssh-config -- "${KEREK_SSH_CONFIG}" docker \

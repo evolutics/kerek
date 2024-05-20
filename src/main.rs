@@ -5,6 +5,7 @@ mod docker_cli_plugin_metadata;
 mod log;
 mod provision;
 mod run_with_ssh_config;
+mod transfer_images;
 
 use clap::Parser;
 use clap::ValueEnum;
@@ -93,6 +94,20 @@ fn main() -> anyhow::Result<()> {
             command,
             ssh_config,
         }),
+
+        Subcommand::TransferImages {
+            compose_arguments,
+            engine_arguments,
+            images,
+        } => {
+            let dry_run = compose_arguments.dry_run;
+
+            transfer_images::go(transfer_images::In {
+                docker_cli: docker_cli(docker_arguments, compose_arguments, engine_arguments),
+                dry_run,
+                images,
+            })
+        }
     }
 }
 
@@ -229,6 +244,24 @@ enum Subcommand {
         /// Program with arguments to run
         #[arg(required = true)]
         command: Vec<String>,
+    },
+
+    /// Copies images from default to specified Docker host
+    ///
+    /// Examples:
+    ///
+    ///     wheelsticks --host ssh://192.0.2.1 transfer-images my-img
+    ///     DOCKER_HOST=ssh://from wheelsticks --host ssh://to transfer-images my-img
+    ///     DOCKER_CONTEXT=from wheelsticks --context to transfer-images my-img
+    TransferImages {
+        #[command(flatten)]
+        compose_arguments: ComposeArguments,
+
+        #[command(flatten)]
+        engine_arguments: EngineArguments,
+
+        /// Images to copy; if empty, use images from Compose configuration
+        images: Vec<String>,
     },
 }
 
@@ -482,6 +515,7 @@ mod tests {
     #[test_case::test_case(&["deploy"]; "deploy")]
     #[test_case::test_case(&["provision"]; "provision")]
     #[test_case::test_case(&["run-with-ssh-config"]; "run-with-ssh-config")]
+    #[test_case::test_case(&["transfer-images"]; "transfer-images")]
     fn readme_includes_subcommand_help(subcommands: &[&str]) {
         let help_command = [&[env!("CARGO_BIN_NAME")], subcommands, &["-h"]]
             .concat()

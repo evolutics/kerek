@@ -162,7 +162,7 @@ struct Cli {
 
 // Top-level Docker arguments.
 //
-// Source: https://docs.docker.com/engine/reference/commandline/cli/
+// Source: https://docs.docker.com/reference/cli/docker/
 #[derive(clap::Args)]
 struct DockerArguments {
     /// Location of client config files

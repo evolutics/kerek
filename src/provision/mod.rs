@@ -25,7 +25,7 @@ pub fn go(
             let mut command = process::Command::new("ssh");
             command
                 .args(ssh_config.iter().flat_map(|ssh_config| ["-F", ssh_config]))
-                .arg(ssh_host);
+                .args([&ssh_host, "bash"]);
             command
         }
     };

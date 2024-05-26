@@ -1,0 +1,12 @@
+[Unit]
+Description=Hi version %i
+
+[Container]
+Environment=HI_VERSION=%i
+Image=docker.io/caddy:2-alpine
+Network=test-net.network
+PodmanArgs=--network-alias greet
+Volume=/home/vagrant/hi.Caddyfile:/etc/caddy/Caddyfile
+
+[Install]
+WantedBy=multi-user.target default.target

@@ -56,9 +56,9 @@ fn main() -> anyhow::Result<()> {
             deploy::go(deploy::In {
                 build,
                 docker_cli: docker_cli(
+                    container_engine_arguments,
                     docker_arguments,
                     docker_compose_arguments,
-                    container_engine_arguments,
                 ),
                 dry_run,
                 force_recreate,
@@ -100,17 +100,17 @@ fn main() -> anyhow::Result<()> {
         }),
 
         Subcommand::TransferImages {
-            docker_compose_arguments,
             container_engine_arguments,
+            docker_compose_arguments,
             images,
         } => {
             let dry_run = docker_compose_arguments.dry_run;
 
             transfer_images::go(transfer_images::In {
                 docker_cli: docker_cli(
+                    container_engine_arguments,
                     docker_arguments,
                     docker_compose_arguments,
-                    container_engine_arguments,
                 ),
                 dry_run,
                 images,
@@ -210,13 +210,13 @@ enum Subcommand {
     /// To force recreating all containers, use the `--force-recreate` flag.
     Deploy {
         #[command(flatten)]
+        container_engine_arguments: ContainerEngineArguments,
+
+        #[command(flatten)]
         docker_compose_arguments: DockerComposeArguments,
 
         #[command(flatten)]
         docker_compose_up_arguments: DockerComposeUpArgumentsForDeploy,
-
-        #[command(flatten)]
-        container_engine_arguments: ContainerEngineArguments,
 
         /// Services to consider
         service_names: Vec<String>,
@@ -263,14 +263,27 @@ enum Subcommand {
     ///     DOCKER_CONTEXT=from wheelsticks --context to transfer-images my-img
     TransferImages {
         #[command(flatten)]
-        docker_compose_arguments: DockerComposeArguments,
+        container_engine_arguments: ContainerEngineArguments,
 
         #[command(flatten)]
-        container_engine_arguments: ContainerEngineArguments,
+        docker_compose_arguments: DockerComposeArguments,
 
         /// Images to copy; if empty, use images from Compose configuration
         images: Vec<String>,
     },
+}
+
+#[derive(clap::Args)]
+struct ContainerEngineArguments {
+    /// Container engine to use
+    #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
+    container_engine: ContainerEngine,
+}
+
+#[derive(Clone, ValueEnum)]
+enum ContainerEngine {
+    Docker,
+    Podman,
 }
 
 // Top-level Docker Compose arguments.
@@ -401,20 +414,8 @@ enum Pull {
     Never,
 }
 
-#[derive(clap::Args)]
-struct ContainerEngineArguments {
-    /// Container engine to use
-    #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
-    container_engine: ContainerEngine,
-}
-
-#[derive(Clone, ValueEnum)]
-enum ContainerEngine {
-    Docker,
-    Podman,
-}
-
 fn docker_cli(
+    ContainerEngineArguments { container_engine }: ContainerEngineArguments,
     DockerArguments {
         config,
         context,
@@ -439,9 +440,9 @@ fn docker_cli(
         project_directory,
         project_name,
     }: DockerComposeArguments,
-    ContainerEngineArguments { container_engine }: ContainerEngineArguments,
 ) -> docker::Cli {
     docker::Cli::new(
+        canonical_argument(container_engine),
         docker::DockerArguments {
             config,
             context,
@@ -465,7 +466,6 @@ fn docker_cli(
             project_directory,
             project_name,
         },
-        canonical_argument(container_engine),
     )
 }
 

@@ -33,9 +33,9 @@ pub struct DockerComposeArguments {
 
 impl Cli {
     pub fn new(
+        container_engine: String,
         docker_arguments: DockerArguments,
         docker_compose_arguments: DockerComposeArguments,
-        container_engine: String,
     ) -> Self {
         Self {
             container_engine,

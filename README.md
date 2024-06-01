@@ -259,6 +259,9 @@ Arguments:
   [SERVICE_NAMES]...  Services to consider
 
 Options:
+      --container-engine <CONTAINER_ENGINE>
+          Container engine to use [default: docker] [possible values: docker,
+          podman]
       --ansi <ANSI>
           Control when to print ANSI control characters [possible values: never,
           always, auto]
@@ -307,9 +310,6 @@ Options:
           Wait for services to be running|healthy
       --wait-timeout <WAIT_TIMEOUT>
           timeout in seconds waiting for application to be running|healthy
-      --container-engine <CONTAINER_ENGINE>
-          Container engine to use [default: docker] [possible values: docker,
-          podman]
   -h, --help
           Print help (see more with '--help')
 ```
@@ -356,6 +356,9 @@ Arguments:
   [IMAGES]...  Images to copy; if empty, use images from Compose configuration
 
 Options:
+      --container-engine <CONTAINER_ENGINE>
+          Container engine to use [default: docker] [possible values: docker,
+          podman]
       --ansi <ANSI>
           Control when to print ANSI control characters [possible values: never,
           always, auto]
@@ -378,9 +381,6 @@ Options:
           first specified, Compose file)
   -p, --project-name <PROJECT_NAME>
           Project name
-      --container-engine <CONTAINER_ENGINE>
-          Container engine to use [default: docker] [possible values: docker,
-          podman]
   -h, --help
           Print help (see more with '--help')
 ```

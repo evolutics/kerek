@@ -395,22 +395,9 @@ enum Pull {
 
 #[derive(clap::Args)]
 struct EngineArguments {
-    /// Compose engine to use; Podman Compose is not supported due to missing
-    /// features
-    #[arg(default_value_t = ComposeEngine::DockerComposeV2, long, value_enum)]
-    compose_engine: ComposeEngine,
-
     /// Container engine to use
     #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
     container_engine: ContainerEngine,
-}
-
-#[derive(Clone, ValueEnum)]
-enum ComposeEngine {
-    #[clap(name = "docker-compose")]
-    DockerComposeV1,
-    #[clap(name = "docker compose")]
-    DockerComposeV2,
 }
 
 #[derive(Clone, ValueEnum)]
@@ -444,10 +431,7 @@ fn docker_cli(
         project_directory,
         project_name,
     }: ComposeArguments,
-    EngineArguments {
-        compose_engine,
-        container_engine,
-    }: EngineArguments,
+    EngineArguments { container_engine }: EngineArguments,
 ) -> docker::Cli {
     docker::Cli::new(
         docker::DockerArguments {
@@ -474,10 +458,6 @@ fn docker_cli(
             project_name,
         },
         canonical_argument(container_engine),
-        canonical_argument(compose_engine)
-            .split_whitespace()
-            .map(|part| part.into())
-            .collect(),
     )
 }
 

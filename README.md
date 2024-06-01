@@ -307,10 +307,6 @@ Options:
           Wait for services to be running|healthy
       --wait-timeout <WAIT_TIMEOUT>
           timeout in seconds waiting for application to be running|healthy
-      --compose-engine <COMPOSE_ENGINE>
-          Compose engine to use; Podman Compose is not supported due to missing
-          features [default: "docker compose"] [possible values: docker-compose,
-          "docker compose"]
       --container-engine <CONTAINER_ENGINE>
           Container engine to use [default: docker] [possible values: docker,
           podman]
@@ -382,10 +378,6 @@ Options:
           first specified, Compose file)
   -p, --project-name <PROJECT_NAME>
           Project name
-      --compose-engine <COMPOSE_ENGINE>
-          Compose engine to use; Podman Compose is not supported due to missing
-          features [default: "docker compose"] [possible values: docker-compose,
-          "docker compose"]
       --container-engine <CONTAINER_ENGINE>
           Container engine to use [default: docker] [possible values: docker,
           podman]

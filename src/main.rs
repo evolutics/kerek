@@ -29,6 +29,7 @@ fn main() -> anyhow::Result<()> {
 
     match subcommand {
         Subcommand::Deploy {
+            container_engine_arguments,
             docker_compose_arguments,
             docker_compose_up_arguments:
                 DockerComposeUpArgumentsForDeploy {
@@ -45,7 +46,6 @@ fn main() -> anyhow::Result<()> {
                     wait_timeout,
                     wait,
                 },
-            engine_arguments,
             service_names,
         } => {
             if detach {
@@ -58,7 +58,7 @@ fn main() -> anyhow::Result<()> {
                 docker_cli: docker_cli(
                     docker_arguments,
                     docker_compose_arguments,
-                    engine_arguments,
+                    container_engine_arguments,
                 ),
                 dry_run,
                 force_recreate,
@@ -101,7 +101,7 @@ fn main() -> anyhow::Result<()> {
 
         Subcommand::TransferImages {
             docker_compose_arguments,
-            engine_arguments,
+            container_engine_arguments,
             images,
         } => {
             let dry_run = docker_compose_arguments.dry_run;
@@ -110,7 +110,7 @@ fn main() -> anyhow::Result<()> {
                 docker_cli: docker_cli(
                     docker_arguments,
                     docker_compose_arguments,
-                    engine_arguments,
+                    container_engine_arguments,
                 ),
                 dry_run,
                 images,
@@ -216,7 +216,7 @@ enum Subcommand {
         docker_compose_up_arguments: DockerComposeUpArgumentsForDeploy,
 
         #[command(flatten)]
-        engine_arguments: EngineArguments,
+        container_engine_arguments: ContainerEngineArguments,
 
         /// Services to consider
         service_names: Vec<String>,
@@ -266,7 +266,7 @@ enum Subcommand {
         docker_compose_arguments: DockerComposeArguments,
 
         #[command(flatten)]
-        engine_arguments: EngineArguments,
+        container_engine_arguments: ContainerEngineArguments,
 
         /// Images to copy; if empty, use images from Compose configuration
         images: Vec<String>,
@@ -402,7 +402,7 @@ enum Pull {
 }
 
 #[derive(clap::Args)]
-struct EngineArguments {
+struct ContainerEngineArguments {
     /// Container engine to use
     #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
     container_engine: ContainerEngine,
@@ -439,7 +439,7 @@ fn docker_cli(
         project_directory,
         project_name,
     }: DockerComposeArguments,
-    EngineArguments { container_engine }: EngineArguments,
+    ContainerEngineArguments { container_engine }: ContainerEngineArguments,
 ) -> docker::Cli {
     docker::Cli::new(
         docker::DockerArguments {

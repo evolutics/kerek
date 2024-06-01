@@ -64,7 +64,7 @@ fn main() -> anyhow::Result<()> {
                 force_recreate,
                 no_build,
                 no_start,
-                pull: pull.map(canonical_argument),
+                pull,
                 quiet_pull,
                 remove_orphans,
                 renew_anon_volumes,
@@ -287,8 +287,8 @@ struct ContainerEngineArguments {
 #[derive(clap::Args)]
 struct DockerComposeArguments {
     /// Control when to print ANSI control characters
-    #[arg(long, value_enum)]
-    ansi: Option<Ansi>,
+    #[arg(long, value_parser = ["never", "always", "auto"])]
+    ansi: Option<String>,
 
     /// Run compose in backward compatibility mode
     #[arg(long)]
@@ -315,8 +315,8 @@ struct DockerComposeArguments {
     profile: Vec<String>,
 
     /// Set type of progress output
-    #[arg(long, value_enum)]
-    progress: Option<Progress>,
+    #[arg(long, value_parser = ["auto", "tty", "plain", "quiet"])]
+    progress: Option<String>,
 
     /// Specify an alternate working directory (default: the path of the, first
     /// specified, Compose file)
@@ -326,21 +326,6 @@ struct DockerComposeArguments {
     /// Project name
     #[arg(long, short = 'p')]
     project_name: Option<String>,
-}
-
-#[derive(Clone, ValueEnum)]
-enum Ansi {
-    Never,
-    Always,
-    Auto,
-}
-
-#[derive(Clone, ValueEnum)]
-enum Progress {
-    Auto,
-    Tty,
-    Plain,
-    Quiet,
 }
 
 // `docker compose up` arguments, where applicable.
@@ -371,8 +356,8 @@ struct DockerComposeUpArgumentsForDeploy {
     no_start: bool,
 
     /// Pull image before running
-    #[arg(long, value_enum)]
-    pull: Option<Pull>,
+    #[arg(long, value_parser = ["always", "missing", "never"])]
+    pull: Option<String>,
 
     /// Pull without printing progress information
     #[arg(long)]
@@ -399,13 +384,6 @@ struct DockerComposeUpArgumentsForDeploy {
     /// timeout in seconds waiting for application to be running|healthy
     #[arg(long)]
     wait_timeout: Option<i64>,
-}
-
-#[derive(Clone, ValueEnum)]
-enum Pull {
-    Always,
-    Missing,
-    Never,
 }
 
 fn docker_cli(
@@ -450,13 +428,13 @@ fn docker_cli(
             tlsverify,
         },
         docker::DockerComposeArguments {
-            ansi: ansi.map(canonical_argument),
+            ansi,
             compatibility,
             env_file,
             file,
             parallel: parallel.map(|parallel| parallel.to_string()),
             profile,
-            progress: progress.map(canonical_argument),
+            progress,
             project_directory,
             project_name,
         },

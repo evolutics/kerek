@@ -1,21 +1,9 @@
 use std::process;
 
 pub struct Cli {
-    compose_arguments: ComposeArguments,
     container_engine: String,
     docker_arguments: DockerArguments,
-}
-
-pub struct ComposeArguments {
-    pub ansi: Option<String>,
-    pub compatibility: bool,
-    pub env_file: Vec<String>,
-    pub file: Vec<String>,
-    pub parallel: Option<String>,
-    pub profile: Vec<String>,
-    pub progress: Option<String>,
-    pub project_directory: Option<String>,
-    pub project_name: Option<String>,
+    docker_compose_arguments: DockerComposeArguments,
 }
 
 pub struct DockerArguments {
@@ -31,16 +19,28 @@ pub struct DockerArguments {
     pub tlsverify: bool,
 }
 
+pub struct DockerComposeArguments {
+    pub ansi: Option<String>,
+    pub compatibility: bool,
+    pub env_file: Vec<String>,
+    pub file: Vec<String>,
+    pub parallel: Option<String>,
+    pub profile: Vec<String>,
+    pub progress: Option<String>,
+    pub project_directory: Option<String>,
+    pub project_name: Option<String>,
+}
+
 impl Cli {
     pub fn new(
         docker_arguments: DockerArguments,
-        compose_arguments: ComposeArguments,
+        docker_compose_arguments: DockerComposeArguments,
         container_engine: String,
     ) -> Self {
         Self {
-            compose_arguments,
             container_engine,
             docker_arguments,
+            docker_compose_arguments,
         }
     }
 
@@ -101,7 +101,7 @@ impl Cli {
     pub fn docker_compose(&self) -> process::Command {
         let mut command = self.with_docker_arguments(process::Command::new("docker"), false);
 
-        let ComposeArguments {
+        let DockerComposeArguments {
             ansi,
             compatibility,
             env_file,
@@ -111,7 +111,7 @@ impl Cli {
             progress,
             project_directory,
             project_name,
-        } = &self.compose_arguments;
+        } = &self.docker_compose_arguments;
 
         command
             .arg("compose")

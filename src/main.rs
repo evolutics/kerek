@@ -29,9 +29,9 @@ fn main() -> anyhow::Result<()> {
 
     match subcommand {
         Subcommand::Deploy {
-            compose_arguments,
-            compose_up_arguments:
-                ComposeUpArgumentsForDeploy {
+            docker_compose_arguments,
+            docker_compose_up_arguments:
+                DockerComposeUpArgumentsForDeploy {
                     build,
                     detach,
                     force_recreate,
@@ -51,11 +51,15 @@ fn main() -> anyhow::Result<()> {
             if detach {
                 log::warn!("Detached mode is always on, no need to set it.");
             }
-            let dry_run = compose_arguments.dry_run;
+            let dry_run = docker_compose_arguments.dry_run;
 
             deploy::go(deploy::In {
                 build,
-                docker_cli: docker_cli(docker_arguments, compose_arguments, engine_arguments),
+                docker_cli: docker_cli(
+                    docker_arguments,
+                    docker_compose_arguments,
+                    engine_arguments,
+                ),
                 dry_run,
                 force_recreate,
                 no_build,
@@ -96,14 +100,18 @@ fn main() -> anyhow::Result<()> {
         }),
 
         Subcommand::TransferImages {
-            compose_arguments,
+            docker_compose_arguments,
             engine_arguments,
             images,
         } => {
-            let dry_run = compose_arguments.dry_run;
+            let dry_run = docker_compose_arguments.dry_run;
 
             transfer_images::go(transfer_images::In {
-                docker_cli: docker_cli(docker_arguments, compose_arguments, engine_arguments),
+                docker_cli: docker_cli(
+                    docker_arguments,
+                    docker_compose_arguments,
+                    engine_arguments,
+                ),
                 dry_run,
                 images,
             })
@@ -202,10 +210,10 @@ enum Subcommand {
     /// To force recreating all containers, use the `--force-recreate` flag.
     Deploy {
         #[command(flatten)]
-        compose_arguments: ComposeArguments,
+        docker_compose_arguments: DockerComposeArguments,
 
         #[command(flatten)]
-        compose_up_arguments: ComposeUpArgumentsForDeploy,
+        docker_compose_up_arguments: DockerComposeUpArgumentsForDeploy,
 
         #[command(flatten)]
         engine_arguments: EngineArguments,
@@ -255,7 +263,7 @@ enum Subcommand {
     ///     DOCKER_CONTEXT=from wheelsticks --context to transfer-images my-img
     TransferImages {
         #[command(flatten)]
-        compose_arguments: ComposeArguments,
+        docker_compose_arguments: DockerComposeArguments,
 
         #[command(flatten)]
         engine_arguments: EngineArguments,
@@ -265,12 +273,12 @@ enum Subcommand {
     },
 }
 
-// Top-level Compose arguments.
+// Top-level Docker Compose arguments.
 //
 // Source: https://docs.docker.com/reference/cli/docker/compose/
 // TODO: Update arguments based on above source.
 #[derive(clap::Args)]
-struct ComposeArguments {
+struct DockerComposeArguments {
     /// Control when to print ANSI control characters
     #[arg(long, value_enum)]
     ansi: Option<Ansi>,
@@ -334,7 +342,7 @@ enum Progress {
 // TODO: Document arguments that are not applicable.
 // TODO: Update arguments based on above source.
 #[derive(clap::Args)]
-struct ComposeUpArgumentsForDeploy {
+struct DockerComposeUpArgumentsForDeploy {
     /// Build images before starting containers
     #[arg(long)]
     build: bool,
@@ -419,7 +427,7 @@ fn docker_cli(
         tlskey,
         tlsverify,
     }: DockerArguments,
-    ComposeArguments {
+    DockerComposeArguments {
         ansi,
         compatibility,
         dry_run: _,
@@ -430,7 +438,7 @@ fn docker_cli(
         progress,
         project_directory,
         project_name,
-    }: ComposeArguments,
+    }: DockerComposeArguments,
     EngineArguments { container_engine }: EngineArguments,
 ) -> docker::Cli {
     docker::Cli::new(
@@ -446,7 +454,7 @@ fn docker_cli(
             tlskey,
             tlsverify,
         },
-        docker::ComposeArguments {
+        docker::DockerComposeArguments {
             ansi: ansi.map(canonical_argument),
             compatibility,
             env_file,

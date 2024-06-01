@@ -99,8 +99,7 @@ impl Cli {
     }
 
     pub fn docker_compose(&self) -> process::Command {
-        let mut command = process::Command::new("docker");
-        command = self.with_docker_arguments(command, false);
+        let mut command = self.with_docker_arguments(process::Command::new("docker"), false);
 
         let ComposeArguments {
             ansi,

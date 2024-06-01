@@ -260,8 +260,7 @@ Arguments:
 
 Options:
       --container-engine <CONTAINER_ENGINE>
-          Container engine to use [default: docker] [possible values: docker,
-          podman]
+          Container engine program to use [default: docker]
       --ansi <ANSI>
           Control when to print ANSI control characters [possible values: never,
           always, auto]
@@ -357,8 +356,7 @@ Arguments:
 
 Options:
       --container-engine <CONTAINER_ENGINE>
-          Container engine to use [default: docker] [possible values: docker,
-          podman]
+          Container engine program to use [default: docker]
       --ansi <ANSI>
           Control when to print ANSI control characters [possible values: never,
           always, auto]

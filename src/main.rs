@@ -275,15 +275,9 @@ enum Subcommand {
 
 #[derive(clap::Args)]
 struct ContainerEngineArguments {
-    /// Container engine to use
-    #[arg(default_value_t = ContainerEngine::Docker, long, value_enum)]
-    container_engine: ContainerEngine,
-}
-
-#[derive(Clone, ValueEnum)]
-enum ContainerEngine {
-    Docker,
-    Podman,
+    /// Container engine program to use
+    #[arg(default_value = "docker", long, value_enum)]
+    container_engine: String,
 }
 
 // Top-level Docker Compose arguments.
@@ -442,7 +436,7 @@ fn docker_cli(
     }: DockerComposeArguments,
 ) -> docker::Cli {
     docker::Cli::new(
-        canonical_argument(container_engine),
+        container_engine,
         docker::DockerArguments {
             config,
             context,

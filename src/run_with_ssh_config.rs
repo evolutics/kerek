@@ -11,6 +11,7 @@ use std::process;
 pub fn go(
     In {
         command,
+        dry_run,
         ssh_config,
     }: In,
 ) -> anyhow::Result<()> {
@@ -39,14 +40,19 @@ pub fn go(
         iter::once(custom_bin.path().to_owned()).chain(env::split_paths(&old_path)),
     )?;
 
-    command::status_ok(
-        process::Command::new(&command[0])
-            .args(&command[1..])
-            .env("PATH", new_path),
-    )
+    let mut command_in_context = process::Command::new(&command[0]);
+    command_in_context.args(&command[1..]).env("PATH", new_path);
+
+    if dry_run {
+        log::info!("Would run: {command_in_context:?}");
+        Ok(())
+    } else {
+        command::status_ok(&mut command_in_context)
+    }
 }
 
 pub struct In {
     pub command: Vec<String>,
+    pub dry_run: bool,
     pub ssh_config: path::PathBuf,
 }

@@ -339,14 +339,15 @@ Options:
 ```
 Runs command with wrapped `ssh` in `$PATH` that uses given SSH config
 
-Usage: wheelsticks run-with-ssh-config <SSH_CONFIG> <COMMAND>...
+Usage: wheelsticks run-with-ssh-config [OPTIONS] <SSH_CONFIG> <COMMAND>...
 
 Arguments:
   <SSH_CONFIG>  Path to SSH config file
   <COMMAND>...  Program with arguments to run
 
 Options:
-  -h, --help  Print help (see more with '--help')
+      --dry-run  Do not change anything, only show what would be done
+  -h, --help     Print help (see more with '--help')
 ```
 
 ### `wheelsticks transfer-images -h`

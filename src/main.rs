@@ -94,9 +94,11 @@ fn main() -> anyhow::Result<()> {
 
         Subcommand::RunWithSshConfig {
             command,
+            dry_run,
             ssh_config,
         } => run_with_ssh_config::go(run_with_ssh_config::In {
             command,
+            dry_run,
             ssh_config,
         }),
 
@@ -241,6 +243,10 @@ enum Subcommand {
     /// an SSH connection with username, hostname, port, etc. However, a custom
     /// SSH config file other than `~/.ssh/config` cannot be provided.
     RunWithSshConfig {
+        /// Do not change anything, only show what would be done
+        #[arg(long)]
+        dry_run: bool,
+
         /// Path to SSH config file
         ssh_config: path::PathBuf,
 

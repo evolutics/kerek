@@ -130,7 +130,8 @@ struct Cli {
     subcommand: Subcommand,
 }
 
-// Top-level Docker arguments.
+// Top-level Docker arguments. These must be top-level arguments of our CLI for
+// its subcommands to be valid Docker plugins even if not always applicable.
 //
 // Source: https://docs.docker.com/reference/cli/docker/
 // TODO: Update arguments based on above source.

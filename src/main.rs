@@ -428,7 +428,7 @@ fn docker_cli(
             compatibility,
             env_file,
             file,
-            parallel: parallel.map(|parallel| parallel.to_string()),
+            parallel,
             profile,
             progress,
             project_directory,

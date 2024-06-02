@@ -24,7 +24,7 @@ pub struct DockerComposeArguments {
     pub compatibility: bool,
     pub env_file: Vec<String>,
     pub file: Vec<String>,
-    pub parallel: Option<String>,
+    pub parallel: Option<i16>,
     pub profile: Vec<String>,
     pub progress: Option<String>,
     pub project_directory: Option<String>,
@@ -125,6 +125,7 @@ impl Cli {
             .args(file.iter().flat_map(|file| ["--file", file]))
             .args(
                 parallel
+                    .map(|parallel| parallel.to_string())
                     .iter()
                     .flat_map(|parallel| ["--parallel", parallel]),
             )

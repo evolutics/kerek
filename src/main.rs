@@ -54,9 +54,9 @@ fn main() -> anyhow::Result<()> {
             deploy::go(deploy::In {
                 build,
                 docker_cli: docker_cli(
-                    container_engine_arguments,
-                    docker_arguments,
-                    docker_compose_arguments,
+                    &container_engine_arguments,
+                    &docker_arguments,
+                    &docker_compose_arguments,
                 ),
                 dry_run,
                 force_recreate,
@@ -106,9 +106,9 @@ fn main() -> anyhow::Result<()> {
 
             transfer_images::go(transfer_images::In {
                 docker_cli: docker_cli(
-                    container_engine_arguments,
-                    docker_arguments,
-                    docker_compose_arguments,
+                    &container_engine_arguments,
+                    &docker_arguments,
+                    &docker_compose_arguments,
                 ),
                 dry_run,
                 images,
@@ -382,8 +382,8 @@ struct DockerComposeUpArgumentsForDeploy {
     wait_timeout: Option<i64>,
 }
 
-fn docker_cli(
-    ContainerEngineArguments { container_engine }: ContainerEngineArguments,
+fn docker_cli<'a>(
+    ContainerEngineArguments { container_engine }: &'a ContainerEngineArguments,
     DockerArguments {
         config,
         context,
@@ -395,7 +395,7 @@ fn docker_cli(
         tlscert,
         tlskey,
         tlsverify,
-    }: DockerArguments,
+    }: &'a DockerArguments,
     DockerComposeArguments {
         ansi,
         compatibility,
@@ -407,32 +407,32 @@ fn docker_cli(
         progress,
         project_directory,
         project_name,
-    }: DockerComposeArguments,
-) -> docker::Cli {
+    }: &'a DockerComposeArguments,
+) -> docker::Cli<'a> {
     docker::Cli::new(
         container_engine,
         docker::DockerArguments {
-            config,
-            context,
-            debug,
-            host,
-            log_level,
-            tls,
-            tlscacert,
-            tlscert,
-            tlskey,
-            tlsverify,
+            config: config.as_deref(),
+            context: context.as_deref(),
+            debug: *debug,
+            host: host.as_deref(),
+            log_level: log_level.as_deref(),
+            tls: *tls,
+            tlscacert: tlscacert.as_deref(),
+            tlscert: tlscert.as_deref(),
+            tlskey: tlskey.as_deref(),
+            tlsverify: *tlsverify,
         },
         docker::DockerComposeArguments {
-            ansi,
-            compatibility,
+            ansi: ansi.as_deref(),
+            compatibility: *compatibility,
             env_file,
             file,
-            parallel,
+            parallel: *parallel,
             profile,
-            progress,
-            project_directory,
-            project_name,
+            progress: progress.as_deref(),
+            project_directory: project_directory.as_deref(),
+            project_name: project_name.as_deref(),
         },
     )
 }

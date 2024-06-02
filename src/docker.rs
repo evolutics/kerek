@@ -1,41 +1,41 @@
 use std::process;
 
-pub struct Cli {
-    container_engine: String,
-    docker_arguments: DockerArguments,
-    docker_compose_arguments: DockerComposeArguments,
+pub struct Cli<'a> {
+    container_engine: &'a str,
+    docker_arguments: DockerArguments<'a>,
+    docker_compose_arguments: DockerComposeArguments<'a>,
 }
 
-pub struct DockerArguments {
-    pub config: Option<String>,
-    pub context: Option<String>,
+pub struct DockerArguments<'a> {
+    pub config: Option<&'a str>,
+    pub context: Option<&'a str>,
     pub debug: bool,
-    pub host: Option<String>,
-    pub log_level: Option<String>,
+    pub host: Option<&'a str>,
+    pub log_level: Option<&'a str>,
     pub tls: bool,
-    pub tlscacert: Option<String>,
-    pub tlscert: Option<String>,
-    pub tlskey: Option<String>,
+    pub tlscacert: Option<&'a str>,
+    pub tlscert: Option<&'a str>,
+    pub tlskey: Option<&'a str>,
     pub tlsverify: bool,
 }
 
-pub struct DockerComposeArguments {
-    pub ansi: Option<String>,
+pub struct DockerComposeArguments<'a> {
+    pub ansi: Option<&'a str>,
     pub compatibility: bool,
-    pub env_file: Vec<String>,
-    pub file: Vec<String>,
+    pub env_file: &'a [String],
+    pub file: &'a [String],
     pub parallel: Option<i16>,
-    pub profile: Vec<String>,
-    pub progress: Option<String>,
-    pub project_directory: Option<String>,
-    pub project_name: Option<String>,
+    pub profile: &'a [String],
+    pub progress: Option<&'a str>,
+    pub project_directory: Option<&'a str>,
+    pub project_name: Option<&'a str>,
 }
 
-impl Cli {
+impl<'a> Cli<'a> {
     pub fn new(
-        container_engine: String,
-        docker_arguments: DockerArguments,
-        docker_compose_arguments: DockerComposeArguments,
+        container_engine: &'a str,
+        docker_arguments: DockerArguments<'a>,
+        docker_compose_arguments: DockerComposeArguments<'a>,
     ) -> Self {
         Self {
             container_engine,
@@ -45,7 +45,7 @@ impl Cli {
     }
 
     pub fn docker(&self) -> process::Command {
-        self.with_docker_arguments(process::Command::new(&self.container_engine), false)
+        self.with_docker_arguments(process::Command::new(self.container_engine), false)
     }
 
     fn with_docker_arguments(
@@ -150,6 +150,6 @@ impl Cli {
     }
 
     pub fn docker_default_daemon(&self) -> process::Command {
-        self.with_docker_arguments(process::Command::new(&self.container_engine), true)
+        self.with_docker_arguments(process::Command::new(self.container_engine), true)
     }
 }

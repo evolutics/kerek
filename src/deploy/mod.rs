@@ -48,9 +48,9 @@ pub fn go(
     })
 }
 
-pub struct In {
+pub struct In<'a> {
     pub build: bool,
-    pub docker_cli: docker::Cli,
+    pub docker_cli: docker::Cli<'a>,
     pub dry_run: bool,
     pub force_recreate: bool,
     pub no_build: bool,

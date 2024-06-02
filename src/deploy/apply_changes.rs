@@ -64,7 +64,7 @@ pub struct In<'a> {
     pub actual_containers: &'a model::ActualContainers,
     pub build: bool,
     pub changes: &'a [model::ServiceContainerChange],
-    pub docker_cli: &'a docker::Cli,
+    pub docker_cli: &'a docker::Cli<'a>,
     pub dry_run: bool,
     pub no_build: bool,
     pub no_start: bool,

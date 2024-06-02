@@ -31,8 +31,8 @@ pub fn go(
     Ok(())
 }
 
-pub struct In {
-    pub docker_cli: docker::Cli,
+pub struct In<'a> {
+    pub docker_cli: docker::Cli<'a>,
     pub dry_run: bool,
     pub images: Vec<String>,
 }

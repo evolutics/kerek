@@ -8,7 +8,6 @@ mod run_with_ssh_config;
 mod transfer_images;
 
 use clap::Parser;
-use clap::ValueEnum;
 use std::path;
 
 fn main() -> anyhow::Result<()> {
@@ -17,14 +16,13 @@ fn main() -> anyhow::Result<()> {
         subcommand,
     } = Cli::parse();
 
-    log::set_level(match docker_arguments.log_level {
+    log::set_level(match docker_arguments.log_level.as_deref() {
         _ if docker_arguments.debug => log::Level::Debug,
         None => log::Level::Info,
-        Some(LogLevel::Debug) => log::Level::Debug,
-        Some(LogLevel::Error) => log::Level::Error,
-        Some(LogLevel::Fatal) => log::Level::Error,
-        Some(LogLevel::Info) => log::Level::Info,
-        Some(LogLevel::Warn) => log::Level::Warn,
+        Some(DEBUG) => log::Level::Debug,
+        Some(INFO) => log::Level::Info,
+        Some(WARN) => log::Level::Warn,
+        Some(_) => log::Level::Error,
     })?;
 
     match subcommand {
@@ -119,6 +117,12 @@ fn main() -> anyhow::Result<()> {
     }
 }
 
+const DEBUG: &str = "debug";
+const INFO: &str = "info";
+const WARN: &str = "warn";
+const ERROR: &str = "error";
+const FATAL: &str = "fatal";
+
 // Order of fields matters for generated help.
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -155,8 +159,8 @@ struct DockerArguments {
     host: Option<String>,
 
     /// Set the logging level
-    #[arg(long, short = 'l', value_enum)]
-    log_level: Option<LogLevel>,
+    #[arg(long, short = 'l', value_parser = [DEBUG, INFO, WARN, ERROR, FATAL])]
+    log_level: Option<String>,
 
     /// Use TLS; implied by --tlsverify
     #[arg(long)]
@@ -177,15 +181,6 @@ struct DockerArguments {
     /// Use TLS and verify the remote
     #[arg(long)]
     tlsverify: bool,
-}
-
-#[derive(Clone, ValueEnum)]
-enum LogLevel {
-    Debug,
-    Info,
-    Warn,
-    Error,
-    Fatal,
 }
 
 #[allow(clippy::large_enum_variant)]
@@ -421,7 +416,7 @@ fn docker_cli(
             context,
             debug,
             host,
-            log_level: log_level.map(canonical_argument),
+            log_level,
             tls,
             tlscacert,
             tlscert,
@@ -440,14 +435,6 @@ fn docker_cli(
             project_name,
         },
     )
-}
-
-fn canonical_argument<T: ValueEnum>(value: T) -> String {
-    value
-        .to_possible_value()
-        .expect("Assertion error: skipped variant unexpected")
-        .get_name()
-        .into()
 }
 
 #[cfg(test)]

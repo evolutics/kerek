@@ -121,7 +121,7 @@ const FATAL: &str = "fatal";
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
-    /// Do not change anything, only show what would be done
+    /// Do not apply changes, only show what would be done
     #[arg(long)]
     dry_run: bool,
 

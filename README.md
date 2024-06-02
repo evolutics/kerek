@@ -231,7 +231,7 @@ Commands:
                            subcommand(s)
 
 Options:
-      --dry-run                Do not change anything, only show what would be
+      --dry-run                Do not apply changes, only show what would be
                                done
       --config <CONFIG>        Location of client config files
   -c, --context <CONTEXT>      Name of the context to use to connect to the

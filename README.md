@@ -231,6 +231,8 @@ Commands:
                            subcommand(s)
 
 Options:
+      --dry-run                Do not change anything, only show what would be
+                               done
       --config <CONFIG>        Location of client config files
   -c, --context <CONTEXT>      Name of the context to use to connect to the
                                daemon (overrides DOCKER_HOST env var and default
@@ -266,8 +268,6 @@ Options:
           always, auto]
       --compatibility
           Run compose in backward compatibility mode
-      --dry-run
-          Execute command in dry run mode
       --env-file <ENV_FILE>
           Specify an alternate environment file
   -f, --file <FILE>
@@ -324,14 +324,9 @@ Arguments:
   <HOST>  Reference like "localhost", "[ssh://]<host>", "vagrant://[<vm>]"
 
 Options:
-      --dry-run
-          Do not change anything, only show what would be done
-      --force
-          Go ahead without prompting user to confirm
-  -F, --ssh-config <SSH_CONFIG>
-          Path to SSH config file
-  -h, --help
-          Print help
+      --force                    Go ahead without prompting user to confirm
+  -F, --ssh-config <SSH_CONFIG>  Path to SSH config file
+  -h, --help                     Print help
 ```
 
 ### `wheelsticks run-with-ssh-config -h`
@@ -339,15 +334,14 @@ Options:
 ```
 Runs command with wrapped `ssh` in `$PATH` that uses given SSH config
 
-Usage: wheelsticks run-with-ssh-config [OPTIONS] <SSH_CONFIG> <COMMAND>...
+Usage: wheelsticks run-with-ssh-config <SSH_CONFIG> <COMMAND>...
 
 Arguments:
   <SSH_CONFIG>  Path to SSH config file
   <COMMAND>...  Program with arguments to run
 
 Options:
-      --dry-run  Do not change anything, only show what would be done
-  -h, --help     Print help (see more with '--help')
+  -h, --help  Print help (see more with '--help')
 ```
 
 ### `wheelsticks transfer-images -h`
@@ -363,8 +357,6 @@ Arguments:
 Options:
       --container-engine <CONTAINER_ENGINE>
           Container engine program to use [default: docker]
-      --dry-run
-          Do not change anything, only show what would be done
   -h, --help
           Print help (see more with '--help')
 ```

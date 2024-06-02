@@ -14,6 +14,7 @@ use std::path;
 fn main() -> anyhow::Result<()> {
     let Cli {
         docker_arguments,
+        dry_run,
         subcommand,
     } = Cli::parse();
 
@@ -50,7 +51,6 @@ fn main() -> anyhow::Result<()> {
             if detach {
                 log::warn!("Detached mode is always on, no need to set it.");
             }
-            let dry_run = docker_compose_arguments.dry_run;
 
             deploy::go(deploy::In {
                 build,
@@ -81,7 +81,6 @@ fn main() -> anyhow::Result<()> {
         }
 
         Subcommand::Provision {
-            dry_run,
             force,
             host,
             ssh_config,
@@ -94,7 +93,6 @@ fn main() -> anyhow::Result<()> {
 
         Subcommand::RunWithSshConfig {
             command,
-            dry_run,
             ssh_config,
         } => run_with_ssh_config::go(run_with_ssh_config::In {
             command,
@@ -104,7 +102,6 @@ fn main() -> anyhow::Result<()> {
 
         Subcommand::TransferImages {
             container_engine_arguments: ContainerEngineArguments { container_engine },
-            dry_run,
             images,
         } => transfer_images::go(transfer_images::In {
             docker_cli: docker::Cli::new(&container_engine, (&docker_arguments).into()),
@@ -124,6 +121,10 @@ const FATAL: &str = "fatal";
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
+    /// Do not change anything, only show what would be done
+    #[arg(long)]
+    dry_run: bool,
+
     #[command(flatten)]
     docker_arguments: DockerArguments,
 
@@ -220,10 +221,6 @@ enum Subcommand {
 
     /// Provisions host with container engine
     Provision {
-        /// Do not change anything, only show what would be done
-        #[arg(long)]
-        dry_run: bool,
-
         /// Go ahead without prompting user to confirm
         #[arg(long)]
         force: bool,
@@ -243,10 +240,6 @@ enum Subcommand {
     /// an SSH connection with username, hostname, port, etc. However, a custom
     /// SSH config file other than `~/.ssh/config` cannot be provided.
     RunWithSshConfig {
-        /// Do not change anything, only show what would be done
-        #[arg(long)]
-        dry_run: bool,
-
         /// Path to SSH config file
         ssh_config: path::PathBuf,
 
@@ -266,10 +259,6 @@ enum Subcommand {
     TransferImages {
         #[command(flatten)]
         container_engine_arguments: ContainerEngineArguments,
-
-        /// Do not change anything, only show what would be done
-        #[arg(long)]
-        dry_run: bool,
 
         /// Images to copy; use "-" to pass image names as stdin lines
         images: Vec<String>,
@@ -296,10 +285,6 @@ struct DockerComposeArguments {
     /// Run compose in backward compatibility mode
     #[arg(long)]
     compatibility: bool,
-
-    /// Execute command in dry run mode
-    #[arg(long)]
-    dry_run: bool,
 
     /// Specify an alternate environment file
     #[arg(long)]
@@ -424,7 +409,6 @@ impl<'a> From<&'a DockerComposeArguments> for docker_compose::Arguments<'a> {
         DockerComposeArguments {
             ansi,
             compatibility,
-            dry_run: _,
             env_file,
             file,
             parallel,

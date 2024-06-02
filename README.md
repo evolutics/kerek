@@ -324,9 +324,14 @@ Arguments:
   <HOST>  Reference like "localhost", "[ssh://]<host>", "vagrant://[<vm>]"
 
 Options:
-      --force                    Go ahead without prompting user to confirm
-  -F, --ssh-config <SSH_CONFIG>  Path to SSH config file
-  -h, --help                     Print help
+      --dry-run
+          Do not change anything, only show what would be done
+      --force
+          Go ahead without prompting user to confirm
+  -F, --ssh-config <SSH_CONFIG>
+          Path to SSH config file
+  -h, --help
+          Print help
 ```
 
 ### `wheelsticks run-with-ssh-config -h`

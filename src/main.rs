@@ -81,10 +81,12 @@ fn main() -> anyhow::Result<()> {
         }
 
         Subcommand::Provision {
+            dry_run,
             force,
             host,
             ssh_config,
         } => provision::go(provision::In {
+            dry_run,
             force,
             host,
             ssh_config,
@@ -216,6 +218,10 @@ enum Subcommand {
 
     /// Provisions host with container engine
     Provision {
+        /// Do not change anything, only show what would be done
+        #[arg(long)]
+        dry_run: bool,
+
         /// Go ahead without prompting user to confirm
         #[arg(long)]
         force: bool,

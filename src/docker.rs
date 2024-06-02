@@ -1,12 +1,11 @@
 use std::process;
 
 pub struct Cli<'a> {
+    arguments: Arguments<'a>,
     container_engine: &'a str,
-    docker_arguments: DockerArguments<'a>,
-    docker_compose_arguments: DockerComposeArguments<'a>,
 }
 
-pub struct DockerArguments<'a> {
+pub struct Arguments<'a> {
     pub config: Option<&'a str>,
     pub context: Option<&'a str>,
     pub debug: bool,
@@ -19,41 +18,22 @@ pub struct DockerArguments<'a> {
     pub tlsverify: bool,
 }
 
-pub struct DockerComposeArguments<'a> {
-    pub ansi: Option<&'a str>,
-    pub compatibility: bool,
-    pub env_file: &'a [String],
-    pub file: &'a [String],
-    pub parallel: Option<i16>,
-    pub profile: &'a [String],
-    pub progress: Option<&'a str>,
-    pub project_directory: Option<&'a str>,
-    pub project_name: Option<&'a str>,
-}
-
 impl<'a> Cli<'a> {
-    pub fn new(
-        container_engine: &'a str,
-        docker_arguments: DockerArguments<'a>,
-        docker_compose_arguments: DockerComposeArguments<'a>,
-    ) -> Self {
+    pub fn new(container_engine: &'a str, arguments: Arguments<'a>) -> Self {
         Self {
+            arguments,
             container_engine,
-            docker_arguments,
-            docker_compose_arguments,
         }
     }
 
-    pub fn docker(&self) -> process::Command {
-        self.with_docker_arguments(process::Command::new(self.container_engine), false)
+    pub fn command(&self) -> process::Command {
+        self.base(false)
     }
 
-    fn with_docker_arguments(
-        &self,
-        mut command: process::Command,
-        default_daemon: bool,
-    ) -> process::Command {
-        let DockerArguments {
+    fn base(&self, default_daemon: bool) -> process::Command {
+        let mut command = process::Command::new(self.container_engine);
+
+        let Arguments {
             config,
             context,
             debug,
@@ -64,7 +44,7 @@ impl<'a> Cli<'a> {
             tlscert,
             tlskey,
             tlsverify,
-        } = &self.docker_arguments;
+        } = &self.arguments;
 
         command
             .args(config.iter().flat_map(|config| ["--config", config]))
@@ -98,58 +78,7 @@ impl<'a> Cli<'a> {
         command
     }
 
-    pub fn docker_compose(&self) -> process::Command {
-        let mut command = self.with_docker_arguments(process::Command::new("docker"), false);
-
-        let DockerComposeArguments {
-            ansi,
-            compatibility,
-            env_file,
-            file,
-            parallel,
-            profile,
-            progress,
-            project_directory,
-            project_name,
-        } = &self.docker_compose_arguments;
-
-        command
-            .arg("compose")
-            .args(ansi.iter().flat_map(|ansi| ["--ansi", ansi]))
-            .args(compatibility.then_some("--compatibility").iter())
-            .args(
-                env_file
-                    .iter()
-                    .flat_map(|env_file| ["--env-file", env_file]),
-            )
-            .args(file.iter().flat_map(|file| ["--file", file]))
-            .args(
-                parallel
-                    .map(|parallel| parallel.to_string())
-                    .iter()
-                    .flat_map(|parallel| ["--parallel", parallel]),
-            )
-            .args(profile.iter().flat_map(|profile| ["--profile", profile]))
-            .args(
-                progress
-                    .iter()
-                    .flat_map(|progress| ["--progress", progress]),
-            )
-            .args(
-                project_directory
-                    .iter()
-                    .flat_map(|project_directory| ["--project-directory", project_directory]),
-            )
-            .args(
-                project_name
-                    .iter()
-                    .flat_map(|project_name| ["--project-name", project_name]),
-            );
-
-        command
-    }
-
-    pub fn docker_default_daemon(&self) -> process::Command {
-        self.with_docker_arguments(process::Command::new(self.container_engine), true)
+    pub fn command_default_daemon(&self) -> process::Command {
+        self.base(true)
     }
 }

@@ -1,14 +1,14 @@
 use super::model;
 use crate::command;
-use crate::docker;
+use crate::docker_compose;
 use std::collections;
 
 pub fn go(
     service_names: &collections::BTreeSet<String>,
-    docker_cli: &docker::Cli,
+    docker_compose_cli: &docker_compose::Cli,
 ) -> anyhow::Result<model::DesiredServices> {
-    let compose_app_definition = get_compose_app_definition(service_names, docker_cli)?;
-    let service_config_hashes = get_service_config_hashes(docker_cli)?;
+    let compose_app_definition = get_compose_app_definition(service_names, docker_compose_cli)?;
+    let service_config_hashes = get_service_config_hashes(docker_compose_cli)?;
 
     Ok(compose_app_definition
         .services
@@ -53,21 +53,21 @@ pub enum OperationOrder {
 
 fn get_compose_app_definition(
     service_names: &collections::BTreeSet<String>,
-    docker_cli: &docker::Cli,
+    docker_compose_cli: &docker_compose::Cli,
 ) -> anyhow::Result<ComposeAppDefinition> {
     command::stdout_json(
-        docker_cli
-            .docker_compose()
+        docker_compose_cli
+            .command()
             .args(["config", "--format", "json", "--"])
             .args(service_names),
     )
 }
 
 fn get_service_config_hashes(
-    docker_cli: &docker::Cli,
+    docker_compose_cli: &docker_compose::Cli,
 ) -> anyhow::Result<collections::BTreeMap<String, String>> {
     let service_hashes =
-        command::stdout_table(docker_cli.docker_compose().args(["config", "--hash", "*"]))?;
+        command::stdout_table(docker_compose_cli.command().args(["config", "--hash", "*"]))?;
 
     Ok(service_hashes
         .into_iter()

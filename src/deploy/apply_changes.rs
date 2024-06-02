@@ -1,6 +1,7 @@
 use super::model;
 use crate::command;
 use crate::docker;
+use crate::docker_compose;
 use crate::log;
 use anyhow::Context;
 use std::collections;
@@ -11,6 +12,7 @@ pub fn go(
         build,
         changes,
         docker_cli,
+        docker_compose_cli,
         dry_run,
         no_build,
         no_start,
@@ -27,7 +29,7 @@ pub fn go(
     let mut state = new_rolling_state(actual_containers);
 
     if build {
-        build_images(service_names, dry_run, docker_cli)?;
+        build_images(service_names, dry_run, docker_compose_cli)?;
     }
 
     for change in changes {
@@ -51,6 +53,7 @@ pub fn go(
                     wait_timeout,
                 },
                 docker_cli,
+                docker_compose_cli,
                 &mut state,
             )
             .with_context(|| format!("Unable to {summary}"))?;
@@ -65,6 +68,7 @@ pub struct In<'a> {
     pub build: bool,
     pub changes: &'a [model::ServiceContainerChange],
     pub docker_cli: &'a docker::Cli<'a>,
+    pub docker_compose_cli: &'a docker_compose::Cli<'a>,
     pub dry_run: bool,
     pub no_build: bool,
     pub no_start: bool,
@@ -112,12 +116,12 @@ fn new_rolling_state(actual_containers: &model::ActualContainers) -> RollingStat
 fn build_images(
     service_names: &collections::BTreeSet<String>,
     dry_run: bool,
-    docker_cli: &docker::Cli,
+    docker_compose_cli: &docker_compose::Cli,
 ) -> anyhow::Result<()> {
     log::debug!("Building services.");
     command::status_ok(
-        docker_cli
-            .docker_compose()
+        docker_compose_cli
+            .command()
             .args(dry_run.then_some("--dry-run").iter())
             .args(["build", "--"])
             .args(service_names),
@@ -176,11 +180,12 @@ fn apply_change<'a>(
     change: &'a model::ServiceContainerChange,
     change_options: ChangeOptions,
     docker_cli: &docker::Cli,
+    docker_compose_cli: &docker_compose::Cli,
     state: &mut RollingState<'a>,
 ) -> anyhow::Result<()> {
     match change {
         model::ServiceContainerChange::Add { service_name, .. } => {
-            add_container(service_name, change_options, docker_cli, state)
+            add_container(service_name, change_options, docker_compose_cli, state)
         }
 
         model::ServiceContainerChange::Keep { .. } => Ok(()),
@@ -206,7 +211,7 @@ fn add_container<'a>(
         wait,
         wait_timeout,
     }: ChangeOptions,
-    docker_cli: &docker::Cli,
+    docker_compose_cli: &docker_compose::Cli,
     state: &mut RollingState<'a>,
 ) -> anyhow::Result<()> {
     let container_count = state
@@ -217,8 +222,8 @@ fn add_container<'a>(
 
     log::debug!("Scaling service {service_name:?} to {container_count} instances.");
     command::status_ok(
-        docker_cli
-            .docker_compose()
+        docker_compose_cli
+            .command()
             .args(["up", "--detach"])
             .args(no_build.then_some("--no-build").iter())
             .args(["--no-deps", "--no-recreate"])
@@ -248,10 +253,10 @@ fn remove_container<'a>(
     let container = summarize_container(container_id);
 
     log::debug!("Stopping {container}.");
-    command::status_ok(docker_cli.docker().args(["stop", "--", container_id]))?;
+    command::status_ok(docker_cli.command().args(["stop", "--", container_id]))?;
 
     log::debug!("Removing {container}.");
-    command::status_ok(docker_cli.docker().args(["rm", "--", container_id]))?;
+    command::status_ok(docker_cli.command().args(["rm", "--", container_id]))?;
 
     state
         .service_container_count

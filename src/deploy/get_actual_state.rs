@@ -1,15 +1,17 @@
 use super::model;
 use crate::command;
 use crate::docker;
+use crate::docker_compose;
 use std::collections;
 
 pub fn go(
     service_names: &collections::BTreeSet<String>,
     docker_cli: &docker::Cli,
+    docker_compose_cli: &docker_compose::Cli,
 ) -> anyhow::Result<model::ActualContainers> {
     let container_ids = command::stdout_utf8(
-        docker_cli
-            .docker_compose()
+        docker_compose_cli
+            .command()
             .args(["ps", "--all", "--quiet", "--"])
             .args(service_names),
     )?;
@@ -20,7 +22,7 @@ pub fn go(
     } else {
         command::stdout_json(
             docker_cli
-                .docker()
+                .command()
                 .args(["inspect", "--"])
                 .args(container_ids),
         )?

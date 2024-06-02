@@ -2,6 +2,7 @@ mod command;
 mod deploy;
 mod docker;
 mod docker_cli_plugin_metadata;
+mod docker_compose;
 mod log;
 mod provision;
 mod run_with_ssh_config;
@@ -27,7 +28,7 @@ fn main() -> anyhow::Result<()> {
 
     match subcommand {
         Subcommand::Deploy {
-            container_engine_arguments,
+            container_engine_arguments: ContainerEngineArguments { container_engine },
             docker_compose_arguments,
             docker_compose_up_arguments:
                 DockerComposeUpArgumentsForDeploy {
@@ -53,10 +54,10 @@ fn main() -> anyhow::Result<()> {
 
             deploy::go(deploy::In {
                 build,
-                docker_cli: docker_cli(
-                    &container_engine_arguments,
-                    &docker_arguments,
-                    &docker_compose_arguments,
+                docker_cli: docker::Cli::new(&container_engine, (&docker_arguments).into()),
+                docker_compose_cli: docker_compose::Cli::new(
+                    (&docker_arguments).into(),
+                    (&docker_compose_arguments).into(),
                 ),
                 dry_run,
                 force_recreate,
@@ -98,17 +99,17 @@ fn main() -> anyhow::Result<()> {
         }),
 
         Subcommand::TransferImages {
-            container_engine_arguments,
+            container_engine_arguments: ContainerEngineArguments { container_engine },
             docker_compose_arguments,
             images,
         } => {
             let dry_run = docker_compose_arguments.dry_run;
 
             transfer_images::go(transfer_images::In {
-                docker_cli: docker_cli(
-                    &container_engine_arguments,
-                    &docker_arguments,
-                    &docker_compose_arguments,
+                docker_cli: docker::Cli::new(&container_engine, (&docker_arguments).into()),
+                docker_compose_cli: docker_compose::Cli::new(
+                    (&docker_arguments).into(),
+                    (&docker_compose_arguments).into(),
                 ),
                 dry_run,
                 images,
@@ -382,36 +383,22 @@ struct DockerComposeUpArgumentsForDeploy {
     wait_timeout: Option<i64>,
 }
 
-fn docker_cli<'a>(
-    ContainerEngineArguments { container_engine }: &'a ContainerEngineArguments,
-    DockerArguments {
-        config,
-        context,
-        debug,
-        host,
-        log_level,
-        tls,
-        tlscacert,
-        tlscert,
-        tlskey,
-        tlsverify,
-    }: &'a DockerArguments,
-    DockerComposeArguments {
-        ansi,
-        compatibility,
-        dry_run: _,
-        env_file,
-        file,
-        parallel,
-        profile,
-        progress,
-        project_directory,
-        project_name,
-    }: &'a DockerComposeArguments,
-) -> docker::Cli<'a> {
-    docker::Cli::new(
-        container_engine,
-        docker::DockerArguments {
+impl<'a> From<&'a DockerArguments> for docker::Arguments<'a> {
+    fn from(
+        DockerArguments {
+            config,
+            context,
+            debug,
+            host,
+            log_level,
+            tls,
+            tlscacert,
+            tlscert,
+            tlskey,
+            tlsverify,
+        }: &'a DockerArguments,
+    ) -> Self {
+        docker::Arguments {
             config: config.as_deref(),
             context: context.as_deref(),
             debug: *debug,
@@ -422,8 +409,26 @@ fn docker_cli<'a>(
             tlscert: tlscert.as_deref(),
             tlskey: tlskey.as_deref(),
             tlsverify: *tlsverify,
-        },
-        docker::DockerComposeArguments {
+        }
+    }
+}
+
+impl<'a> From<&'a DockerComposeArguments> for docker_compose::Arguments<'a> {
+    fn from(
+        DockerComposeArguments {
+            ansi,
+            compatibility,
+            dry_run: _,
+            env_file,
+            file,
+            parallel,
+            profile,
+            progress,
+            project_directory,
+            project_name,
+        }: &'a DockerComposeArguments,
+    ) -> Self {
+        docker_compose::Arguments {
             ansi: ansi.as_deref(),
             compatibility: *compatibility,
             env_file,
@@ -433,8 +438,8 @@ fn docker_cli<'a>(
             progress: progress.as_deref(),
             project_directory: project_directory.as_deref(),
             project_name: project_name.as_deref(),
-        },
-    )
+        }
+    }
 }
 
 #[cfg(test)]

@@ -5,12 +5,14 @@ mod model;
 mod plan_changes;
 
 use super::docker;
+use super::docker_compose;
 use std::collections;
 
 pub fn go(
     In {
         build,
         docker_cli,
+        docker_compose_cli,
         dry_run,
         force_recreate,
         no_build,
@@ -25,8 +27,8 @@ pub fn go(
         wait_timeout,
     }: In,
 ) -> anyhow::Result<()> {
-    let actual_containers = get_actual_state::go(&service_names, &docker_cli)?;
-    let desired_services = get_desired_state::go(&service_names, &docker_cli)?;
+    let actual_containers = get_actual_state::go(&service_names, &docker_cli, &docker_compose_cli)?;
+    let desired_services = get_desired_state::go(&service_names, &docker_compose_cli)?;
     let changes = plan_changes::go(&actual_containers, &desired_services, force_recreate);
 
     apply_changes::go(apply_changes::In {
@@ -34,6 +36,7 @@ pub fn go(
         build,
         changes: &changes,
         docker_cli: &docker_cli,
+        docker_compose_cli: &docker_compose_cli,
         dry_run,
         no_build,
         no_start,
@@ -51,6 +54,7 @@ pub fn go(
 pub struct In<'a> {
     pub build: bool,
     pub docker_cli: docker::Cli<'a>,
+    pub docker_compose_cli: docker_compose::Cli<'a>,
     pub dry_run: bool,
     pub force_recreate: bool,
     pub no_build: bool,

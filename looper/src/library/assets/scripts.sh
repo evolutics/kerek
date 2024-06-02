@@ -20,8 +20,9 @@ build() {
 
 deploy() {
   echo 'Transferring images.' >&2
-  wheelsticks run-with-ssh-config -- "${KEREK_SSH_CONFIG}" wheelsticks \
-    --host "ssh://${KEREK_ENVIRONMENT_ID}" transfer-images
+  docker compose config --images | wheelsticks run-with-ssh-config -- \
+    "${KEREK_SSH_CONFIG}" wheelsticks --host "ssh://${KEREK_ENVIRONMENT_ID}" \
+    transfer-images -
 
   echo 'Deploying containers on remote.' >&2
   wheelsticks run-with-ssh-config -- "${KEREK_SSH_CONFIG}" docker \

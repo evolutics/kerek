@@ -100,21 +100,13 @@ fn main() -> anyhow::Result<()> {
 
         Subcommand::TransferImages {
             container_engine_arguments: ContainerEngineArguments { container_engine },
-            docker_compose_arguments,
+            dry_run,
             images,
-        } => {
-            let dry_run = docker_compose_arguments.dry_run;
-
-            transfer_images::go(transfer_images::In {
-                docker_cli: docker::Cli::new(&container_engine, (&docker_arguments).into()),
-                docker_compose_cli: docker_compose::Cli::new(
-                    (&docker_arguments).into(),
-                    (&docker_compose_arguments).into(),
-                ),
-                dry_run,
-                images,
-            })
-        }
+        } => transfer_images::go(transfer_images::In {
+            docker_cli: docker::Cli::new(&container_engine, (&docker_arguments).into()),
+            dry_run,
+            images,
+        }),
     }
 }
 
@@ -258,14 +250,16 @@ enum Subcommand {
     ///     wheelsticks --host ssh://192.0.2.1 transfer-images my-img
     ///     DOCKER_HOST=ssh://from wheelsticks --host ssh://to transfer-images my-img
     ///     DOCKER_CONTEXT=from wheelsticks --context to transfer-images my-img
+    ///     docker compose config --images | wheelsticks --host … transfer-images -
     TransferImages {
         #[command(flatten)]
         container_engine_arguments: ContainerEngineArguments,
 
-        #[command(flatten)]
-        docker_compose_arguments: DockerComposeArguments,
+        /// Do not change anything, only show what would be done
+        #[arg(long)]
+        dry_run: bool,
 
-        /// Images to copy; if empty, use images from Compose configuration
+        /// Images to copy; use "-" to pass image names as stdin lines
         images: Vec<String>,
     },
 }

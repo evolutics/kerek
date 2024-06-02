@@ -1,18 +1,17 @@
 use super::command;
 use super::docker;
-use super::docker_compose;
 use super::log;
 use anyhow::Context;
+use std::io;
 
 pub fn go(
     In {
         docker_cli,
-        docker_compose_cli,
         dry_run,
         images,
     }: In,
 ) -> anyhow::Result<()> {
-    let images = get_images(&docker_compose_cli, images)?;
+    let images = get_images(images)?;
 
     for image in images {
         if dry_run {
@@ -35,22 +34,21 @@ pub fn go(
 
 pub struct In<'a> {
     pub docker_cli: docker::Cli<'a>,
-    pub docker_compose_cli: docker_compose::Cli<'a>,
     pub dry_run: bool,
     pub images: Vec<String>,
 }
 
-fn get_images(
-    docker_compose_cli: &docker_compose::Cli,
-    images: Vec<String>,
-) -> anyhow::Result<Vec<String>> {
-    Ok(if images.is_empty() {
-        // TODO: Select only images not already on host.
-        let images =
-            command::stdout_utf8(docker_compose_cli.command().args(["config", "--images"]))
-                .context("Unable to get images from Compose configuration")?;
-        images.lines().map(|image| image.into()).collect()
-    } else {
-        images
+fn get_images(mut images: Vec<String>) -> anyhow::Result<Vec<String>> {
+    // TODO: Select only images not already on host.
+    Ok(match images.iter().position(|image| image == "-") {
+        None => images,
+        Some(stdin_index) => {
+            let stdin_images = io::stdin()
+                .lines()
+                .collect::<io::Result<Vec<_>>>()
+                .context("Unable to read stdin lines")?;
+            images.splice(stdin_index..=stdin_index, stdin_images);
+            images
+        }
     })
 }

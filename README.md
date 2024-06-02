@@ -352,33 +352,13 @@ Copies images from default to specified Docker host
 Usage: wheelsticks transfer-images [OPTIONS] [IMAGES]...
 
 Arguments:
-  [IMAGES]...  Images to copy; if empty, use images from Compose configuration
+  [IMAGES]...  Images to copy; use "-" to pass image names as stdin lines
 
 Options:
       --container-engine <CONTAINER_ENGINE>
           Container engine program to use [default: docker]
-      --ansi <ANSI>
-          Control when to print ANSI control characters [possible values: never,
-          always, auto]
-      --compatibility
-          Run compose in backward compatibility mode
       --dry-run
-          Execute command in dry run mode
-      --env-file <ENV_FILE>
-          Specify an alternate environment file
-  -f, --file <FILE>
-          Compose configuration files
-      --parallel <PARALLEL>
-          Control max parallelism, -1 for unlimited
-      --profile <PROFILE>
-          Specify a profile to enable
-      --progress <PROGRESS>
-          Set type of progress output [possible values: auto, tty, plain, quiet]
-      --project-directory <PROJECT_DIRECTORY>
-          Specify an alternate working directory (default: the path of the,
-          first specified, Compose file)
-  -p, --project-name <PROJECT_NAME>
-          Project name
+          Do not change anything, only show what would be done
   -h, --help
           Print help (see more with '--help')
 ```

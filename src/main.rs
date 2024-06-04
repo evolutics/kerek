@@ -136,7 +136,6 @@ struct Cli {
 // its subcommands to be valid Docker plugins even if not always applicable.
 //
 // Source: https://docs.docker.com/reference/cli/docker/
-// TODO: Update arguments based on above source.
 #[derive(clap::Args)]
 struct DockerArguments {
     /// Location of client config files

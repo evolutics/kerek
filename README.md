@@ -237,7 +237,7 @@ Options:
   -c, --context <CONTEXT>      Name of the context to use to connect to the
                                daemon (overrides DOCKER_HOST env var and default
                                context set with "docker context use")
-  -D, --debug                  Enable debug mode [aliases: verbose]
+  -D, --debug                  Enable debug mode
   -H, --host <HOST>            Daemon socket to connect to
   -l, --log-level <LOG_LEVEL>  Set the logging level [possible values: debug,
                                info, warn, error, fatal]

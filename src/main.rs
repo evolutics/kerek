@@ -149,7 +149,7 @@ struct DockerArguments {
     context: Option<String>,
 
     /// Enable debug mode
-    #[arg(long, short = 'D', visible_alias = "verbose")]
+    #[arg(long, short = 'D')]
     debug: bool,
 
     /// Daemon socket to connect to

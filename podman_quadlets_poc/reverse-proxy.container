@@ -2,10 +2,10 @@
 Description=Reverse proxy
 
 [Container]
+Exec=caddy reverse-proxy --from :80 --to greet
 Image=docker.io/caddy:2-alpine
 Network=test-net.network
 PublishPort=127.0.0.1:8080:80
-Volume=/home/vagrant/reverse-proxy.Caddyfile:/etc/caddy/Caddyfile
 
 [Install]
 WantedBy=multi-user.target default.target

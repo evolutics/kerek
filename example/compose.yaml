@@ -1,18 +1,14 @@
 name: example
 services:
   greet:
+    command: "caddy respond --listen :80 'Hi from ${GREET_VERSION-A}\n'"
     deploy:
       update_config:
         order: start-first
-    environment:
-      - "GREET_VERSION=${GREET_VERSION-A}"
     image: "docker.io/caddy:2-alpine"
-    volumes:
-      - "./greet.Caddyfile:/etc/caddy/Caddyfile"
 
   reverse-proxy:
+    command: caddy reverse-proxy --from :80 --to greet
     image: "docker.io/caddy:2-alpine"
     ports:
       - "127.0.0.1:8080:80"
-    volumes:
-      - "./reverse-proxy.Caddyfile:/etc/caddy/Caddyfile"

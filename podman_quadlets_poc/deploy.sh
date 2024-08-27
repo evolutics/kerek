@@ -5,9 +5,6 @@ set -o nounset
 set -o pipefail
 
 main() {
-  vagrant upload hi.Caddyfile ./
-  vagrant upload reverse-proxy.Caddyfile ./
-
   vagrant ssh -- mkdir --parents .config/containers/systemd
 
   vagrant upload hi@.container .config/containers/systemd/

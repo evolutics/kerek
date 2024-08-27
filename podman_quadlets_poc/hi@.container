@@ -5,7 +5,7 @@ Description=Hi version %i
 Exec=caddy respond --listen :80 "Hi from %i\n"
 Image=docker.io/caddy:2-alpine
 Network=test-net.network
-PodmanArgs=--network-alias greet
+NetworkAlias=greet
 
 [Install]
 WantedBy=multi-user.target default.target

@@ -15,9 +15,7 @@ pub fn go(
         ssh_config,
     }: In,
 ) -> anyhow::Result<()> {
-    // TODO: Use `path::absolute` once stable.
-    let ssh_config = ssh_config
-        .canonicalize()
+    let ssh_config = path::absolute(&ssh_config)
         .with_context(|| format!("Unable to make {ssh_config:?} absolute"))?;
 
     let real_ssh = command::stdout_utf8(process::Command::new("which").arg("ssh"))?;

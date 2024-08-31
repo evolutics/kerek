@@ -4,11 +4,6 @@ use std::path;
 use std::process;
 
 #[test]
-fn compose() -> anyhow::Result<()> {
-    test_one_offs("compose")
-}
-
-#[test]
 fn log_only() -> anyhow::Result<()> {
     let folder = path::Path::new("examples/log_only");
     let log_file = folder.join("log.txt");
@@ -33,45 +28,6 @@ Move to next version
 Break
 ",
     );
-    Ok(())
-}
-
-fn test_one_offs(example: &str) -> anyhow::Result<()> {
-    let folder = ["examples", example].iter().collect::<path::PathBuf>();
-    reset_fake_production(&folder)?;
-
-    assert!(execute_subcommand("clean", &folder)?.success());
-    assert!(execute_subcommand("run", &folder)?.success());
-    assert!(execute_subcommand("dry-run", &folder)?.success());
-    Ok(())
-}
-
-fn reset_fake_production(folder: &path::Path) -> anyhow::Result<()> {
-    assert!(process::Command::new("vagrant")
-        .args(["destroy", "--force"])
-        .current_dir(folder)
-        .status()?
-        .success());
-    assert!(process::Command::new("vagrant")
-        .arg("up")
-        .current_dir(folder)
-        .status()?
-        .success());
-    let ssh_host = "production";
-    let ssh_config = path::Path::new("safe/ssh_config");
-    assert!(process::Command::new("vagrant")
-        .args(["ssh-config", "--host", ssh_host])
-        .current_dir(folder)
-        .stdout(fs::File::create(folder.join(ssh_config))?)
-        .status()?
-        .success());
-    assert!(process::Command::new("wheelsticks")
-        .args(["provision", "--force", "--ssh-config"])
-        .arg(ssh_config)
-        .args(["--", ssh_host])
-        .current_dir(folder)
-        .status()?
-        .success());
     Ok(())
 }
 

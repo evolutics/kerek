@@ -20,34 +20,15 @@ pub fn go(
         log::info!("Would provision host {host:?}.");
         Ok(())
     } else {
-        let host = match host.split_once("://") {
-            None if host == "localhost" => Host::Localhost,
-            Some(("ssh", host)) => Host::Ssh { host },
-            Some(("vagrant", vm)) => Host::Vagrant {
-                vm: (!vm.is_empty()).then_some(vm),
-            },
-            _ => Host::Ssh { host: &host },
-        };
-
-        let mut command = match host {
-            Host::Localhost => process::Command::new("bash"),
-            Host::Ssh { host } => {
-                let mut command = process::Command::new("ssh");
-                command
-                    .args(ssh_config.iter().flat_map(|ssh_config| ["-F", ssh_config]))
-                    .args([host, "bash"]);
-                command
-            }
-            Host::Vagrant { vm } => {
-                command::status_ok(vagrant().arg("up").args(vm))?;
-                let mut command = vagrant();
-                command.args(["ssh", "--command", "bash"]).args(vm).args(
-                    ssh_config
-                        .iter()
-                        .flat_map(|ssh_config| ["--", "-F", ssh_config]),
-                );
-                command
-            }
+        let mut command = if host == "localhost" {
+            process::Command::new("bash")
+        } else {
+            let mut command = process::Command::new("ssh");
+            command
+                .args(ssh_config.iter().flat_map(|ssh_config| ["-F", ssh_config]))
+                .arg(host)
+                .arg("bash");
+            command
         };
 
         command::stdin_ok(include_bytes!("provision_on_host.sh"), &mut command)
@@ -59,12 +40,6 @@ pub struct In {
     pub force: bool,
     pub host: String,
     pub ssh_config: Option<String>,
-}
-
-enum Host<'a> {
-    Localhost,
-    Ssh { host: &'a str },
-    Vagrant { vm: Option<&'a str> },
 }
 
 fn confirm_with_user(question: &str) -> anyhow::Result<()> {
@@ -81,14 +56,4 @@ fn confirm_with_user(question: &str) -> anyhow::Result<()> {
     } else {
         Err(anyhow::anyhow!("Aborted by user"))
     }
-}
-
-fn vagrant() -> process::Command {
-    let mut command = process::Command::new("vagrant");
-    command.args(
-        (log::level() <= log::Level::Debug)
-            .then_some("--debug")
-            .iter(),
-    );
-    command
 }

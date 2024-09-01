@@ -228,7 +228,7 @@ enum Subcommand {
         #[arg(long, short = 'F')]
         ssh_config: Option<String>,
 
-        /// Reference like "localhost", "[ssh://]<host>", "vagrant://[<vm>]"
+        /// Reference like "localhost" or "[ssh://][<user>@]<hostname>[:<port>]"
         host: String,
     },
 

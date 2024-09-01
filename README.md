@@ -320,7 +320,7 @@ Provisions host with container engine
 Usage: kerek provision [OPTIONS] <HOST>
 
 Arguments:
-  <HOST>  Reference like "localhost", "[ssh://]<host>", "vagrant://[<vm>]"
+  <HOST>  Reference like "localhost" or "[ssh://][<user>@]<hostname>[:<port>]"
 
 Options:
       --force                    Go ahead without prompting user to confirm

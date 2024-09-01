@@ -219,6 +219,10 @@ enum Subcommand {
     DockerCliPluginMetadata,
 
     /// Provisions host with container engine
+    ///
+    /// This targets a host via SSH, unless host "localhost" and no SSH config
+    /// file are passed as arguments, in which case the current machine is
+    /// targeted.
     Provision {
         /// Go ahead without prompting user to confirm
         #[arg(long)]

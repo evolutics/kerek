@@ -20,7 +20,7 @@ pub fn go(
         log::info!("Would provision host {host:?}.");
         Ok(())
     } else {
-        let mut command = if host == "localhost" {
+        let mut command = if host == "localhost" && ssh_config.is_none() {
             process::Command::new("bash")
         } else {
             let mut command = process::Command::new("ssh");

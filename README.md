@@ -325,7 +325,7 @@ Arguments:
 Options:
       --force                    Go ahead without prompting user to confirm
   -F, --ssh-config <SSH_CONFIG>  Path to SSH config file
-  -h, --help                     Print help
+  -h, --help                     Print help (see more with '--help')
 ```
 
 ### `kerek run-with-ssh-config -h`

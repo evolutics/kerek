@@ -38,8 +38,8 @@ test_container_engine() {
 }
 
 kerek_deploy() {
-  "${KEREK}" deploy --container-engine "${KEREK_CONTAINER_ENGINE}" \
-    --wait --wait-timeout 30
+  kerek deploy --container-engine "${KEREK_CONTAINER_ENGINE}" --wait \
+    --wait-timeout 30
 }
 
 main() {

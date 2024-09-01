@@ -1,4 +1,3 @@
 .vagrant/
 /.direnv/
-/example/test.log
 /target/

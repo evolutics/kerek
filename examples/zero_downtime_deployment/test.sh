@@ -5,8 +5,6 @@ set -o nounset
 set -o pipefail
 
 test_container_engine() {
-  cd example
-
   docker compose down
   trap 'docker compose down' EXIT
 

@@ -86,8 +86,10 @@ services:
     # …
 ```
 
-See [`example/compose.yaml`](example/compose.yaml) for a demo. It defines a
-service called `greet` made available on localhost:8080 via a `reverse-proxy`:
+Se
+[`examples/zero_downtime_deployment/compose.yaml`](examples/zero_downtime_deployment/compose.yaml)
+for a demo. It defines a service called `greet` made available on localhost:8080
+via a `reverse-proxy`:
 
 ```
     localhost:8080    ╭───────────────╮        ╭───────────────╮
@@ -100,7 +102,7 @@ With this design the service stays available, even during updates. You can play
 with it as follows:
 
 ```bash
-cd example
+cd examples/zero_downtime_deployment
 kerek deploy --wait
 curl localhost:8080 # … prints "Hi from A"
 

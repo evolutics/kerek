@@ -5,8 +5,6 @@ set -o nounset
 set -o pipefail
 
 main() {
-  cd tests
-
   vagrant destroy --force
   vagrant up
   trap 'vagrant destroy --force' EXIT

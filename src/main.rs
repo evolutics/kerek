@@ -251,10 +251,10 @@ enum Subcommand {
     ///
     /// Examples:
     ///
-    ///     wheelsticks --host ssh://192.0.2.1 transfer-images my-img
-    ///     DOCKER_HOST=ssh://from wheelsticks --host ssh://to transfer-images my-img
-    ///     DOCKER_CONTEXT=from wheelsticks --context to transfer-images my-img
-    ///     docker compose config --images | wheelsticks --host … transfer-images -
+    ///     kerek --host ssh://192.0.2.1 transfer-images my-img
+    ///     DOCKER_HOST=ssh://from kerek --host ssh://to transfer-images my-img
+    ///     DOCKER_CONTEXT=from kerek --context to transfer-images my-img
+    ///     docker compose config --images | kerek --host … transfer-images -
     TransferImages {
         #[command(flatten)]
         container_engine_arguments: ContainerEngineArguments,
@@ -444,7 +444,7 @@ mod tests {
     #[test]
     fn readme_top_level_heading_includes_description() {
         let description = env!("CARGO_PKG_DESCRIPTION");
-        let top_level_heading = format!("# Wheelsticks: {description}\n\n");
+        let top_level_heading = format!("# Kerek: {description}\n\n");
 
         assert!(get_readme().starts_with(&top_level_heading));
     }

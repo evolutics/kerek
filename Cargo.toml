@@ -1,11 +1,11 @@
 [package]
-name = "wheelsticks"
+name = "kerek"
 version = "1.0.0"
 authors = ["Benjamin Fischer <benjamin.fischer@evolutics.info>"]
 edition = "2021"
 description = "Zero-downtime deployments for Docker Compose"
-homepage = "https://github.com/evolutics/wheelsticks"
-repository = "https://github.com/evolutics/wheelsticks"
+homepage = "https://github.com/evolutics/kerek"
+repository = "https://github.com/evolutics/kerek"
 license = "MIT"
 keywords = ["compose", "deployment", "docker", "docker-compose", "podman"]
 categories = ["command-line-utilities", "virtualization", "web-programming"]

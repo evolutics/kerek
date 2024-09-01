@@ -36,7 +36,7 @@ mod tests {
             r#"{
   "SchemaVersion": "0.1.0",
   "ShortDescription": "Zero-downtime deployments for Docker Compose",
-  "URL": "https://github.com/evolutics/wheelsticks",
+  "URL": "https://github.com/evolutics/kerek",
   "Vendor": "Benjamin Fischer",
   "Version": "1.0.0"
 }"#,

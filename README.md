@@ -1,7 +1,7 @@
-# Wheelsticks: Zero-downtime deployments for Docker Compose
+# Kerek: Zero-downtime deployments for Docker Compose
 
-Wheelsticks is an addition to Docker Compose that helps updating services with
-zero downtime.
+Kerek is an addition to Docker Compose that helps updating services with zero
+downtime.
 
 ## Motivation
 
@@ -41,9 +41,9 @@ and `start-first`. But support for this part of the specification is optional,
 and plain Docker Compose always applies `stop-first` irrespective of what is in
 your Compose files.
 
-However, Wheelsticks supports both options. Just run `wheelsticks deploy` in
-place of `docker compose up`. No need to change any other Docker or Docker
-Compose workflows.
+However, Kerek supports both options. Just run `kerek deploy` in place of
+`docker compose up`. No need to change any other Docker or Docker Compose
+workflows.
 
 ## Installation
 
@@ -60,13 +60,13 @@ cargo install --git https://github.com/evolutics/kerek
 
 ### Docker CLI plugin
 
-Optionally, Wheelsticks can be set up as a Docker CLI plugin. With that, calls
-to `wheelsticks deploy` can be replaced by `docker deploy`, which some people
-prefer. Example [setup](https://github.com/docker/cli/issues/1534):
+Optionally, Kerek can be set up as a Docker CLI plugin. With that, calls to
+`kerek deploy` can be replaced by `docker deploy`, which some people prefer.
+Example [setup](https://github.com/docker/cli/issues/1534):
 
 ```bash
 mkdir --parents ~/.docker/cli-plugins
-ln --symbolic "$(which wheelsticks)" ~/.docker/cli-plugins/docker-deploy
+ln --symbolic "$(which kerek)" ~/.docker/cli-plugins/docker-deploy
 ```
 
 ## Usage
@@ -101,11 +101,11 @@ with it as follows:
 
 ```bash
 cd example
-wheelsticks deploy --wait
+kerek deploy --wait
 curl localhost:8080 # … prints "Hi from A"
 
 export GREET_VERSION=B
-wheelsticks deploy --wait
+kerek deploy --wait
 curl localhost:8080 # … prints "Hi from B"
 
 docker compose down
@@ -131,14 +131,14 @@ does not cause an update.
 Using `--force-recreate` always updates services irrespective of config hash
 changes.
 
-| Command                                 | Effect                                        |
-| --------------------------------------- | --------------------------------------------- |
-| `wheelsticks deploy`                    | Update all services with changed config hash  |
-| `wheelsticks deploy --dry-run`          | Update nothing but show what would be changed |
-| `wheelsticks deploy x`                  | Update service `x` if its config hash changed |
-| `wheelsticks deploy --force-recreate`   | Always update all services                    |
-| `wheelsticks deploy --force-recreate x` | Always update service `x`                     |
-| `docker compose config --hash '*'`      | Show service config hashes for Compose file   |
+| Command                            | Effect                                        |
+| ---------------------------------- | --------------------------------------------- |
+| `kerek deploy`                     | Update all services with changed config hash  |
+| `kerek deploy --dry-run`           | Update nothing but show what would be changed |
+| `kerek deploy x`                   | Update service `x` if its config hash changed |
+| `kerek deploy --force-recreate`    | Always update all services                    |
+| `kerek deploy --force-recreate x`  | Always update service `x`                     |
+| `docker compose config --hash '*'` | Show service config hashes for Compose file   |
 
 ### Service update process
 
@@ -213,12 +213,12 @@ Other lightweight options for single-node environments:
 
 ## Command-line arguments reference
 
-### `wheelsticks -h`
+### `kerek -h`
 
 ```
 Zero-downtime deployments for Docker Compose
 
-Usage: wheelsticks [OPTIONS] <COMMAND>
+Usage: kerek [OPTIONS] <COMMAND>
 
 Commands:
   deploy               Create or update services
@@ -249,12 +249,12 @@ Options:
   -V, --version                Print version
 ```
 
-### `wheelsticks deploy -h`
+### `kerek deploy -h`
 
 ```
 Create or update services
 
-Usage: wheelsticks deploy [OPTIONS] [SERVICE_NAMES]...
+Usage: kerek deploy [OPTIONS] [SERVICE_NAMES]...
 
 Arguments:
   [SERVICE_NAMES]...  Services to consider
@@ -312,12 +312,12 @@ Options:
           Print help (see more with '--help')
 ```
 
-### `wheelsticks provision -h`
+### `kerek provision -h`
 
 ```
 Provisions host with container engine
 
-Usage: wheelsticks provision [OPTIONS] <HOST>
+Usage: kerek provision [OPTIONS] <HOST>
 
 Arguments:
   <HOST>  Reference like "localhost", "[ssh://]<host>", "vagrant://[<vm>]"
@@ -328,12 +328,12 @@ Options:
   -h, --help                     Print help
 ```
 
-### `wheelsticks run-with-ssh-config -h`
+### `kerek run-with-ssh-config -h`
 
 ```
 Runs command with wrapped `ssh` in `$PATH` that uses given SSH config
 
-Usage: wheelsticks run-with-ssh-config <SSH_CONFIG> <COMMAND>...
+Usage: kerek run-with-ssh-config <SSH_CONFIG> <COMMAND>...
 
 Arguments:
   <SSH_CONFIG>  Path to SSH config file
@@ -343,12 +343,12 @@ Options:
   -h, --help  Print help (see more with '--help')
 ```
 
-### `wheelsticks transfer-images -h`
+### `kerek transfer-images -h`
 
 ```
 Copies images from default to specified Docker host
 
-Usage: wheelsticks transfer-images [OPTIONS] [IMAGES]...
+Usage: kerek transfer-images [OPTIONS] [IMAGES]...
 
 Arguments:
   [IMAGES]...  Images to copy; use "-" to pass image names as stdin lines

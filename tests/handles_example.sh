@@ -10,7 +10,7 @@ test_container_engine() {
   docker compose down
   trap 'docker compose down' EXIT
 
-  wheelsticks_deploy
+  kerek_deploy
 
   while true; do
     curl --fail --max-time 0.2 --silent http://localhost:8080 || echo "Error $?"
@@ -19,7 +19,7 @@ test_container_engine() {
 
   sleep 2s
 
-  GREET_VERSION=B wheelsticks_deploy
+  GREET_VERSION=B kerek_deploy
 
   sleep 2s
 
@@ -39,14 +39,14 @@ test_container_engine() {
   fi
 }
 
-wheelsticks_deploy() {
-  "${WHEELSTICKS}" deploy --container-engine "${WHEELSTICKS_CONTAINER_ENGINE}" \
+kerek_deploy() {
+  "${KEREK}" deploy --container-engine "${KEREK_CONTAINER_ENGINE}" \
     --wait --wait-timeout 30
 }
 
 main() {
   (
-    WHEELSTICKS_CONTAINER_ENGINE=docker test_container_engine
+    KEREK_CONTAINER_ENGINE=docker test_container_engine
   )
 
   (
@@ -57,7 +57,7 @@ main() {
     sleep 2s
 
     (
-      WHEELSTICKS_CONTAINER_ENGINE=podman test_container_engine
+      KEREK_CONTAINER_ENGINE=podman test_container_engine
     )
   )
 }

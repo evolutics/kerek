@@ -13,14 +13,14 @@ main() {
 
   vagrant ssh-config --host ssh-host >ssh_config
 
-  "${WHEELSTICKS}" provision --force --ssh-config ssh_config ssh-host
+  "${KEREK}" provision --force --ssh-config ssh_config ssh-host
 
   docker compose pull --ignore-buildable
 
-  docker compose config --images | "${WHEELSTICKS}" run-with-ssh-config -- \
-    ssh_config "${WHEELSTICKS}" --host ssh://ssh-host transfer-images -
+  docker compose config --images | "${KEREK}" run-with-ssh-config -- \
+    ssh_config "${KEREK}" --host ssh://ssh-host transfer-images -
 
-  "${WHEELSTICKS}" run-with-ssh-config -- ssh_config "${WHEELSTICKS}" \
+  "${KEREK}" run-with-ssh-config -- ssh_config "${KEREK}" \
     --host ssh://ssh-host deploy --no-build --pull never --remove-orphans --wait
 
   local -r result="$(curl --fail-with-body --max-time 3 --retry 99 \

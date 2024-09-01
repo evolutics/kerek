@@ -54,10 +54,9 @@ Compose workflows.
 
 ### Installing
 
-See [releases](https://github.com/evolutics/wheelsticks/releases) for
-pre-compiled executables.
-
-Alternatively, build from source with `cargo install wheelsticks`.
+```
+cargo install --git https://github.com/evolutics/kerek
+```
 
 ### Docker CLI plugin
 

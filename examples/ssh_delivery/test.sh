@@ -6,8 +6,8 @@ set -o pipefail
 
 main() {
   vagrant destroy --force
-  vagrant up
   trap 'vagrant destroy --force' EXIT
+  vagrant up
 
   vagrant ssh-config --host ssh-host >ssh_config
 

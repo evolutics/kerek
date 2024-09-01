@@ -13,7 +13,10 @@ pub fn go(
     }: In,
 ) -> anyhow::Result<()> {
     if !force {
-        confirm_with_user(&format!("About to provision {host:?}! Are you sure?"))?;
+        confirm_with_user(&format!(
+            "About to provision {host:?}, making system-wide changes! \
+            Are you sure?",
+        ))?;
     }
 
     if dry_run {

@@ -222,7 +222,8 @@ Usage: kerek [OPTIONS] <COMMAND>
 
 Commands:
   deploy               Create or update services
-  provision            Provisions host with container engine
+  provision            Provisions host with container engine, making
+                           system-wide changes
   run-with-ssh-config  Runs command with wrapped `ssh` in `$PATH` that uses
                            given SSH config
   transfer-images      Copies images from default to specified Docker host
@@ -315,7 +316,7 @@ Options:
 ### `kerek provision -h`
 
 ```
-Provisions host with container engine
+Provisions host with container engine, making system-wide changes
 
 Usage: kerek provision [OPTIONS] <HOST>
 

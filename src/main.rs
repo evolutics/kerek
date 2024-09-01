@@ -218,7 +218,7 @@ enum Subcommand {
     #[command(hide = true)]
     DockerCliPluginMetadata,
 
-    /// Provisions host with container engine
+    /// Provisions host with container engine, making system-wide changes
     ///
     /// This targets a host via SSH, unless host "localhost" and no SSH config
     /// file are passed as arguments, in which case the current machine is

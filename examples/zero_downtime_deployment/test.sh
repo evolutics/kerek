@@ -38,13 +38,12 @@ test_container_engine() {
 }
 
 kerek_deploy() {
-  kerek deploy --container-engine "${KEREK_CONTAINER_ENGINE}" --wait \
-    --wait-timeout 30
+  kerek deploy --wait --wait-timeout 30
 }
 
 main() {
   (
-    KEREK_CONTAINER_ENGINE=docker test_container_engine
+    CONTAINER_ENGINE=docker test_container_engine
   )
 
   (
@@ -55,7 +54,7 @@ main() {
     sleep 2s
 
     (
-      KEREK_CONTAINER_ENGINE=podman test_container_engine
+      CONTAINER_ENGINE=podman test_container_engine
     )
   )
 }

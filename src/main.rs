@@ -271,7 +271,7 @@ enum Subcommand {
 #[derive(clap::Args)]
 struct ContainerEngineArguments {
     /// Container engine program to use
-    #[arg(default_value = "docker", long, value_enum)]
+    #[arg(default_value = "docker", env, long, value_enum)]
     container_engine: String,
 }
 

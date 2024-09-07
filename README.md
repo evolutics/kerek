@@ -197,7 +197,8 @@ replicas. The following visualizes the process for a service with 3 replicas.
 
 ### Podman support
 
-Pass `--container-engine podman` to use Podman instead of Docker.
+Pass `--container-engine podman` or set the environment variable
+`CONTAINER_ENGINE=podman` to use Podman instead of Docker.
 
 Podman Compose is not supported as it currently lacks some needed features like
 the calculation of service config hashes (`docker compose config --hash '*'`).
@@ -264,7 +265,8 @@ Arguments:
 
 Options:
       --container-engine <CONTAINER_ENGINE>
-          Container engine program to use [default: docker]
+          Container engine program to use [env: CONTAINER_ENGINE=] [default:
+          docker]
       --ansi <ANSI>
           Control when to print ANSI control characters [possible values: never,
           always, auto]
@@ -358,7 +360,8 @@ Arguments:
 
 Options:
       --container-engine <CONTAINER_ENGINE>
-          Container engine program to use [default: docker]
+          Container engine program to use [env: CONTAINER_ENGINE=] [default:
+          docker]
   -h, --help
           Print help (see more with '--help')
 ```

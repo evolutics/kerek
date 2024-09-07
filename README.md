@@ -195,10 +195,11 @@ replicas. The following visualizes the process for a service with 3 replicas.
 ┄┄┄┄───────────────────────────────────────────────────┤
 ```
 
-### Podman support
+### Support for Podman and other container engines
 
 Pass `--container-engine podman` or set the environment variable
-`CONTAINER_ENGINE=podman` to use Podman instead of Docker.
+`CONTAINER_ENGINE=podman` to use Podman instead of Docker. Kerek is
+engine-agnostic so you may use any other container engine with a compatible CLI.
 
 Podman Compose is not supported as it currently lacks some needed features like
 the calculation of service config hashes (`docker compose config --hash '*'`).

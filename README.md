@@ -225,16 +225,13 @@ Zero-downtime deployments for Docker Compose
 Usage: kerek [OPTIONS] <COMMAND>
 
 Commands:
-  deploy               Create or update services
-  provision            Provisions host with container engine, making
-                           system-wide changes
-  run-with-ssh-config  Runs command with wrapped `ssh` in `$PATH` that uses
-                           given SSH config
-  transfer-images      Copies images from default to specified Docker host
-  tunnel-ssh           Forwards localhost TCP port to remote Docker host
-                           over SSH
-  help                 Print this message or the help of the given
-                           subcommand(s)
+  deploy           Create or update services
+  provision        Provisions host with container engine, making system-wide
+                       changes
+  transfer-images  Copies images from default to specified Docker host
+  tunnel-ssh       Forwards localhost TCP port to remote Docker host over
+                       SSH
+  help             Print this message or the help of the given subcommand(s)
 
 Options:
       --dry-run                Do not apply changes, only show what would be
@@ -334,21 +331,6 @@ Options:
       --force                    Go ahead without prompting user to confirm
   -F, --ssh-config <SSH_CONFIG>  Path to SSH config file
   -h, --help                     Print help (see more with '--help')
-```
-
-### `kerek run-with-ssh-config -h`
-
-```
-Runs command with wrapped `ssh` in `$PATH` that uses given SSH config
-
-Usage: kerek run-with-ssh-config <SSH_CONFIG> <COMMAND>...
-
-Arguments:
-  <SSH_CONFIG>  Path to SSH config file
-  <COMMAND>...  Program with arguments to run
-
-Options:
-  -h, --help  Print help (see more with '--help')
 ```
 
 ### `kerek transfer-images -h`

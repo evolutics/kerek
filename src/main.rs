@@ -5,12 +5,10 @@ mod docker_cli_plugin_metadata;
 mod docker_compose;
 mod log;
 mod provision;
-mod run_with_ssh_config;
 mod transfer_images;
 mod tunnel_ssh;
 
 use clap::Parser;
-use std::path;
 
 fn main() -> anyhow::Result<()> {
     let Cli {
@@ -89,15 +87,6 @@ fn main() -> anyhow::Result<()> {
             dry_run,
             force,
             host,
-            ssh_config,
-        }),
-
-        Subcommand::RunWithSshConfig {
-            command,
-            ssh_config,
-        } => run_with_ssh_config::go(run_with_ssh_config::In {
-            command,
-            dry_run,
             ssh_config,
         }),
 
@@ -248,21 +237,6 @@ enum Subcommand {
 
         /// Reference like "localhost" or "[ssh://][<user>@]<hostname>[:<port>]"
         host: String,
-    },
-
-    /// Runs command with wrapped `ssh` in `$PATH` that uses given SSH config
-    ///
-    /// This may be useful for an SSH connection to a Docker host with a custom
-    /// SSH config file. The Docker CLI supports the form `ssh://…` to specify
-    /// an SSH connection with username, hostname, port, etc. However, a custom
-    /// SSH config file other than `~/.ssh/config` cannot be provided.
-    RunWithSshConfig {
-        /// Path to SSH config file
-        ssh_config: path::PathBuf,
-
-        /// Program with arguments to run
-        #[arg(required = true)]
-        command: Vec<String>,
     },
 
     /// Copies images from default to specified Docker host
@@ -502,7 +476,6 @@ mod tests {
     #[test_case::test_case(&[]; "")]
     #[test_case::test_case(&["deploy"]; "deploy")]
     #[test_case::test_case(&["provision"]; "provision")]
-    #[test_case::test_case(&["run-with-ssh-config"]; "run-with-ssh-config")]
     #[test_case::test_case(&["transfer-images"]; "transfer-images")]
     #[test_case::test_case(&["tunnel-ssh"]; "tunnel-ssh")]
     fn readme_includes_subcommand_help(subcommands: &[&str]) {

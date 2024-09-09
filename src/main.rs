@@ -7,6 +7,7 @@ mod log;
 mod provision;
 mod run_with_ssh_config;
 mod transfer_images;
+mod tunnel_ssh;
 
 use clap::Parser;
 use std::path;
@@ -107,6 +108,19 @@ fn main() -> anyhow::Result<()> {
             docker_cli: docker::Cli::new(&container_engine, (&docker_arguments).into()),
             dry_run,
             images,
+        }),
+
+        Subcommand::TunnelSsh {
+            local_port,
+            remote_socket,
+            ssh_config,
+            ssh_host,
+        } => tunnel_ssh::go(tunnel_ssh::In {
+            dry_run,
+            local_port,
+            remote_socket,
+            ssh_config,
+            ssh_host,
         }),
     }
 }
@@ -265,6 +279,34 @@ enum Subcommand {
 
         /// Images to copy; use "-" to pass image names as stdin lines
         images: Vec<String>,
+    },
+
+    /// Forwards localhost TCP port to remote Docker host over SSH
+    ///
+    /// While an SSH tunnel is running, you can connect to the remote Docker
+    /// host using `DOCKER_HOST=tcp://localhost:22375` locally. Note that a
+    /// custom SSH config file can be specified, unlike with vanilla Docker.
+    ///
+    /// Example:
+    ///
+    ///     kerek tunnel-ssh my-ssh-host &
+    ///     DOCKER_HOST=tcp://localhost:22375 podman ps
+    ///     kill %%
+    TunnelSsh {
+        /// TCP port on localhost to be forwarded
+        #[arg(default_value_t = 22375, long)]
+        local_port: u16,
+
+        /// Path to Unix domain socket of Docker host on remote
+        #[arg(long)]
+        remote_socket: Option<String>,
+
+        /// Path to SSH config file
+        #[arg(long, short = 'F')]
+        ssh_config: Option<String>,
+
+        /// Reference like "[ssh://][<user>@]<hostname>[:<port>]"
+        ssh_host: String,
     },
 }
 
@@ -462,6 +504,7 @@ mod tests {
     #[test_case::test_case(&["provision"]; "provision")]
     #[test_case::test_case(&["run-with-ssh-config"]; "run-with-ssh-config")]
     #[test_case::test_case(&["transfer-images"]; "transfer-images")]
+    #[test_case::test_case(&["tunnel-ssh"]; "tunnel-ssh")]
     fn readme_includes_subcommand_help(subcommands: &[&str]) {
         let help_command = [&[env!("CARGO_BIN_NAME")], subcommands, &["-h"]]
             .concat()

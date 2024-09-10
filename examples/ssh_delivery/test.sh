@@ -21,9 +21,6 @@ main() {
     (
       kerek tunnel-ssh --local-socket temp.sock --ssh-config ssh_config ssh-host
       trap 'kill "$(lsof -t "${PWD}/temp.sock")"' EXIT
-      until docker --host "unix://${PWD}/temp.sock" ps; do
-        sleep 0.01s
-      done
 
       docker compose config --images \
         | kerek --host "unix://${PWD}/temp.sock" transfer-images -

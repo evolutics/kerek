@@ -82,7 +82,7 @@ fn main() -> anyhow::Result<()> {
         Subcommand::Provision {
             force,
             host,
-            ssh_config,
+            ssh_arguments: SshArguments { ssh_config },
         } => provision::go(provision::In {
             dry_run,
             force,
@@ -102,7 +102,7 @@ fn main() -> anyhow::Result<()> {
         Subcommand::TunnelSsh {
             local_socket,
             remote_socket,
-            ssh_config,
+            ssh_arguments: SshArguments { ssh_config },
             ssh_host,
         } => tunnel_ssh::go(tunnel_ssh::In {
             dry_run,
@@ -231,9 +231,8 @@ enum Subcommand {
         #[arg(long)]
         force: bool,
 
-        /// Path to SSH config file
-        #[arg(long, short = 'F')]
-        ssh_config: Option<String>,
+        #[command(flatten)]
+        ssh_arguments: SshArguments,
 
         /// Reference like "localhost" or "[ssh://][<user>@]<hostname>[:<port>]"
         host: String,
@@ -276,9 +275,8 @@ enum Subcommand {
         #[arg(long)]
         remote_socket: Option<String>,
 
-        /// Path to SSH config file
-        #[arg(long, short = 'F')]
-        ssh_config: Option<String>,
+        #[command(flatten)]
+        ssh_arguments: SshArguments,
 
         /// Reference like "[ssh://][<user>@]<hostname>[:<port>]"
         ssh_host: String,
@@ -290,6 +288,13 @@ struct ContainerEngineArguments {
     /// Container engine program to use
     #[arg(default_value = "docker", env, long, value_enum)]
     container_engine: String,
+}
+
+#[derive(clap::Args)]
+struct SshArguments {
+    /// Path to SSH config file
+    #[arg(long, short = 'F')]
+    ssh_config: Option<String>,
 }
 
 // Top-level Docker Compose arguments.

@@ -1,17 +1,20 @@
 use super::log;
 use anyhow::Context;
 use std::os::unix::process::CommandExt;
+use std::path;
 use std::process;
 
 pub fn go(
     In {
         dry_run,
-        local_port,
+        local_socket,
         remote_socket,
         ssh_config,
         ssh_host,
     }: In,
 ) -> anyhow::Result<()> {
+    let local_socket = path::absolute(&local_socket)
+        .with_context(|| format!("Unable to make {local_socket:?} absolute"))?;
     // TODO: Get socket path automatically, depending on container engine:
     // - `docker context inspect --format '{{.Endpoints.docker.Host}}'`
     // - `podman info --format '{{.Host.RemoteSocket.Path}}'`
@@ -22,9 +25,11 @@ pub fn go(
         .args(ssh_config.iter().flat_map(|ssh_config| ["-F", ssh_config]))
         .args([
             "-f",
-            "-L",
-            &format!("localhost:{local_port}:{remote_socket}"),
             "-N",
+            "-o",
+            &format!("LocalForward {local_socket:?} {remote_socket:?}"),
+            "-o",
+            "StreamLocalBindUnlink=yes", // Required to reuse socket file.
             &ssh_host,
         ]);
 
@@ -39,7 +44,7 @@ pub fn go(
 
 pub struct In {
     pub dry_run: bool,
-    pub local_port: u16,
+    pub local_socket: String,
     pub remote_socket: Option<String>,
     pub ssh_config: Option<String>,
     pub ssh_host: String,

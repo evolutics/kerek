@@ -229,8 +229,8 @@ Commands:
   provision        Provisions host with container engine, making system-wide
                        changes
   transfer-images  Copies images from default to specified Docker host
-  tunnel-ssh       Forwards localhost TCP port to remote Docker host over
-                       SSH
+  tunnel-ssh       Forwards local Unix domain socket to remote Docker host
+                       over SSH
   help             Print this message or the help of the given subcommand(s)
 
 Options:
@@ -354,7 +354,7 @@ Options:
 ### `kerek tunnel-ssh -h`
 
 ```
-Forwards localhost TCP port to remote Docker host over SSH
+Forwards local Unix domain socket to remote Docker host over SSH
 
 Usage: kerek tunnel-ssh [OPTIONS] <SSH_HOST>
 
@@ -362,8 +362,9 @@ Arguments:
   <SSH_HOST>  Reference like "[ssh://][<user>@]<hostname>[:<port>]"
 
 Options:
-      --local-port <LOCAL_PORT>
-          TCP port on localhost to be forwarded [default: 22375]
+      --local-socket <LOCAL_SOCKET>
+          Path to Unix domain socket on localhost to be forwarded [default:
+          kerek.sock]
       --remote-socket <REMOTE_SOCKET>
           Path to Unix domain socket of Docker host on remote
   -F, --ssh-config <SSH_CONFIG>

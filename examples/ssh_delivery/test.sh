@@ -19,16 +19,16 @@ main() {
     docker compose pull --ignore-buildable
 
     (
-      kerek tunnel-ssh --local-port 22375 --ssh-config ssh_config ssh-host
-      trap 'kill "$(lsof -i tcp@localhost:22375 -t)"' EXIT
-      until docker --host tcp://localhost:22375 ps; do
+      kerek tunnel-ssh --local-socket temp.sock --ssh-config ssh_config ssh-host
+      trap 'kill "$(lsof -t "${PWD}/temp.sock")"' EXIT
+      until docker --host "unix://${PWD}/temp.sock" ps; do
         sleep 0.01s
       done
 
       docker compose config --images \
-        | kerek --host tcp://localhost:22375 transfer-images -
+        | kerek --host "unix://${PWD}/temp.sock" transfer-images -
 
-      kerek --host tcp://localhost:22375 \
+      kerek --host "unix://${PWD}/temp.sock" \
         deploy --no-build --pull never --remove-orphans --wait
     )
 

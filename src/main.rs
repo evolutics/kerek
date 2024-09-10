@@ -100,13 +100,13 @@ fn main() -> anyhow::Result<()> {
         }),
 
         Subcommand::TunnelSsh {
-            local_port,
+            local_socket,
             remote_socket,
             ssh_config,
             ssh_host,
         } => tunnel_ssh::go(tunnel_ssh::In {
             dry_run,
-            local_port,
+            local_socket,
             remote_socket,
             ssh_config,
             ssh_host,
@@ -255,21 +255,21 @@ enum Subcommand {
         images: Vec<String>,
     },
 
-    /// Forwards localhost TCP port to remote Docker host over SSH
+    /// Forwards local Unix domain socket to remote Docker host over SSH
     ///
     /// While an SSH tunnel is running, you can connect to the remote Docker
-    /// host using `DOCKER_HOST=tcp://localhost:22375` locally. Note that a
+    /// host using `DOCKER_HOST=unix:///path/to/temp.sock` locally. Note that a
     /// custom SSH config file can be specified, unlike with vanilla Docker.
     ///
     /// Example:
     ///
-    ///     kerek tunnel-ssh my-ssh-host
-    ///     DOCKER_HOST=tcp://localhost:22375 podman ps
-    ///     kill "$(lsof -i tcp@localhost:22375 -t)"
+    ///     kerek tunnel-ssh --local-socket temp.sock my-ssh-host
+    ///     DOCKER_HOST="unix://${PWD}/temp.sock" podman ps
+    ///     kill "$(lsof -t "${PWD}/temp.sock")"
     TunnelSsh {
-        /// TCP port on localhost to be forwarded
-        #[arg(default_value_t = 22375, long)]
-        local_port: u16,
+        /// Path to Unix domain socket on localhost to be forwarded
+        #[arg(default_value = "kerek.sock", long)]
+        local_socket: String,
 
         /// Path to Unix domain socket of Docker host on remote
         #[arg(long)]

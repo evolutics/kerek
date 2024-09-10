@@ -263,9 +263,9 @@ enum Subcommand {
     ///
     /// Example:
     ///
-    ///     kerek tunnel-ssh my-ssh-host &
+    ///     kerek tunnel-ssh my-ssh-host
     ///     DOCKER_HOST=tcp://localhost:22375 podman ps
-    ///     kill %%
+    ///     kill "$(lsof -i tcp@localhost:22375 -t)"
     TunnelSsh {
         /// TCP port on localhost to be forwarded
         #[arg(default_value_t = 22375, long)]

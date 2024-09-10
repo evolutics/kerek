@@ -19,8 +19,8 @@ main() {
     docker compose pull --ignore-buildable
 
     (
-      kerek tunnel-ssh --local-port 22375 --ssh-config ssh_config ssh-host &
-      trap 'kill %%' EXIT
+      kerek tunnel-ssh --local-port 22375 --ssh-config ssh_config ssh-host
+      trap 'kill "$(lsof -i tcp@localhost:22375 -t)"' EXIT
       until docker --host tcp://localhost:22375 ps; do
         sleep 0.01s
       done

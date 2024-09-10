@@ -21,6 +21,7 @@ pub fn go(
     command
         .args(ssh_config.iter().flat_map(|ssh_config| ["-F", ssh_config]))
         .args([
+            "-f",
             "-L",
             &format!("localhost:{local_port}:{remote_socket}"),
             "-N",

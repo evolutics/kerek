@@ -10,8 +10,6 @@ systemctl --user enable --now podman
 
 sudo loginctl enable-linger
 
-sudo ln --force --symbolic /usr/bin/podman /usr/local/bin/docker
-
 sudo sysctl --write net.ipv4.ip_unprivileged_port_start=80 \
   | sudo tee /etc/sysctl.d/99-custom.conf
 

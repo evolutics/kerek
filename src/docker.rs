@@ -1,3 +1,4 @@
+use super::log;
 use std::process;
 
 pub struct Cli<'a> {
@@ -10,7 +11,7 @@ pub struct Arguments<'a> {
     pub context: Option<&'a str>,
     pub debug: bool,
     pub host: Option<&'a str>,
-    pub log_level: Option<&'a str>,
+    pub log_level: Option<log::Level>,
     pub tls: bool,
     pub tlscacert: Option<&'a str>,
     pub tlscert: Option<&'a str>,
@@ -60,11 +61,18 @@ impl<'a> Cli<'a> {
                     .filter(|_| !default_daemon)
                     .flat_map(|host| ["--host", host]),
             )
-            .args(
-                log_level
-                    .iter()
-                    .flat_map(|log_level| ["--log-level", log_level]),
-            )
+            .args(log_level.iter().flat_map(|log_level| {
+                [
+                    "--log-level",
+                    match log_level {
+                        log::Level::Debug => "debug",
+                        log::Level::Info => "info",
+                        log::Level::Warn => "warn",
+                        log::Level::Error => "error",
+                        log::Level::Fatal => "fatal",
+                    },
+                ]
+            }))
             .args(tls.then_some("--tls").iter())
             .args(
                 tlscacert

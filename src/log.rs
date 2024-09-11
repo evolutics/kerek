@@ -2,12 +2,13 @@ use std::sync;
 
 static LEVEL: sync::OnceLock<Level> = sync::OnceLock::new();
 
-#[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(clap::ValueEnum, Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Level {
     Debug,
     Info,
     Warn,
     Error,
+    Fatal,
 }
 
 pub fn level() -> Level {

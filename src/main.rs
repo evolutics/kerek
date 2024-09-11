@@ -17,13 +17,10 @@ fn main() -> anyhow::Result<()> {
         subcommand,
     } = Cli::parse();
 
-    log::set_level(match docker_arguments.log_level.as_deref() {
-        _ if docker_arguments.debug => log::Level::Debug,
-        None => log::Level::Info,
-        Some(DEBUG) => log::Level::Debug,
-        Some(INFO) => log::Level::Info,
-        Some(WARN) => log::Level::Warn,
-        Some(_) => log::Level::Error,
+    log::set_level(if docker_arguments.debug {
+        log::Level::Debug
+    } else {
+        docker_arguments.log_level.unwrap_or(log::Level::Info)
     })?;
 
     match subcommand {
@@ -114,12 +111,6 @@ fn main() -> anyhow::Result<()> {
     }
 }
 
-const DEBUG: &str = "debug";
-const INFO: &str = "info";
-const WARN: &str = "warn";
-const ERROR: &str = "error";
-const FATAL: &str = "fatal";
-
 // Order of fields matters for generated help.
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -159,8 +150,8 @@ struct DockerArguments {
     host: Option<String>,
 
     /// Set the logging level
-    #[arg(long, short = 'l', value_parser = [DEBUG, INFO, WARN, ERROR, FATAL])]
-    log_level: Option<String>,
+    #[arg(long, short = 'l', value_enum)]
+    log_level: Option<log::Level>,
 
     /// Use TLS; implied by --tlsverify
     #[arg(long)]
@@ -419,7 +410,7 @@ impl<'a> From<&'a DockerArguments> for docker::Arguments<'a> {
             context: context.as_deref(),
             debug: *debug,
             host: host.as_deref(),
-            log_level: log_level.as_deref(),
+            log_level: *log_level,
             tls: *tls,
             tlscacert: tlscacert.as_deref(),
             tlscert: tlscert.as_deref(),

@@ -30,11 +30,9 @@ main() {
     )
 
     local -r result="$(curl --fail-with-body --max-time 3 --retry 99 \
-      --retry-connrefused --retry-max-time 150 http://192.168.60.159)"
-    if [[ "${result}" != 'hello-world' ]]; then
-      echo "Unexpected result of sanity check: ${result}" >&2
-      exit 1
-    fi
+      --retry-connrefused --retry-max-time 150 http://192.168.60.159 \
+      | tee /dev/stderr)"
+    [[ "${result}" == 'hello-world' ]]
   )
 }
 

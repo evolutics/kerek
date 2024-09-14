@@ -5,6 +5,7 @@ mod docker_cli_plugin_metadata;
 mod docker_compose;
 mod log;
 mod provision;
+mod ssh;
 mod transfer_images;
 mod tunnel_ssh;
 
@@ -79,12 +80,12 @@ fn main() -> anyhow::Result<()> {
         Subcommand::Provision {
             force,
             host,
-            ssh_arguments: SshArguments { ssh_config },
+            ssh_arguments,
         } => provision::go(provision::In {
             dry_run,
             force,
             host,
-            ssh_config,
+            ssh_cli: ssh_cli(&docker_arguments, &ssh_arguments),
         }),
 
         Subcommand::TransferImages {
@@ -99,13 +100,13 @@ fn main() -> anyhow::Result<()> {
         Subcommand::TunnelSsh {
             local_socket,
             remote_socket,
-            ssh_arguments: SshArguments { ssh_config },
+            ssh_arguments,
             ssh_host,
         } => tunnel_ssh::go(tunnel_ssh::In {
             dry_run,
             local_socket,
             remote_socket,
-            ssh_config,
+            ssh_cli: ssh_cli(&docker_arguments, &ssh_arguments),
             ssh_host,
         }),
     }
@@ -446,6 +447,17 @@ impl<'a> From<&'a DockerComposeArguments> for docker_compose::Arguments<'a> {
             project_name: project_name.as_deref(),
         }
     }
+}
+
+fn ssh_cli<'a>(
+    docker_arguments: &'a DockerArguments,
+    SshArguments { ssh_config }: &'a SshArguments,
+) -> ssh::Cli<'a> {
+    ssh::Cli::new(ssh::Arguments {
+        config: ssh_config.as_deref(),
+        debug: docker_arguments.debug,
+        log_level: docker_arguments.log_level,
+    })
 }
 
 #[cfg(test)]

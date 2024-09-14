@@ -1,15 +1,15 @@
 use super::log;
+use super::ssh;
 use anyhow::Context;
 use std::os::unix::process::CommandExt;
 use std::path;
-use std::process;
 
 pub fn go(
     In {
         dry_run,
         local_socket,
         remote_socket,
-        ssh_config,
+        ssh_cli,
         ssh_host,
     }: In,
 ) -> anyhow::Result<()> {
@@ -20,18 +20,16 @@ pub fn go(
     // - `podman info --format '{{.Host.RemoteSocket.Path}}'`
     let remote_socket = remote_socket.unwrap_or("/run/user/1000/podman/podman.sock".into());
 
-    let mut command = process::Command::new("ssh");
-    command
-        .args(ssh_config.iter().flat_map(|ssh_config| ["-F", ssh_config]))
-        .args([
-            "-f",
-            "-N",
-            "-o",
-            &format!("LocalForward {local_socket:?} {remote_socket:?}"),
-            "-o",
-            "StreamLocalBindUnlink=yes", // Required to reuse socket file.
-            &ssh_host,
-        ]);
+    let mut command = ssh_cli.command();
+    command.args([
+        "-f",
+        "-N",
+        "-o",
+        &format!("LocalForward {local_socket:?} {remote_socket:?}"),
+        "-o",
+        "StreamLocalBindUnlink=yes", // Required to reuse socket file.
+        &ssh_host,
+    ]);
 
     if dry_run {
         log::info!("Would execute: {command:?}");
@@ -42,10 +40,10 @@ pub fn go(
     }
 }
 
-pub struct In {
+pub struct In<'a> {
     pub dry_run: bool,
     pub local_socket: String,
     pub remote_socket: Option<String>,
-    pub ssh_config: Option<String>,
+    pub ssh_cli: ssh::Cli<'a>,
     pub ssh_host: String,
 }

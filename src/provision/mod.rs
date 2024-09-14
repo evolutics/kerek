@@ -1,5 +1,6 @@
 use super::command;
 use super::log;
+use super::ssh;
 use std::io;
 use std::io::Write;
 use std::process;
@@ -9,7 +10,7 @@ pub fn go(
         dry_run,
         force,
         host,
-        ssh_config,
+        ssh_cli,
     }: In,
 ) -> anyhow::Result<()> {
     if !force {
@@ -23,14 +24,11 @@ pub fn go(
         log::info!("Would provision host {host:?}.");
         Ok(())
     } else {
-        let mut command = if host == "localhost" && ssh_config.is_none() {
+        let mut command = if host == "localhost" && !ssh_cli.has_config_override() {
             process::Command::new("bash")
         } else {
-            let mut command = process::Command::new("ssh");
-            command
-                .args(ssh_config.iter().flat_map(|ssh_config| ["-F", ssh_config]))
-                .arg(host)
-                .arg("bash");
+            let mut command = ssh_cli.command();
+            command.arg(host).arg("bash");
             command
         };
 
@@ -38,11 +36,11 @@ pub fn go(
     }
 }
 
-pub struct In {
+pub struct In<'a> {
     pub dry_run: bool,
     pub force: bool,
     pub host: String,
-    pub ssh_config: Option<String>,
+    pub ssh_cli: ssh::Cli<'a>,
 }
 
 fn confirm_with_user(question: &str) -> anyhow::Result<()> {

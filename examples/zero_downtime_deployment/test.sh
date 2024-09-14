@@ -5,36 +5,39 @@ set -o nounset
 set -o pipefail
 
 test_container_engine() {
-  docker compose down
-  trap 'docker compose down' EXIT
+  (
+    docker compose down
+    trap 'docker compose down' EXIT
 
-  kerek_deploy
+    kerek_deploy
 
-  while true; do
-    curl --fail --max-time 0.2 --silent http://localhost:8080 || echo "Error $?"
-    sleep 0.01s
-  done >test.log &
+    while true; do
+      curl --fail --max-time 0.2 --silent http://localhost:8080 \
+        || echo "Error $?"
+      sleep 0.01s
+    done >test.log &
 
-  sleep 2s
+    sleep 2s
 
-  GREET_VERSION=B kerek_deploy
+    GREET_VERSION=B kerek_deploy
 
-  sleep 2s
+    sleep 2s
 
-  kill %%
+    kill %%
 
-  for greet_version in 'A' 'B'; do
-    if ! grep --quiet "Hi from ${greet_version}" test.log; then
-      echo "No successful ping for greet version: ${greet_version}" >&2
+    for greet_version in 'A' 'B'; do
+      if ! grep --quiet "Hi from ${greet_version}" test.log; then
+        echo "No successful ping for greet version: ${greet_version}" >&2
+        exit 1
+      fi
+    done
+
+    local -r ping_errors="$(grep Error test.log)"
+    if [[ -n "${ping_errors}" ]]; then
+      printf 'Failed pings:\n%s\n' "${ping_errors}" >&2
       exit 1
     fi
-  done
-
-  local -r ping_errors="$(grep Error test.log)"
-  if [[ -n "${ping_errors}" ]]; then
-    printf 'Failed pings:\n%s\n' "${ping_errors}" >&2
-    exit 1
-  fi
+  )
 }
 
 kerek_deploy() {
@@ -42,9 +45,7 @@ kerek_deploy() {
 }
 
 main() {
-  (
-    CONTAINER_ENGINE=docker test_container_engine
-  )
+  CONTAINER_ENGINE=docker test_container_engine
 
   (
     export DOCKER_HOST="unix://${PWD}/podman.sock"
@@ -53,9 +54,7 @@ main() {
     trap "kill -SIGINT $!" EXIT
     sleep 2s
 
-    (
-      CONTAINER_ENGINE=podman test_container_engine
-    )
+    CONTAINER_ENGINE=podman test_container_engine
   )
 }
 

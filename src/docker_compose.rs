@@ -80,3 +80,102 @@ impl<'a> Cli<'a> {
         command
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn handles_maximum() -> anyhow::Result<()> {
+        let command = Cli::new(
+            docker::Arguments {
+                config: None,
+                context: None,
+                debug: true,
+                host: None,
+                log_level: None,
+                tls: false,
+                tlscacert: None,
+                tlscert: None,
+                tlskey: None,
+                tlsverify: false,
+            },
+            Arguments {
+                ansi: Some("ansi"),
+                compatibility: true,
+                env_file: &["env_file".into()],
+                file: &["file".into()],
+                parallel: Some(5),
+                profile: &["profile".into()],
+                progress: Some("progress"),
+                project_directory: Some("project_directory"),
+                project_name: Some("project_name"),
+            },
+        )
+        .command();
+
+        assert_eq!(command.get_program(), "docker");
+        assert_eq!(
+            command.get_args().collect::<Vec<_>>(),
+            [
+                "--debug",
+                "compose",
+                "--ansi",
+                "ansi",
+                "--compatibility",
+                "--env-file",
+                "env_file",
+                "--file",
+                "file",
+                "--parallel",
+                "5",
+                "--profile",
+                "profile",
+                "--progress",
+                "progress",
+                "--project-directory",
+                "project_directory",
+                "--project-name",
+                "project_name",
+            ],
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn handles_minimum() -> anyhow::Result<()> {
+        let command = Cli::new(
+            docker::Arguments {
+                config: None,
+                context: None,
+                debug: true,
+                host: None,
+                log_level: None,
+                tls: false,
+                tlscacert: None,
+                tlscert: None,
+                tlskey: None,
+                tlsverify: false,
+            },
+            Arguments {
+                ansi: None,
+                compatibility: false,
+                env_file: &[],
+                file: &[],
+                parallel: None,
+                profile: &[],
+                progress: None,
+                project_directory: None,
+                project_name: None,
+            },
+        )
+        .command();
+
+        assert_eq!(command.get_program(), "docker");
+        assert_eq!(
+            command.get_args().collect::<Vec<_>>(),
+            ["--debug", "compose"],
+        );
+        Ok(())
+    }
+}

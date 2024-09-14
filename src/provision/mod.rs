@@ -9,6 +9,7 @@ pub fn go(
     In {
         dry_run,
         force,
+        has_ssh_config_override,
         host,
         ssh_cli,
     }: In,
@@ -24,7 +25,7 @@ pub fn go(
         log::info!("Would provision host {host:?}.");
         Ok(())
     } else {
-        let mut command = if host == "localhost" && !ssh_cli.has_config_override() {
+        let mut command = if host == "localhost" && !has_ssh_config_override {
             process::Command::new("bash")
         } else {
             let mut command = ssh_cli.command();
@@ -39,6 +40,7 @@ pub fn go(
 pub struct In<'a> {
     pub dry_run: bool,
     pub force: bool,
+    pub has_ssh_config_override: bool,
     pub host: String,
     pub ssh_cli: ssh::Cli<'a>,
 }

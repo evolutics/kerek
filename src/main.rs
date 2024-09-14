@@ -84,6 +84,7 @@ fn main() -> anyhow::Result<()> {
         } => provision::go(provision::In {
             dry_run,
             force,
+            has_ssh_config_override: ssh_arguments.ssh_config.is_some(),
             host,
             ssh_cli: ssh_cli(&docker_arguments, &ssh_arguments),
         }),

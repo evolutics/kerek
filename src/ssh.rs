@@ -42,10 +42,6 @@ impl<'a> Cli<'a> {
 
         command
     }
-
-    pub fn has_config_override(&self) -> bool {
-        self.arguments.config.is_some()
-    }
 }
 
 #[cfg(test)]
@@ -54,30 +50,30 @@ mod tests {
 
     #[test]
     fn translates_maximum_arguments() -> anyhow::Result<()> {
-        let cli = Cli::new(Arguments {
+        let command = Cli::new(Arguments {
             config: Some("config"),
             debug: true,
             log_level: Some(log::Level::Warn),
-        });
+        })
+        .command();
 
         assert_eq!(
-            cli.command().get_args().collect::<Vec<_>>(),
+            command.get_args().collect::<Vec<_>>(),
             ["-F", "config", "-o", "LogLevel=ERROR", "-vvv"],
         );
-        assert!(cli.has_config_override());
         Ok(())
     }
 
     #[test]
     fn translates_minimum_arguments() -> anyhow::Result<()> {
-        let cli = Cli::new(Arguments {
+        let command = Cli::new(Arguments {
             config: None,
             debug: false,
             log_level: None,
-        });
+        })
+        .command();
 
-        assert_eq!(cli.command().get_args().next(), None);
-        assert!(!cli.has_config_override());
+        assert_eq!(command.get_args().next(), None);
         Ok(())
     }
 }

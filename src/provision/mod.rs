@@ -29,7 +29,7 @@ pub fn go(
             process::Command::new("bash")
         } else {
             let mut command = ssh_cli.command();
-            command.arg(host).arg("bash");
+            command.args([&host, "bash"]);
             command
         };
 

@@ -12,8 +12,7 @@ test_container_engine() {
     kerek_deploy
 
     while true; do
-      curl --fail --max-time 0.2 --silent http://localhost:8080 \
-        || echo "Error $?"
+      curl --fail --max-time 0.2 --silent localhost:8080 || echo "Error $?"
       sleep 0.01s
     done >test.log &
 

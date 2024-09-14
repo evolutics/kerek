@@ -380,13 +380,13 @@ struct DockerComposeUpArgumentsForDeploy {
     #[arg(long)]
     remove_orphans: bool,
 
-    /// Recreate anonymous volumes instead of retrieving data from the
-    /// previous containers
+    /// Recreate anonymous volumes instead of retrieving data from the previous
+    /// containers
     #[arg(long, short = 'V')]
     renew_anon_volumes: bool,
 
-    /// Use this timeout in seconds for container shutdown when containers
-    /// are already running
+    /// Use this timeout in seconds for container shutdown when containers are
+    /// already running
     #[arg(long, short = 't')]
     timeout: Option<i64>,
 

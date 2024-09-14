@@ -172,24 +172,27 @@ struct DockerArguments {
 #[allow(clippy::large_enum_variant)]
 #[derive(clap::Subcommand)]
 enum Subcommand {
+    // Keep following help in sync with this source, where applicable:
+    // https://github.com/docker/compose/blob/main/docs/reference/compose_up.md
     /// Create or update services
     ///
     /// Builds, (re)creates, and starts containers for a service.
     ///
-    /// Unless they are already running, this command also starts any linked
-    /// services.
+    /// If service names are given as command-line operands, this command does
+    /// not automatically start any of their linked services.
     ///
     /// The containers are always started in the background and left running
     /// (detached mode).
     ///
     /// If there are existing containers for a service, and the service's
-    /// configuration was changed after the container's creation, then the
+    /// configuration or image was changed after the container's creation, the
     /// changes are picked up by recreating the containers (preserving mounted
     /// volumes). Whether the old containers are stopped before or after
     /// the new containers are started is controlled via
     /// `services.*.deploy.update_config.order` in a Compose file.
     ///
-    /// To force recreating all containers, use the `--force-recreate` flag.
+    /// If you want to force recreating all containers, use the
+    /// `--force-recreate` flag.
     Deploy {
         #[command(flatten)]
         container_engine_arguments: ContainerEngineArguments,

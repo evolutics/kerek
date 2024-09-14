@@ -295,9 +295,10 @@ Options:
   -d, --detach
           This has no effect as detached mode is always on; for migration only
       --force-recreate
-          Recreate containers even if their configuration hasn't changed
+          Recreate containers even if their configuration and image haven't
+          changed
       --no-build
-          Don't build an image, even if it's missing
+          Don't build an image, even if it's policy
       --no-start
           Don't start the services after creating them
       --pull <PULL>
@@ -315,7 +316,7 @@ Options:
       --wait
           Wait for services to be running|healthy
       --wait-timeout <WAIT_TIMEOUT>
-          timeout in seconds waiting for application to be running|healthy
+          Maximum duration to wait for the project to be running|healthy
   -h, --help
           Print help (see more with '--help')
 ```

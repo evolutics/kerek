@@ -356,11 +356,12 @@ struct DockerComposeUpArgumentsForDeploy {
     #[arg(long, short = 'd')]
     detach: bool,
 
-    /// Recreate containers even if their configuration hasn't changed
+    /// Recreate containers even if their configuration and image haven't
+    /// changed
     #[arg(long)]
     force_recreate: bool,
 
-    /// Don't build an image, even if it's missing
+    /// Don't build an image, even if it's policy
     #[arg(long)]
     no_build: bool,
 
@@ -394,7 +395,7 @@ struct DockerComposeUpArgumentsForDeploy {
     #[arg(long)]
     wait: bool,
 
-    /// timeout in seconds waiting for application to be running|healthy
+    /// Maximum duration to wait for the project to be running|healthy
     #[arg(long)]
     wait_timeout: Option<i64>,
 }

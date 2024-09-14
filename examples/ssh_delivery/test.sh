@@ -4,6 +4,33 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+test_container_engine() {
+  if [[ -f ssh_config ]]; then
+    vagrant snapshot pop
+  else
+    vagrant ssh-config --host ssh-host >ssh_config
+    kerek provision --force --ssh-config ssh_config ssh-host
+    vagrant snapshot push
+  fi
+
+  docker compose pull --ignore-buildable
+
+  (
+    kerek tunnel-ssh --local-socket temp.sock --ssh-config ssh_config ssh-host
+    trap 'kill "$(lsof -t "${PWD}/temp.sock")"' EXIT
+
+    docker compose config --images \
+      | kerek --host "unix://${PWD}/temp.sock" transfer-images -
+
+    kerek --host "unix://${PWD}/temp.sock" \
+      deploy --no-build --pull never --remove-orphans --wait
+  )
+
+  [[ "$(curl --fail-with-body --max-time 3 --retry 99 --retry-connrefused \
+    --retry-max-time 150 http://192.168.60.159 \
+    | tee /dev/stderr)" == 'hello-world' ]]
+}
+
 main() {
   vagrant destroy --force
   trap 'vagrant destroy --force' EXIT
@@ -11,32 +38,16 @@ main() {
 
   (
     trap 'rm --force ssh_config' EXIT
-    vagrant ssh-config --host ssh-host >ssh_config
 
-    kerek provision --force --ssh-config ssh_config ssh-host
-
-    docker compose pull --ignore-buildable
+    CONTAINER_ENGINE=docker test_container_engine
 
     (
-      kerek tunnel-ssh --local-socket temp.sock --ssh-config ssh_config ssh-host
-      trap 'kill "$(lsof -t "${PWD}/temp.sock")"' EXIT
+      export DOCKER_HOST="unix://${PWD}/podman.sock"
+      podman system service --time 0 "${DOCKER_HOST}" &
+      trap 'kill "$(lsof -t "${PWD}/podman.sock")"' EXIT
 
-      docker compose config --images \
-        | kerek --host "unix://${PWD}/temp.sock" transfer-images -
-
-      kerek --host "unix://${PWD}/temp.sock" \
-        deploy --no-build --pull never --remove-orphans --wait
-
-      for container_engine in docker podman; do
-        [[ "$("${container_engine}" --host "unix://${PWD}/temp.sock" \
-          ps --format '{{.Image}}' \
-          | tee /dev/stderr)" == 'localhost/hashicorp/http-echo:1.0' ]]
-      done
+      CONTAINER_ENGINE=podman test_container_engine
     )
-
-    [[ "$(curl --fail-with-body --max-time 3 --retry 99 --retry-connrefused \
-      --retry-max-time 150 http://192.168.60.159 \
-      | tee /dev/stderr)" == 'hello-world' ]]
   )
 }
 

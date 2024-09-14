@@ -292,7 +292,8 @@ struct SshArguments {
 
 // Top-level Docker Compose arguments.
 //
-// Source: https://docs.docker.com/reference/cli/docker/compose/
+// Source:
+// https://github.com/docker/compose/blob/main/docs/reference/compose.md#options
 // TODO: Update arguments based on above source.
 #[derive(clap::Args)]
 struct DockerComposeArguments {

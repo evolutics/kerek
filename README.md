@@ -292,8 +292,6 @@ Options:
           Project name
       --build
           Build images before starting containers
-  -d, --detach
-          This has no effect as detached mode is always on; for migration only
       --force-recreate
           Recreate containers even if their configuration and image haven't
           changed

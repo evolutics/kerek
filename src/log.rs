@@ -39,15 +39,5 @@ macro_rules! info {
     }};
 }
 
-#[macro_export]
-macro_rules! warn {
-    ($($argument:tt)*) => {{
-        if $crate::log::level() <= $crate::log::Level::Warn {
-            eprintln!($($argument)*);
-        }
-    }};
-}
-
-pub use super::warn;
 pub use debug;
 pub use info;

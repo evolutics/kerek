@@ -31,7 +31,6 @@ fn main() -> anyhow::Result<()> {
             docker_compose_up_arguments:
                 DockerComposeUpArgumentsForDeploy {
                     build,
-                    detach,
                     force_recreate,
                     no_build,
                     no_start,
@@ -44,32 +43,26 @@ fn main() -> anyhow::Result<()> {
                     wait,
                 },
             service_names,
-        } => {
-            if detach {
-                log::warn!("Detached mode is always on, no need to set it.");
-            }
-
-            deploy::go(deploy::In {
-                build,
-                docker_cli: docker::Cli::new(&container_engine, (&docker_arguments).into()),
-                docker_compose_cli: docker_compose::Cli::new(
-                    (&docker_arguments).into(),
-                    (&docker_compose_arguments).into(),
-                ),
-                dry_run,
-                force_recreate,
-                no_build,
-                no_start,
-                pull,
-                quiet_pull,
-                remove_orphans,
-                renew_anon_volumes,
-                service_names: service_names.into_iter().collect(),
-                timeout: timeout.map(|timeout| timeout.to_string()),
-                wait,
-                wait_timeout: wait_timeout.map(|wait_timeout| wait_timeout.to_string()),
-            })
-        }
+        } => deploy::go(deploy::In {
+            build,
+            docker_cli: docker::Cli::new(&container_engine, (&docker_arguments).into()),
+            docker_compose_cli: docker_compose::Cli::new(
+                (&docker_arguments).into(),
+                (&docker_compose_arguments).into(),
+            ),
+            dry_run,
+            force_recreate,
+            no_build,
+            no_start,
+            pull,
+            quiet_pull,
+            remove_orphans,
+            renew_anon_volumes,
+            service_names: service_names.into_iter().collect(),
+            timeout: timeout.map(|timeout| timeout.to_string()),
+            wait,
+            wait_timeout: wait_timeout.map(|wait_timeout| wait_timeout.to_string()),
+        }),
 
         Subcommand::DockerCliPluginMetadata => {
             let metadata = docker_cli_plugin_metadata::go()?;
@@ -351,10 +344,6 @@ struct DockerComposeUpArgumentsForDeploy {
     /// Build images before starting containers
     #[arg(long)]
     build: bool,
-
-    /// This has no effect as detached mode is always on; for migration only
-    #[arg(long, short = 'd')]
-    detach: bool,
 
     /// Recreate containers even if their configuration and image haven't
     /// changed

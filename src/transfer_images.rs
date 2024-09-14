@@ -21,7 +21,8 @@ pub fn go(
 
             command::piped_ok(
                 docker_cli
-                    .command_default_daemon()
+                    .default_daemon()
+                    .command()
                     .args(["save", "--", &image]),
                 docker_cli.command().arg("load"),
             )

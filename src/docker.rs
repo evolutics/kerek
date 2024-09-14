@@ -28,10 +28,6 @@ impl<'a> Cli<'a> {
     }
 
     pub fn command(&self) -> process::Command {
-        self.base(false)
-    }
-
-    fn base(&self, default_daemon: bool) -> process::Command {
         let mut command = process::Command::new(self.container_engine);
 
         let Arguments {
@@ -49,18 +45,9 @@ impl<'a> Cli<'a> {
 
         command
             .args(config.iter().flat_map(|config| ["--config", config]))
-            .args(
-                context
-                    .iter()
-                    .filter(|_| !default_daemon)
-                    .flat_map(|context| ["--context", context]),
-            )
+            .args(context.iter().flat_map(|context| ["--context", context]))
             .args(debug.then_some("--debug").iter())
-            .args(
-                host.iter()
-                    .filter(|_| !default_daemon)
-                    .flat_map(|host| ["--host", host]),
-            )
+            .args(host.iter().flat_map(|host| ["--host", host]))
             .args(log_level.iter().flat_map(|log_level| {
                 [
                     "--log-level",
@@ -86,7 +73,14 @@ impl<'a> Cli<'a> {
         command
     }
 
-    pub fn command_default_daemon(&self) -> process::Command {
-        self.base(true)
+    pub fn default_daemon(&self) -> Self {
+        Self {
+            arguments: Arguments {
+                context: None,
+                host: None,
+                ..self.arguments
+            },
+            container_engine: self.container_engine,
+        }
     }
 }

@@ -29,10 +29,9 @@ main() {
         deploy --no-build --pull never --remove-orphans --wait
     )
 
-    local -r result="$(curl --fail-with-body --max-time 3 --retry 99 \
-      --retry-connrefused --retry-max-time 150 http://192.168.60.159 \
-      | tee /dev/stderr)"
-    [[ "${result}" == 'hello-world' ]]
+    [[ "$(curl --fail-with-body --max-time 3 --retry 99 --retry-connrefused \
+      --retry-max-time 150 http://192.168.60.159 \
+      | tee /dev/stderr)" == 'hello-world' ]]
   )
 }
 

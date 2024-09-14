@@ -267,6 +267,8 @@ Options:
       --container-engine <CONTAINER_ENGINE>
           Container engine program to use [env: CONTAINER_ENGINE=] [default:
           docker]
+      --all-resources
+          Include all resources, even those not used by services
       --ansi <ANSI>
           Control when to print ANSI control characters [possible values: never,
           always, auto]

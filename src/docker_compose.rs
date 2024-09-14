@@ -7,6 +7,7 @@ pub struct Cli<'a> {
 }
 
 pub struct Arguments<'a> {
+    pub all_resources: bool,
     pub ansi: Option<&'a str>,
     pub compatibility: bool,
     pub env_file: &'a [String],
@@ -33,6 +34,7 @@ impl<'a> Cli<'a> {
         let mut command = self.docker_cli.command();
 
         let Arguments {
+            all_resources,
             ansi,
             compatibility,
             env_file,
@@ -46,6 +48,7 @@ impl<'a> Cli<'a> {
 
         command
             .arg("compose")
+            .args(all_resources.then_some("--all-resources").iter())
             .args(ansi.iter().flat_map(|ansi| ["--ansi", ansi]))
             .args(compatibility.then_some("--compatibility").iter())
             .args(
@@ -101,6 +104,7 @@ mod tests {
                 tlsverify: false,
             },
             Arguments {
+                all_resources: false,
                 ansi: None,
                 compatibility: false,
                 env_file: &[],
@@ -138,6 +142,7 @@ mod tests {
                 tlsverify: false,
             },
             Arguments {
+                all_resources: true,
                 ansi: Some("ansi"),
                 compatibility: true,
                 env_file: &["env_file".into()],
@@ -157,6 +162,7 @@ mod tests {
             [
                 "--debug",
                 "compose",
+                "--all-resources",
                 "--ansi",
                 "ansi",
                 "--compatibility",

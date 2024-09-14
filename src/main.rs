@@ -294,11 +294,14 @@ struct SshArguments {
 //
 // Source:
 // https://github.com/docker/compose/blob/main/docs/reference/compose.md#options
-// TODO: Update arguments based on above source.
 //
 // Option `--dry-run` is available on shared level.
 #[derive(clap::Args)]
 struct DockerComposeArguments {
+    /// Include all resources, even those not used by services
+    #[arg(long)]
+    all_resources: bool,
+
     /// Control when to print ANSI control characters
     #[arg(long, value_parser = ["never", "always", "auto"])]
     ansi: Option<String>,
@@ -428,6 +431,7 @@ impl<'a> From<&'a DockerArguments> for docker::Arguments<'a> {
 impl<'a> From<&'a DockerComposeArguments> for docker_compose::Arguments<'a> {
     fn from(
         DockerComposeArguments {
+            all_resources,
             ansi,
             compatibility,
             env_file,
@@ -440,6 +444,7 @@ impl<'a> From<&'a DockerComposeArguments> for docker_compose::Arguments<'a> {
         }: &'a DockerComposeArguments,
     ) -> Self {
         docker_compose::Arguments {
+            all_resources: *all_resources,
             ansi: ansi.as_deref(),
             compatibility: *compatibility,
             env_file,

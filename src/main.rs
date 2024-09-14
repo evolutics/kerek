@@ -337,8 +337,31 @@ struct DockerComposeArguments {
 //
 // Source:
 // https://github.com/docker/compose/blob/main/docs/reference/compose_up.md#options
-// TODO: Document arguments that are not applicable.
-// TODO: Update arguments based on above source.
+//
+// Option `--dry-run` is available on top level, hence not repeated.
+//
+// Options not available because they are always applied:
+//
+// - `--detach`, which is incompatible with:
+//   - `--abort-on-container-exit`
+//   - `--abort-on-container-failure`
+//   - `--attach`
+//   - `--attach-dependencies`
+//   - `--exit-code-from`
+//   - `--menu`
+//   - `--watch`
+// - `--no-deps` (for simplicity)
+// - `--no-recreate`, which is incompatible with:
+//   - `--always-recreate-deps`
+// - `--scale`
+//
+// Options not available because they concern service logs, which are not shown
+// at all in detached mode:
+//
+// - `--no-attach`
+// - `--no-color`
+// - `--no-log-prefix`
+// - `--timestamps`
 #[derive(clap::Args)]
 struct DockerComposeUpArgumentsForDeploy {
     /// Build images before starting containers

@@ -49,8 +49,7 @@ main() {
   (
     export DOCKER_HOST="unix://${PWD}/podman.sock"
     podman system service --time 0 "${DOCKER_HOST}" &
-    # shellcheck disable=SC2064
-    trap "kill $!" EXIT
+    trap 'kill "$(lsof -t "${PWD}/podman.sock")"' EXIT
     sleep 2s
 
     CONTAINER_ENGINE=podman test_container_engine

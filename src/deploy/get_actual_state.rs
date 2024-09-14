@@ -47,7 +47,6 @@ struct Config {
 fn convert_container(container: Container) -> model::ActualContainer {
     model::ActualContainer {
         container_id: container.id,
-        // TODO: Consider Podman Compose with `io.podman.compose.config-hash`.
         service_config_hash: container.config.labels["com.docker.compose.config-hash"].clone(),
         service_name: container.config.labels["com.docker.compose.service"].clone(),
     }

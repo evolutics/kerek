@@ -49,7 +49,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn translates_maximum_arguments() -> anyhow::Result<()> {
+    fn handles_maximum() -> anyhow::Result<()> {
         let command = Cli::new(Arguments {
             config: Some("config"),
             debug: true,
@@ -57,6 +57,7 @@ mod tests {
         })
         .command();
 
+        assert_eq!(command.get_program(), "ssh");
         assert_eq!(
             command.get_args().collect::<Vec<_>>(),
             ["-F", "config", "-o", "LogLevel=ERROR", "-vvv"],
@@ -65,7 +66,7 @@ mod tests {
     }
 
     #[test]
-    fn translates_minimum_arguments() -> anyhow::Result<()> {
+    fn handles_minimum() -> anyhow::Result<()> {
         let command = Cli::new(Arguments {
             config: None,
             debug: false,
@@ -73,6 +74,7 @@ mod tests {
         })
         .command();
 
+        assert_eq!(command.get_program(), "ssh");
         assert_eq!(command.get_args().next(), None);
         Ok(())
     }

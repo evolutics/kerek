@@ -90,6 +90,30 @@ mod tests {
     use super::*;
 
     #[test]
+    fn handles_minimum() -> anyhow::Result<()> {
+        let command = Cli::new(
+            "container-engine",
+            Arguments {
+                config: None,
+                context: None,
+                debug: false,
+                host: None,
+                log_level: None,
+                tls: false,
+                tlscacert: None,
+                tlscert: None,
+                tlskey: None,
+                tlsverify: false,
+            },
+        )
+        .command();
+
+        assert_eq!(command.get_program(), "container-engine");
+        assert_eq!(command.get_args().next(), None);
+        Ok(())
+    }
+
+    #[test]
     fn handles_maximum() -> anyhow::Result<()> {
         let command = Cli::new(
             "container-engine",
@@ -131,30 +155,6 @@ mod tests {
                 "--tlsverify",
             ],
         );
-        Ok(())
-    }
-
-    #[test]
-    fn handles_minimum() -> anyhow::Result<()> {
-        let command = Cli::new(
-            "container-engine",
-            Arguments {
-                config: None,
-                context: None,
-                debug: false,
-                host: None,
-                log_level: None,
-                tls: false,
-                tlscacert: None,
-                tlscert: None,
-                tlskey: None,
-                tlsverify: false,
-            },
-        )
-        .command();
-
-        assert_eq!(command.get_program(), "container-engine");
-        assert_eq!(command.get_args().next(), None);
         Ok(())
     }
 

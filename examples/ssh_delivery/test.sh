@@ -4,7 +4,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-# TODO: Test Podman CLI, too.
 main() {
   vagrant destroy --force
   trap 'vagrant destroy --force' EXIT
@@ -27,6 +26,12 @@ main() {
 
       kerek --host "unix://${PWD}/temp.sock" \
         deploy --no-build --pull never --remove-orphans --wait
+
+      for container_engine in docker podman; do
+        [[ "$("${container_engine}" --host "unix://${PWD}/temp.sock" \
+          ps --format '{{.Image}}' \
+          | tee /dev/stderr)" == 'localhost/hashicorp/http-echo:1.0' ]]
+      done
     )
 
     [[ "$(curl --fail-with-body --max-time 3 --retry 99 --retry-connrefused \

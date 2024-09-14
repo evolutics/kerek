@@ -342,7 +342,8 @@ struct DockerComposeArguments {
 
 // `docker compose up` arguments, where applicable.
 //
-// Source: https://docs.docker.com/reference/cli/docker/compose/up/
+// Source:
+// https://github.com/docker/compose/blob/main/docs/reference/compose_up.md#options
 // TODO: Document arguments that are not applicable.
 // TODO: Update arguments based on above source.
 #[derive(clap::Args)]

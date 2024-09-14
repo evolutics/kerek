@@ -253,7 +253,7 @@ enum Subcommand {
     /// Example:
     ///
     ///     kerek tunnel-ssh --local-socket temp.sock my-ssh-host
-    ///     DOCKER_HOST="unix://${PWD}/temp.sock" podman ps
+    ///     CONTAINER_HOST="unix://${PWD}/temp.sock" podman ps
     ///     kill "$(lsof -t "${PWD}/temp.sock")"
     TunnelSsh {
         /// Path to Unix domain socket on localhost to be forwarded

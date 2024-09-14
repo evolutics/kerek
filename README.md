@@ -281,7 +281,8 @@ Options:
       --profile <PROFILE>
           Specify a profile to enable
       --progress <PROGRESS>
-          Set type of progress output [possible values: auto, tty, plain, quiet]
+          Set type of progress output [possible values: auto, tty, plain, json,
+          quiet]
       --project-directory <PROJECT_DIRECTORY>
           Specify an alternate working directory (default: the path of the,
           first specified, Compose file)

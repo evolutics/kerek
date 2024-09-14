@@ -324,7 +324,7 @@ struct DockerComposeArguments {
     profile: Vec<String>,
 
     /// Set type of progress output
-    #[arg(long, value_parser = ["auto", "tty", "plain", "quiet"])]
+    #[arg(long, value_parser = ["auto", "tty", "plain", "json", "quiet"])]
     progress: Option<String>,
 
     /// Specify an alternate working directory (default: the path of the, first

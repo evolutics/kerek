@@ -295,6 +295,8 @@ struct SshArguments {
 // Source:
 // https://github.com/docker/compose/blob/main/docs/reference/compose.md#options
 // TODO: Update arguments based on above source.
+//
+// Option `--dry-run` is available on shared level.
 #[derive(clap::Args)]
 struct DockerComposeArguments {
     /// Control when to print ANSI control characters

@@ -40,7 +40,7 @@ pub struct In<'a> {
 }
 
 fn get_images(mut images: Vec<String>) -> anyhow::Result<Vec<String>> {
-    // TODO: Select only images not already on host.
+    // TODO: Offer option to only transfer images not already on host.
     Ok(match images.iter().position(|image| image == "-") {
         None => images,
         Some(stdin_index) => {

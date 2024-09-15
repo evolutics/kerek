@@ -243,15 +243,15 @@ enum Subcommand {
     /// Forwards local Unix domain socket to remote Docker host over SSH
     ///
     /// This runs an SSH tunnel in the background. Meanwhile, you can connect to
-    /// the remote Docker host using `DOCKER_HOST=unix:///path/to/temp.sock`
+    /// the remote Docker host using `DOCKER_HOST=unix:///path/to/kerek.sock`
     /// locally. Note that a custom SSH config file can be specified, unlike
     /// with vanilla Docker.
     ///
     /// Example:
     ///
-    ///     kerek tunnel-ssh --local-socket temp.sock my-ssh-host
-    ///     CONTAINER_HOST="unix://${PWD}/temp.sock" podman ps
-    ///     kill "$(lsof -t "${PWD}/temp.sock")"
+    ///     kerek tunnel-ssh my-ssh-host
+    ///     CONTAINER_HOST="unix://${PWD}/kerek.sock" podman ps
+    ///     kill "$(lsof -t "${PWD}/kerek.sock")"
     TunnelSsh {
         /// Path to Unix domain socket on localhost to be forwarded
         #[arg(default_value = "kerek.sock", long)]

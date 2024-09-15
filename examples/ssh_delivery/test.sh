@@ -17,14 +17,13 @@ test_container_engine() {
   docker compose pull --ignore-buildable
 
   (
-    kerek --container-engine podman \
-      tunnel-ssh --local-socket temp.sock --ssh-config ssh_config ssh-host
-    trap 'kill "$(lsof -t "${PWD}/temp.sock")"' EXIT
+    kerek --container-engine podman tunnel-ssh --ssh-config ssh_config ssh-host
+    trap 'kill "$(lsof -t "${PWD}/kerek.sock")"' EXIT
 
     docker compose config --images \
-      | kerek --host "unix://${PWD}/temp.sock" transfer-images -
+      | kerek --host "unix://${PWD}/kerek.sock" transfer-images -
 
-    kerek --host "unix://${PWD}/temp.sock" \
+    kerek --host "unix://${PWD}/kerek.sock" \
       deploy --no-build --pull never --remove-orphans --wait
   )
 

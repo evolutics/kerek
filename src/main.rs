@@ -13,6 +13,7 @@ use clap::Parser;
 
 fn main() -> anyhow::Result<()> {
     let Cli {
+        container_engine,
         docker_arguments,
         dry_run,
         subcommand,
@@ -26,7 +27,6 @@ fn main() -> anyhow::Result<()> {
 
     match subcommand {
         Subcommand::Deploy {
-            container_engine_arguments: ContainerEngineArguments { container_engine },
             docker_compose_arguments,
             docker_compose_up_arguments:
                 DockerComposeUpArgumentsForDeploy {
@@ -71,7 +71,6 @@ fn main() -> anyhow::Result<()> {
         }
 
         Subcommand::Provision {
-            container_engine_arguments: ContainerEngineArguments { container_engine },
             force,
             host,
             ssh_arguments,
@@ -84,17 +83,13 @@ fn main() -> anyhow::Result<()> {
             ssh_cli: ssh_cli(&docker_arguments, &ssh_arguments),
         }),
 
-        Subcommand::TransferImages {
-            container_engine_arguments: ContainerEngineArguments { container_engine },
-            images,
-        } => transfer_images::go(transfer_images::In {
+        Subcommand::TransferImages { images } => transfer_images::go(transfer_images::In {
             docker_cli: docker::Cli::new(&container_engine, (&docker_arguments).into()),
             dry_run,
             images,
         }),
 
         Subcommand::TunnelSsh {
-            container_engine_arguments: ContainerEngineArguments { container_engine },
             local_socket,
             remote_socket,
             ssh_arguments,
@@ -114,6 +109,10 @@ fn main() -> anyhow::Result<()> {
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
+    /// Container engine program to use
+    #[arg(default_value = "docker", env, long, value_enum)]
+    container_engine: String,
+
     /// Do not apply changes, only show what would be done
     #[arg(long)]
     dry_run: bool,
@@ -199,9 +198,6 @@ enum Subcommand {
     /// `--force-recreate` flag.
     Deploy {
         #[command(flatten)]
-        container_engine_arguments: ContainerEngineArguments,
-
-        #[command(flatten)]
         docker_compose_arguments: DockerComposeArguments,
 
         #[command(flatten)]
@@ -220,9 +216,6 @@ enum Subcommand {
     /// file are passed as arguments, in which case the current machine is
     /// targeted.
     Provision {
-        #[command(flatten)]
-        container_engine_arguments: ContainerEngineArguments,
-
         /// Go ahead without prompting user to confirm
         #[arg(long)]
         force: bool,
@@ -243,9 +236,6 @@ enum Subcommand {
     ///     DOCKER_CONTEXT=from kerek --context to transfer-images my-img
     ///     docker compose config --images | kerek --host … transfer-images -
     TransferImages {
-        #[command(flatten)]
-        container_engine_arguments: ContainerEngineArguments,
-
         /// Images to copy; use "-" to pass image names as stdin lines
         images: Vec<String>,
     },
@@ -263,9 +253,6 @@ enum Subcommand {
     ///     CONTAINER_HOST="unix://${PWD}/temp.sock" podman ps
     ///     kill "$(lsof -t "${PWD}/temp.sock")"
     TunnelSsh {
-        #[command(flatten)]
-        container_engine_arguments: ContainerEngineArguments,
-
         /// Path to Unix domain socket on localhost to be forwarded
         #[arg(default_value = "kerek.sock", long)]
         local_socket: String,
@@ -280,13 +267,6 @@ enum Subcommand {
         /// Reference like "[ssh://][<user>@]<hostname>[:<port>]"
         ssh_host: String,
     },
-}
-
-#[derive(clap::Args)]
-struct ContainerEngineArguments {
-    /// Container engine program to use
-    #[arg(default_value = "docker", env, long, value_enum)]
-    container_engine: String,
 }
 
 #[derive(clap::Args)]

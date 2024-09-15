@@ -9,16 +9,16 @@ test_container_engine() {
     vagrant snapshot pop
   else
     vagrant ssh-config --host ssh-host >ssh_config
-    kerek provision --container-engine podman --force --ssh-config ssh_config \
-      ssh-host
+    kerek --container-engine podman \
+      provision --force --ssh-config ssh_config ssh-host
     vagrant snapshot push
   fi
 
   docker compose pull --ignore-buildable
 
   (
-    kerek tunnel-ssh --container-engine podman --local-socket temp.sock \
-      --ssh-config ssh_config ssh-host
+    kerek --container-engine podman \
+      tunnel-ssh --local-socket temp.sock --ssh-config ssh_config ssh-host
     trap 'kill "$(lsof -t "${PWD}/temp.sock")"' EXIT
 
     docker compose config --images \

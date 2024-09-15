@@ -234,23 +234,37 @@ Commands:
   help             Print this message or the help of the given subcommand(s)
 
 Options:
-      --dry-run                Do not apply changes, only show what would be
-                               done
-      --config <CONFIG>        Location of client config files
-  -c, --context <CONTEXT>      Name of the context to use to connect to the
-                               daemon (overrides DOCKER_HOST env var and default
-                               context set with "docker context use")
-  -D, --debug                  Enable debug mode
-  -H, --host <HOST>            Daemon socket to connect to
-  -l, --log-level <LOG_LEVEL>  Set the logging level [possible values: debug,
-                               info, warn, error, fatal]
-      --tls                    Use TLS; implied by --tlsverify
-      --tlscacert <TLSCACERT>  Trust certs signed only by this CA
-      --tlscert <TLSCERT>      Path to TLS certificate file
-      --tlskey <TLSKEY>        Path to TLS key file
-      --tlsverify              Use TLS and verify the remote
-  -h, --help                   Print help
-  -V, --version                Print version
+      --container-engine <CONTAINER_ENGINE>
+          Container engine program to use [env: CONTAINER_ENGINE=] [default:
+          docker]
+      --dry-run
+          Do not apply changes, only show what would be done
+      --config <CONFIG>
+          Location of client config files
+  -c, --context <CONTEXT>
+          Name of the context to use to connect to the daemon (overrides
+          DOCKER_HOST env var and default context set with "docker context use")
+  -D, --debug
+          Enable debug mode
+  -H, --host <HOST>
+          Daemon socket to connect to
+  -l, --log-level <LOG_LEVEL>
+          Set the logging level [possible values: debug, info, warn, error,
+          fatal]
+      --tls
+          Use TLS; implied by --tlsverify
+      --tlscacert <TLSCACERT>
+          Trust certs signed only by this CA
+      --tlscert <TLSCERT>
+          Path to TLS certificate file
+      --tlskey <TLSKEY>
+          Path to TLS key file
+      --tlsverify
+          Use TLS and verify the remote
+  -h, --help
+          Print help
+  -V, --version
+          Print version
 ```
 
 ### `kerek deploy -h`
@@ -264,9 +278,6 @@ Arguments:
   [SERVICE_NAMES]...  Services to consider
 
 Options:
-      --container-engine <CONTAINER_ENGINE>
-          Container engine program to use [env: CONTAINER_ENGINE=] [default:
-          docker]
       --all-resources
           Include all resources, even those not used by services
       --ansi <ANSI>
@@ -330,15 +341,9 @@ Arguments:
   <HOST>  Reference like "localhost" or "[ssh://][<user>@]<hostname>[:<port>]"
 
 Options:
-      --container-engine <CONTAINER_ENGINE>
-          Container engine program to use [env: CONTAINER_ENGINE=] [default:
-          docker]
-      --force
-          Go ahead without prompting user to confirm
-  -F, --ssh-config <SSH_CONFIG>
-          Path to SSH config file
-  -h, --help
-          Print help (see more with '--help')
+      --force                    Go ahead without prompting user to confirm
+  -F, --ssh-config <SSH_CONFIG>  Path to SSH config file
+  -h, --help                     Print help (see more with '--help')
 ```
 
 ### `kerek transfer-images -h`
@@ -346,17 +351,13 @@ Options:
 ```
 Copies images from default to specified Docker host
 
-Usage: kerek transfer-images [OPTIONS] [IMAGES]...
+Usage: kerek transfer-images [IMAGES]...
 
 Arguments:
   [IMAGES]...  Images to copy; use "-" to pass image names as stdin lines
 
 Options:
-      --container-engine <CONTAINER_ENGINE>
-          Container engine program to use [env: CONTAINER_ENGINE=] [default:
-          docker]
-  -h, --help
-          Print help (see more with '--help')
+  -h, --help  Print help (see more with '--help')
 ```
 
 ### `kerek tunnel-ssh -h`
@@ -370,9 +371,6 @@ Arguments:
   <SSH_HOST>  Reference like "[ssh://][<user>@]<hostname>[:<port>]"
 
 Options:
-      --container-engine <CONTAINER_ENGINE>
-          Container engine program to use [env: CONTAINER_ENGINE=] [default:
-          docker]
       --local-socket <LOCAL_SOCKET>
           Path to Unix domain socket on localhost to be forwarded [default:
           kerek.sock]

@@ -71,10 +71,12 @@ fn main() -> anyhow::Result<()> {
         }
 
         Subcommand::Provision {
+            container_engine_arguments: ContainerEngineArguments { container_engine },
             force,
             host,
             ssh_arguments,
         } => provision::go(provision::In {
+            container_engine,
             dry_run,
             force,
             has_ssh_config_override: ssh_arguments.ssh_config.is_some(),
@@ -218,6 +220,9 @@ enum Subcommand {
     /// file are passed as arguments, in which case the current machine is
     /// targeted.
     Provision {
+        #[command(flatten)]
+        container_engine_arguments: ContainerEngineArguments,
+
         /// Go ahead without prompting user to confirm
         #[arg(long)]
         force: bool,

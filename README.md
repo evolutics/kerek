@@ -330,9 +330,15 @@ Arguments:
   <HOST>  Reference like "localhost" or "[ssh://][<user>@]<hostname>[:<port>]"
 
 Options:
-      --force                    Go ahead without prompting user to confirm
-  -F, --ssh-config <SSH_CONFIG>  Path to SSH config file
-  -h, --help                     Print help (see more with '--help')
+      --container-engine <CONTAINER_ENGINE>
+          Container engine program to use [env: CONTAINER_ENGINE=] [default:
+          docker]
+      --force
+          Go ahead without prompting user to confirm
+  -F, --ssh-config <SSH_CONFIG>
+          Path to SSH config file
+  -h, --help
+          Print help (see more with '--help')
 ```
 
 ### `kerek transfer-images -h`

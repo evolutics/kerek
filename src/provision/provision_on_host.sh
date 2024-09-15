@@ -4,6 +4,11 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+if [[ "${CONTAINER_ENGINE}" != 'podman' ]]; then
+  echo "Unsupported container engine: ${CONTAINER_ENGINE}" >&2
+  exit 1
+fi
+
 sudo apt-get --yes install podman
 
 systemctl --user enable --now podman

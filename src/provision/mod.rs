@@ -7,6 +7,7 @@ use std::process;
 
 pub fn go(
     In {
+        container_engine,
         dry_run,
         force,
         has_ssh_config_override,
@@ -26,10 +27,16 @@ pub fn go(
         Ok(())
     } else {
         let mut command = if host == "localhost" && !has_ssh_config_override {
-            process::Command::new("bash")
+            let mut command = process::Command::new("bash");
+            command.env("CONTAINER_ENGINE", container_engine);
+            command
         } else {
             let mut command = ssh_cli.command();
-            command.args([&host, "bash"]);
+            command.args([
+                &host,
+                &format!("CONTAINER_ENGINE={container_engine}"),
+                "bash",
+            ]);
             command
         };
 
@@ -38,6 +45,7 @@ pub fn go(
 }
 
 pub struct In<'a> {
+    pub container_engine: String,
     pub dry_run: bool,
     pub force: bool,
     pub has_ssh_config_override: bool,

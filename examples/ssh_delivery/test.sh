@@ -9,7 +9,8 @@ test_container_engine() {
     vagrant snapshot pop
   else
     vagrant ssh-config --host ssh-host >ssh_config
-    kerek provision --force --ssh-config ssh_config ssh-host
+    kerek provision --container-engine podman --force --ssh-config ssh_config \
+      ssh-host
     vagrant snapshot push
   fi
 

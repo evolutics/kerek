@@ -46,7 +46,7 @@ struct UpdateConfig {
 
 #[derive(serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub enum OperationOrder {
+enum OperationOrder {
     StartFirst,
     StopFirst,
 }

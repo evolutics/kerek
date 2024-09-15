@@ -364,6 +364,9 @@ Arguments:
   <SSH_HOST>  Reference like "[ssh://][<user>@]<hostname>[:<port>]"
 
 Options:
+      --container-engine <CONTAINER_ENGINE>
+          Container engine program to use [env: CONTAINER_ENGINE=] [default:
+          docker]
       --local-socket <LOCAL_SOCKET>
           Path to Unix domain socket on localhost to be forwarded [default:
           kerek.sock]

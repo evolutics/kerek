@@ -16,7 +16,8 @@ test_container_engine() {
   docker compose pull --ignore-buildable
 
   (
-    kerek tunnel-ssh --local-socket temp.sock --ssh-config ssh_config ssh-host
+    kerek tunnel-ssh --container-engine podman --local-socket temp.sock \
+      --ssh-config ssh_config ssh-host
     trap 'kill "$(lsof -t "${PWD}/temp.sock")"' EXIT
 
     docker compose config --images \

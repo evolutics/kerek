@@ -92,11 +92,13 @@ fn main() -> anyhow::Result<()> {
         }),
 
         Subcommand::TunnelSsh {
+            container_engine_arguments: ContainerEngineArguments { container_engine },
             local_socket,
             remote_socket,
             ssh_arguments,
             ssh_host,
         } => tunnel_ssh::go(tunnel_ssh::In {
+            container_engine,
             dry_run,
             local_socket,
             remote_socket,
@@ -256,6 +258,9 @@ enum Subcommand {
     ///     CONTAINER_HOST="unix://${PWD}/temp.sock" podman ps
     ///     kill "$(lsof -t "${PWD}/temp.sock")"
     TunnelSsh {
+        #[command(flatten)]
+        container_engine_arguments: ContainerEngineArguments,
+
         /// Path to Unix domain socket on localhost to be forwarded
         #[arg(default_value = "kerek.sock", long)]
         local_socket: String,

@@ -351,13 +351,15 @@ Options:
 ```
 Copies images from default to specified Docker host
 
-Usage: kerek transfer-images [IMAGES]...
+Usage: kerek transfer-images [OPTIONS] [IMAGES]...
 
 Arguments:
   [IMAGES]...  Images to copy; use "-" to pass image names as stdin lines
 
 Options:
-  -h, --help  Print help (see more with '--help')
+      --force  Copy images without checking if the destination already has such
+               images; useful for replacing images with `latest` tag
+  -h, --help   Print help (see more with '--help')
 ```
 
 ### `kerek tunnel-ssh -h`

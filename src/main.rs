@@ -83,9 +83,10 @@ fn main() -> anyhow::Result<()> {
             ssh_cli: ssh_cli(&docker_arguments, &ssh_arguments),
         }),
 
-        Subcommand::TransferImages { images } => transfer_images::go(transfer_images::In {
+        Subcommand::TransferImages { force, images } => transfer_images::go(transfer_images::In {
             docker_cli: docker::Cli::new(&container_engine, (&docker_arguments).into()),
             dry_run,
+            force,
             images,
         }),
 
@@ -229,6 +230,13 @@ enum Subcommand {
 
     /// Copies images from default to specified Docker host
     ///
+    /// By default, only images absent on the destination host are transferred.
+    /// An image is considered present if the name matches one of these forms:
+    ///
+    /// - `<namespace>:<tag>`
+    /// - `<namespace>@<digest>`
+    /// - `<namespace>:<tag>@<digest>`
+    ///
     /// Examples:
     ///
     ///     kerek --host ssh://192.0.2.1 transfer-images my-img
@@ -236,6 +244,11 @@ enum Subcommand {
     ///     DOCKER_CONTEXT=from kerek --context to transfer-images my-img
     ///     docker compose config --images | kerek --host … transfer-images -
     TransferImages {
+        /// Copy images without checking if the destination already has such
+        /// images; useful for replacing images with `latest` tag
+        #[arg(long)]
+        force: bool,
+
         /// Images to copy; use "-" to pass image names as stdin lines
         images: Vec<String>,
     },

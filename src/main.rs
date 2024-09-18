@@ -511,6 +511,7 @@ mod tests {
         include_str!("../README.md")
     }
 
+    // TODO: Show full help in readme.
     #[test_case::test_case(&[]; "")]
     #[test_case::test_case(&["deploy"]; "deploy")]
     #[test_case::test_case(&["provision"]; "provision")]

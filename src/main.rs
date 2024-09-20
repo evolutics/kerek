@@ -136,7 +136,7 @@ struct DockerArguments {
     config: Option<String>,
 
     /// Name of the context to use to connect to the daemon (overrides
-    /// DOCKER_HOST env var and default context set with "docker context use")
+    /// DOCKER_HOST env var and default context set with `docker context use`)
     #[arg(long, short = 'c')]
     context: Option<String>,
 
@@ -213,7 +213,7 @@ enum Subcommand {
 
     /// Provisions host with container engine, making system-wide changes
     ///
-    /// This targets a host via SSH, unless host "localhost" and no SSH config
+    /// This targets a host via SSH, unless host `localhost` and no SSH config
     /// file are passed as arguments, in which case the current machine is
     /// targeted.
     Provision {
@@ -224,7 +224,7 @@ enum Subcommand {
         #[command(flatten)]
         ssh_arguments: SshArguments,
 
-        /// Reference like "localhost" or "[ssh://][<user>@]<hostname>[:<port>]"
+        /// Reference like `localhost` or `[ssh://][<user>@]<hostname>[:<port>]`
         host: String,
     },
 
@@ -249,7 +249,7 @@ enum Subcommand {
         #[arg(long)]
         force: bool,
 
-        /// Images to copy; use "-" to pass image names as stdin lines
+        /// Images to copy; use `-` to pass image names as stdin lines
         images: Vec<String>,
     },
 
@@ -277,7 +277,7 @@ enum Subcommand {
         #[command(flatten)]
         ssh_arguments: SshArguments,
 
-        /// Reference like "[ssh://][<user>@]<hostname>[:<port>]"
+        /// Reference like `[ssh://][<user>@]<hostname>[:<port>]`
         ssh_host: String,
     },
 }

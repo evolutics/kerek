@@ -243,7 +243,7 @@ Options:
           Location of client config files
   -c, --context <CONTEXT>
           Name of the context to use to connect to the daemon (overrides
-          DOCKER_HOST env var and default context set with "docker context use")
+          DOCKER_HOST env var and default context set with `docker context use`)
   -D, --debug
           Enable debug mode
   -H, --host <HOST>
@@ -338,7 +338,7 @@ Provisions host with container engine, making system-wide changes
 Usage: kerek provision [OPTIONS] <HOST>
 
 Arguments:
-  <HOST>  Reference like "localhost" or "[ssh://][<user>@]<hostname>[:<port>]"
+  <HOST>  Reference like `localhost` or `[ssh://][<user>@]<hostname>[:<port>]`
 
 Options:
       --force                    Go ahead without prompting user to confirm
@@ -354,7 +354,7 @@ Copies images from default to specified Docker host
 Usage: kerek transfer-images [OPTIONS] [IMAGES]...
 
 Arguments:
-  [IMAGES]...  Images to copy; use "-" to pass image names as stdin lines
+  [IMAGES]...  Images to copy; use `-` to pass image names as stdin lines
 
 Options:
       --force  Copy images without checking if the destination already has such
@@ -370,7 +370,7 @@ Forwards local Unix domain socket to remote Docker host over SSH
 Usage: kerek tunnel-ssh [OPTIONS] <SSH_HOST>
 
 Arguments:
-  <SSH_HOST>  Reference like "[ssh://][<user>@]<hostname>[:<port>]"
+  <SSH_HOST>  Reference like `[ssh://][<user>@]<hostname>[:<port>]`
 
 Options:
       --local-socket <LOCAL_SOCKET>

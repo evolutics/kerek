@@ -232,17 +232,17 @@ enum Subcommand {
     ///
     /// By default, only images absent on the destination host are transferred.
     /// An image is considered present if the name matches one of these forms:
-    ///
-    /// - `<namespace>:<tag>`
-    /// - `<namespace>@<digest>`
-    /// - `<namespace>:<tag>@<digest>`
+    ///{n}
+    ///{n}- `<namespace>:<tag>`
+    ///{n}- `<namespace>@<digest>`
+    ///{n}- `<namespace>:<tag>@<digest>`
     ///
     /// Examples:
-    ///
-    ///     kerek --host ssh://192.0.2.1 transfer-images my-img
-    ///     DOCKER_HOST=ssh://from kerek --host ssh://to transfer-images my-img
-    ///     DOCKER_CONTEXT=from kerek --context to transfer-images my-img
-    ///     docker compose config --images | kerek --host … transfer-images -
+    ///{n}
+    ///{n}    kerek --host ssh://192.0.2.1 transfer-images my-img
+    ///{n}    DOCKER_HOST=ssh://from kerek --host ssh://to transfer-images my-img
+    ///{n}    DOCKER_CONTEXT=from kerek --context to transfer-images my-img
+    ///{n}    docker compose config --images | kerek --host … transfer-images -
     TransferImages {
         /// Copy images without checking if the destination already has such
         /// images; useful for replacing images with `latest` tag
@@ -261,10 +261,10 @@ enum Subcommand {
     /// with vanilla Docker.
     ///
     /// Example:
-    ///
-    ///     kerek tunnel-ssh my-ssh-host
-    ///     CONTAINER_HOST="unix://${PWD}/kerek.sock" podman ps
-    ///     kill "$(lsof -t "${PWD}/kerek.sock")"
+    ///{n}
+    ///{n}    kerek tunnel-ssh my-ssh-host
+    ///{n}    CONTAINER_HOST="unix://${PWD}/kerek.sock" podman ps
+    ///{n}    kill "$(lsof -t "${PWD}/kerek.sock")"
     TunnelSsh {
         /// Path to Unix domain socket on localhost to be forwarded
         #[arg(default_value = "kerek.sock", long)]

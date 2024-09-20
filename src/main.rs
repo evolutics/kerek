@@ -518,7 +518,7 @@ mod tests {
     #[test_case::test_case(&["transfer-images"]; "transfer-images")]
     #[test_case::test_case(&["tunnel-ssh"]; "tunnel-ssh")]
     fn readme_includes_subcommand_help(subcommands: &[&str]) {
-        let help_command = [&[env!("CARGO_BIN_NAME")], subcommands, &["-h"]]
+        let help_command = [&[env!("CARGO_BIN_NAME")], subcommands, &["--help"]]
             .concat()
             .join(" ");
         let mut root = Cli::command().term_width(80);
@@ -526,8 +526,14 @@ mod tests {
         let leaf = subcommands.iter().fold(&mut root, |node, subcommand| {
             node.find_subcommand_mut(subcommand).expect(subcommand)
         });
-        let help_message = leaf.render_help();
-        let help_section = format!("\n\n### `{help_command}`\n\n```\n{help_message}```\n");
+        let help_message = leaf.render_long_help();
+        let help_message = help_message
+            .to_string()
+            .lines()
+            .map(|line| line.trim_end())
+            .collect::<Vec<_>>()
+            .join("\n");
+        let help_section = format!("\n\n### `{help_command}`\n\n```\n{help_message}\n```\n");
 
         assert!(get_readme().contains(&help_section), "{help_section}")
     }

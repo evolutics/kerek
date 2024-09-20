@@ -217,7 +217,7 @@ Other lightweight options for single-node environments:
 
 ## Command-line arguments reference
 
-### `kerek -h`
+### `kerek --help`
 
 ```
 Zero-downtime deployments for Docker Compose
@@ -235,151 +235,251 @@ Commands:
 
 Options:
       --container-engine <CONTAINER_ENGINE>
-          Container engine program to use [env: CONTAINER_ENGINE=] [default:
-          docker]
+          Container engine program to use
+
+          [env: CONTAINER_ENGINE=]
+          [default: docker]
+
       --dry-run
           Do not apply changes, only show what would be done
+
       --config <CONFIG>
           Location of client config files
+
   -c, --context <CONTEXT>
           Name of the context to use to connect to the daemon (overrides
           DOCKER_HOST env var and default context set with `docker context use`)
+
   -D, --debug
           Enable debug mode
+
   -H, --host <HOST>
           Daemon socket to connect to
+
   -l, --log-level <LOG_LEVEL>
-          Set the logging level [possible values: debug, info, warn, error,
-          fatal]
+          Set the logging level
+
+          [possible values: debug, info, warn, error, fatal]
+
       --tls
           Use TLS; implied by --tlsverify
+
       --tlscacert <TLSCACERT>
           Trust certs signed only by this CA
+
       --tlscert <TLSCERT>
           Path to TLS certificate file
+
       --tlskey <TLSKEY>
           Path to TLS key file
+
       --tlsverify
           Use TLS and verify the remote
+
   -h, --help
           Print help
+
   -V, --version
           Print version
 ```
 
-### `kerek deploy -h`
+### `kerek deploy --help`
 
 ```
 Create or update services
 
+Builds, (re)creates, and starts containers for a service.
+
+If service names are given as command-line operands, this command does not
+automatically start any of their linked services.
+
+The containers are always started in the background and left running (detached
+mode).
+
+If there are existing containers for a service, and the service's configuration
+or image was changed after the container's creation, the changes are picked up
+by recreating the containers (preserving mounted volumes). Whether the old
+containers are stopped before or after the new containers are started is
+controlled via `services.*.deploy.update_config.order` in a Compose file.
+
+If you want to force recreating all containers, use the `--force-recreate` flag.
+
 Usage: kerek deploy [OPTIONS] [SERVICE_NAMES]...
 
 Arguments:
-  [SERVICE_NAMES]...  Services to consider
+  [SERVICE_NAMES]...
+          Services to consider
 
 Options:
       --all-resources
           Include all resources, even those not used by services
+
       --ansi <ANSI>
-          Control when to print ANSI control characters [possible values: never,
-          always, auto]
+          Control when to print ANSI control characters
+
+          [possible values: never, always, auto]
+
       --compatibility
           Run compose in backward compatibility mode
+
       --env-file <ENV_FILE>
           Specify an alternate environment file
+
   -f, --file <FILE>
           Compose configuration files
+
       --parallel <PARALLEL>
           Control max parallelism, -1 for unlimited
+
       --profile <PROFILE>
           Specify a profile to enable
+
       --progress <PROGRESS>
-          Set type of progress output [possible values: auto, tty, plain, json,
-          quiet]
+          Set type of progress output
+
+          [possible values: auto, tty, plain, json, quiet]
+
       --project-directory <PROJECT_DIRECTORY>
           Specify an alternate working directory (default: the path of the,
           first specified, Compose file)
+
   -p, --project-name <PROJECT_NAME>
           Project name
+
       --build
           Build images before starting containers
+
       --force-recreate
           Recreate containers even if their configuration and image haven't
           changed
+
       --no-build
           Don't build an image, even if it's policy
+
       --no-start
           Don't start the services after creating them
+
       --pull <PULL>
-          Pull image before running [possible values: always, missing, never]
+          Pull image before running
+
+          [possible values: always, missing, never]
+
       --quiet-pull
           Pull without printing progress information
+
       --remove-orphans
           Remove containers for services not defined in the Compose file
+
   -V, --renew-anon-volumes
           Recreate anonymous volumes instead of retrieving data from the
           previous containers
+
   -t, --timeout <TIMEOUT>
           Use this timeout in seconds for container shutdown when containers are
           already running
+
       --wait
           Wait for services to be running|healthy
+
       --wait-timeout <WAIT_TIMEOUT>
           Maximum duration to wait for the project to be running|healthy
+
   -h, --help
-          Print help (see more with '--help')
+          Print help (see a summary with '-h')
 ```
 
-### `kerek provision -h`
+### `kerek provision --help`
 
 ```
 Provisions host with container engine, making system-wide changes
 
+This targets a host via SSH, unless host `localhost` and no SSH config file are
+passed as arguments, in which case the current machine is targeted.
+
 Usage: kerek provision [OPTIONS] <HOST>
 
 Arguments:
-  <HOST>  Reference like `localhost` or `[ssh://][<user>@]<hostname>[:<port>]`
+  <HOST>
+          Reference like `localhost` or `[ssh://][<user>@]<hostname>[:<port>]`
 
 Options:
-      --force                    Go ahead without prompting user to confirm
-  -F, --ssh-config <SSH_CONFIG>  Path to SSH config file
-  -h, --help                     Print help (see more with '--help')
+      --force
+          Go ahead without prompting user to confirm
+
+  -F, --ssh-config <SSH_CONFIG>
+          Path to SSH config file
+
+  -h, --help
+          Print help (see a summary with '-h')
 ```
 
-### `kerek transfer-images -h`
+### `kerek transfer-images --help`
 
 ```
 Copies images from default to specified Docker host
 
+By default, only images absent on the destination host are transferred. An image
+is considered present if the name matches one of these forms:
+
+- `<namespace>:<tag>`
+- `<namespace>@<digest>`
+- `<namespace>:<tag>@<digest>`
+
+Examples:
+
+    kerek --host ssh://192.0.2.1 transfer-images my-img
+    DOCKER_HOST=ssh://from kerek --host ssh://to transfer-images my-img
+    DOCKER_CONTEXT=from kerek --context to transfer-images my-img
+    docker compose config --images | kerek --host … transfer-images -
+
 Usage: kerek transfer-images [OPTIONS] [IMAGES]...
 
 Arguments:
-  [IMAGES]...  Images to copy; use `-` to pass image names as stdin lines
+  [IMAGES]...
+          Images to copy; use `-` to pass image names as stdin lines
 
 Options:
-      --force  Copy images without checking if the destination already has such
-               images; useful for replacing images with `latest` tag
-  -h, --help   Print help (see more with '--help')
+      --force
+          Copy images without checking if the destination already has such
+          images; useful for replacing images with `latest` tag
+
+  -h, --help
+          Print help (see a summary with '-h')
 ```
 
-### `kerek tunnel-ssh -h`
+### `kerek tunnel-ssh --help`
 
 ```
 Forwards local Unix domain socket to remote Docker host over SSH
 
+This runs an SSH tunnel in the background. Meanwhile, you can connect to the
+remote Docker host using `DOCKER_HOST=unix:///path/to/kerek.sock` locally. Note
+that a custom SSH config file can be specified, unlike with vanilla Docker.
+
+Example:
+
+    kerek tunnel-ssh my-ssh-host
+    CONTAINER_HOST="unix://${PWD}/kerek.sock" podman ps
+    kill "$(lsof -t "${PWD}/kerek.sock")"
+
 Usage: kerek tunnel-ssh [OPTIONS] <SSH_HOST>
 
 Arguments:
-  <SSH_HOST>  Reference like `[ssh://][<user>@]<hostname>[:<port>]`
+  <SSH_HOST>
+          Reference like `[ssh://][<user>@]<hostname>[:<port>]`
 
 Options:
       --local-socket <LOCAL_SOCKET>
-          Path to Unix domain socket on localhost to be forwarded [default:
-          kerek.sock]
+          Path to Unix domain socket on localhost to be forwarded
+
+          [default: kerek.sock]
+
       --remote-socket <REMOTE_SOCKET>
           Path to Unix domain socket of Docker host on remote
+
   -F, --ssh-config <SSH_CONFIG>
           Path to SSH config file
+
   -h, --help
-          Print help (see more with '--help')
+          Print help (see a summary with '-h')
 ```

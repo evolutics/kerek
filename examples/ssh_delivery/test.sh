@@ -34,7 +34,7 @@ test_container_engine() {
 
 main() {
   vagrant destroy --force
-  trap 'vagrant destroy --force' EXIT
+  trap 'vagrant halt' EXIT
   vagrant up
 
   (

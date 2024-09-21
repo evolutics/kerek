@@ -147,10 +147,15 @@ struct Process<'a> {
 impl Drop for Process<'_> {
     fn drop(&mut self) {
         let Self { child, command } = self;
-        let pid = child.id();
-        log::debug!("Killing process {pid} from command: {command:?}");
-        if let Err(error) = child.kill() {
-            log::error!("Error killing process {pid}: {error}");
+
+        let has_process_exited = child.try_wait().is_ok_and(|status| status.is_some());
+
+        if !has_process_exited {
+            let pid = child.id();
+            log::debug!("Killing process {pid} from command: {command:?}");
+            if let Err(error) = child.kill() {
+                log::error!("Error killing process {pid}: {error}");
+            }
         }
     }
 }

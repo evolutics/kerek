@@ -1,35 +1,62 @@
+use super::log;
 use anyhow::Context;
 use serde::de;
+use std::io;
 use std::io::Write;
 use std::process;
 use std::thread;
 
 pub fn piped_ok(commands: &mut [&mut process::Command]) -> anyhow::Result<()> {
-    let mut children = Vec::<process::Child>::new();
+    let mut processes = Vec::<Process>::new();
 
     let mut pipeline = commands.iter_mut().peekable();
     while let Some(command) = pipeline.next() {
-        (|| {
-            if let Some(previous) = children.last_mut() {
-                let stdout = previous.stdout.take().context("Unable to open stdout")?;
-                command.stdin(stdout);
-            }
-            if pipeline.peek().is_some() {
-                command.stdout(process::Stdio::piped());
-            }
-            children.push(command.spawn()?);
+        if let Some(Process {
+            child: previous, ..
+        }) = processes.last_mut()
+        {
+            let stdout = previous
+                .stdout
+                .take()
+                .context("Unable to open stdout")
+                .command_context(command)?;
+            command.stdin(stdout);
+        }
 
-            Ok(())
-        })()
-        .command_context(command)?;
+        if pipeline.peek().is_some() {
+            command.stdout(process::Stdio::piped());
+        }
+
+        processes.push(Process {
+            child: command.spawn().command_context(command)?,
+            command,
+        });
     }
 
-    for (index, child) in children.iter_mut().enumerate() {
-        let command = &commands[index];
-        (|| status_result(child.wait()?))().command_context(command)?;
-    }
+    let is_pipeline_ok = match processes.last_mut() {
+        None => true,
+        Some(Process { ref mut child, .. }) => child.wait()?.success(),
+    };
 
-    Ok(())
+    // Status of whole pipeline is status of its last command. However, for
+    // better user-facing error messages, we return first instead of last error
+    // because root cause is usually with first error.
+
+    if is_pipeline_ok {
+        Ok(())
+    } else {
+        for Process {
+            ref mut child,
+            command,
+        } in processes
+        {
+            match child.try_wait()? {
+                None => (),
+                Some(status) => status_result(status).command_context(command)?,
+            }
+        }
+        unreachable!("At least last command should have error");
+    }
 }
 
 pub fn status_ok(command: &mut process::Command) -> anyhow::Result<()> {
@@ -106,6 +133,28 @@ impl<T> CommandContext<T> for anyhow::Result<T> {
     }
 }
 
+impl<T> CommandContext<T> for io::Result<T> {
+    fn command_context(self, command: &process::Command) -> anyhow::Result<T> {
+        self.with_context(|| format!("Error with command: {command:?}"))
+    }
+}
+
+struct Process<'a> {
+    child: process::Child,
+    command: &'a process::Command,
+}
+
+impl Drop for Process<'_> {
+    fn drop(&mut self) {
+        let Self { child, command } = self;
+        let pid = child.id();
+        log::debug!("Killing process {pid} from command: {command:?}");
+        if let Err(error) = child.kill() {
+            log::error!("Error killing process {pid}: {error}");
+        }
+    }
+}
+
 fn status_result(status: process::ExitStatus) -> anyhow::Result<()> {
     if status.success() {
         Ok(())
@@ -117,23 +166,25 @@ fn status_result(status: process::ExitStatus) -> anyhow::Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test_case::test_case(vec![], true; "success 0")]
-    #[test_case::test_case(vec![invalid_program_()], false; "invalid 0/1")]
-    #[test_case::test_case(vec![bash("false")], false; "failure 0/1")]
+    #[test_case::test_case(vec![], true; "0")]
+    #[test_case::test_case(vec![invalid_program_()], false; "invalid 1")]
+    #[test_case::test_case(vec![bash("false")], false; "failure 1")]
     #[test_case::test_case(vec![bash("true")], true; "success 1")]
     #[test_case::test_case(vec![invalid_program_(), bash("true")], false; "invalid 0/2")]
     #[test_case::test_case(vec![bash("true"), invalid_program_()], false; "invalid 1/2")]
-    #[test_case::test_case(vec![bash("false"), bash("true")], false; "failure 0/2")]
-    #[test_case::test_case(vec![bash("true"), bash("false")], false; "failure 1/2")]
-    #[test_case::test_case(vec![bash("echo 'Hi'"), bash("[[ $(cat) == 'Hi' ]]")], true; "success 2")]
+    #[test_case::test_case(vec![bash("false"), bash("true")], true; "false, success 2")]
+    #[test_case::test_case(vec![bash("true"), bash("false")], false; "true, failure 2")]
+    #[test_case::test_case(vec![bash("echo 'Hi'"), bash("[[ $(cat) == 'Hi' ]]")], true; "pipe 2")]
+    #[test_case::test_case(vec![bash("yes"), bash("false")], false; "loop, failure 2")]
+    #[test_case::test_case(vec![bash("yes"), bash("true")], true; "loop, success 2")]
     #[test_case::test_case(vec![invalid_program_(), bash("true"), bash("true")], false; "invalid 0/3")]
     #[test_case::test_case(vec![bash("true"), invalid_program_(), bash("true")], false; "invalid 1/3")]
     #[test_case::test_case(vec![bash("true"), bash("true"), invalid_program_()], false; "invalid 2/3")]
-    #[test_case::test_case(vec![bash("false"), bash("true"), bash("true")], false; "failure 0/3")]
-    #[test_case::test_case(vec![bash("true"), bash("false"), bash("true")], false; "failure 1/3")]
-    #[test_case::test_case(vec![bash("true"), bash("true"), bash("false")], false; "failure 2/3")]
-    #[test_case::test_case(vec![bash("echo 'Hi'"), bash("rev"), bash("[[ $(cat) == 'iH' ]]")], true; "success 3")]
+    #[test_case::test_case(vec![bash("false"), bash("false"), bash("true")], true; "false, success 3")]
+    #[test_case::test_case(vec![bash("true"), bash("true"), bash("false")], false; "true, failure 3")]
+    #[test_case::test_case(vec![bash("echo 'Hi'"), bash("rev"), bash("[[ $(cat) == 'iH' ]]")], true; "pipe 3")]
+    #[test_case::test_case(vec![bash("yes"), bash("yes"), bash("false")], false; "loop, failure 3")]
+    #[test_case::test_case(vec![bash("yes"), bash("yes"), bash("true")], true; "loop, success 3")]
     fn piped_ok_handles(mut commands: Vec<process::Command>, expected: bool) {
         let mut commands = commands.iter_mut().collect::<Vec<_>>();
         assert_eq!(piped_ok(commands.as_mut_slice()).is_ok(), expected)

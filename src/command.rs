@@ -17,9 +17,7 @@ pub fn piped_ok(commands: &mut [&mut process::Command]) -> anyhow::Result<()> {
             if pipeline.peek().is_some() {
                 command.stdout(process::Stdio::piped());
             }
-
-            let child = command.spawn().context("Unable to spawn")?;
-            children.push(child);
+            children.push(command.spawn()?);
 
             Ok(())
         })()

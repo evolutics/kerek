@@ -21,13 +21,7 @@ pub fn piped_ok(
 }
 
 pub fn status_ok(command: &mut process::Command) -> anyhow::Result<()> {
-    go(command, process::Command::status, |status| {
-        if status.success() {
-            Ok(())
-        } else {
-            status_error(status)
-        }
-    })
+    go(command, process::Command::status, status_result)
 }
 
 pub fn stdin_ok(input: &'static [u8], command: &mut process::Command) -> anyhow::Result<()> {
@@ -47,12 +41,8 @@ pub fn stdout_json<T: de::DeserializeOwned>(command: &mut process::Command) -> a
         command.stderr(process::Stdio::inherit()),
         process::Command::output,
         |output| {
-            if output.status.success() {
-                serde_json::from_slice(&output.stdout)
-                    .context("Unable to deserialize JSON from stdout")
-            } else {
-                status_error(output.status)
-            }
+            status_result(output.status)?;
+            serde_json::from_slice(&output.stdout).context("Unable to deserialize JSON from stdout")
         },
     )
 }
@@ -64,32 +54,29 @@ pub fn stdout_table<const N: usize>(
         command.stderr(process::Stdio::inherit()),
         process::Command::output,
         |output| {
-            if output.status.success() {
-                let table =
-                    String::from_utf8(output.stdout).context("Stdout is not valid UTF-8")?;
-                table
-                    .lines()
-                    .enumerate()
-                    .map(|(row_index, row)| {
-                        let fields = row
-                            .split_whitespace()
-                            .map(|field| field.into())
-                            .collect::<Vec<_>>();
+            status_result(output.status)?;
 
-                        fields.try_into().map_err(|fields: Vec<_>| {
-                            let line_number = row_index + 1;
-                            let field_count = fields.len();
-                            anyhow::anyhow!(
-                                "Unable to parse result line {line_number}, \
+            let table = String::from_utf8(output.stdout).context("Stdout is not valid UTF-8")?;
+            table
+                .lines()
+                .enumerate()
+                .map(|(row_index, row)| {
+                    let fields = row
+                        .split_whitespace()
+                        .map(|field| field.into())
+                        .collect::<Vec<_>>();
+
+                    fields.try_into().map_err(|fields: Vec<_>| {
+                        let line_number = row_index + 1;
+                        let field_count = fields.len();
+                        anyhow::anyhow!(
+                            "Unable to parse result line {line_number}, \
                                 expected {N} fields \
                                 but got {field_count}: {row:?}"
-                            )
-                        })
+                        )
                     })
-                    .collect()
-            } else {
-                status_error(output.status)
-            }
+                })
+                .collect()
         },
     )
 }
@@ -99,11 +86,8 @@ pub fn stdout_utf8(command: &mut process::Command) -> anyhow::Result<String> {
         command.stderr(process::Stdio::inherit()),
         process::Command::output,
         |output| {
-            if output.status.success() {
-                String::from_utf8(output.stdout).context("Stdout is not valid UTF-8")
-            } else {
-                status_error(output.status)
-            }
+            status_result(output.status)?;
+            String::from_utf8(output.stdout).context("Stdout is not valid UTF-8")
         },
     )
 }
@@ -126,17 +110,15 @@ fn go<
     }
 }
 
-fn status_error<T>(status: process::ExitStatus) -> anyhow::Result<T> {
-    Err(anyhow::anyhow!("{status}"))
+fn wait_ok(child: &mut process::Child) -> anyhow::Result<()> {
+    status_result(child.wait().context("Unable to wait")?)
 }
 
-fn wait_ok(child: &mut process::Child) -> anyhow::Result<()> {
-    let status = child.wait().context("Unable to wait")?;
-
+fn status_result(status: process::ExitStatus) -> anyhow::Result<()> {
     if status.success() {
         Ok(())
     } else {
-        status_error(status)
+        Err(anyhow::anyhow!("{status}"))
     }
 }
 

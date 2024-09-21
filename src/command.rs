@@ -46,7 +46,7 @@ pub fn stdin_ok(input: &'static [u8], command: &mut process::Command) -> anyhow:
         |mut child| {
             let mut stdin = child.stdin.take().context("Unable to open stdin")?;
             thread::spawn(move || stdin.write_all(input).context("Unable to write to stdin"));
-            wait_ok(&mut child)
+            status_result(child.wait().context("Unable to wait")?)
         },
     )
 }
@@ -123,10 +123,6 @@ fn go<
         Ok(value) => evaluate(value)
             .with_context(|| format!("Unable to evaluate result of command: {command:?}")),
     }
-}
-
-fn wait_ok(child: &mut process::Child) -> anyhow::Result<()> {
-    status_result(child.wait().context("Unable to wait")?)
 }
 
 fn status_result(status: process::ExitStatus) -> anyhow::Result<()> {

@@ -9,15 +9,30 @@ pub fn piped_ok(
     writer: &mut process::Command,
     reader: &mut process::Command,
 ) -> anyhow::Result<()> {
-    go(
-        writer.stdout(process::Stdio::piped()),
-        process::Command::spawn,
-        |mut child| {
-            let stdout = child.stdout.take().context("Unable to open stdout")?;
-            status_ok(reader.stdin(stdout))?;
-            wait_ok(&mut child)
-        },
-    )
+    let mut child = writer
+        .stdout(process::Stdio::piped())
+        .spawn()
+        .with_context(|| format!("Unable to spawn command: {writer:?}"))?;
+    let stdout = child
+        .stdout
+        .take()
+        .with_context(|| format!("Unable to open stdout from command: {writer:?}"))?;
+
+    let last_result = status_ok(reader.stdin(stdout));
+
+    match child
+        .try_wait()
+        .with_context(|| format!("Unable to try waiting for command: {writer:?}"))?
+    {
+        None => child
+            .kill()
+            .with_context(|| format!("Unable to kill command: {writer:?}")),
+        Some(status) => {
+            status_result(status).with_context(|| format!("Error with command: {writer:?}"))
+        }
+    }?;
+
+    last_result
 }
 
 pub fn status_ok(command: &mut process::Command) -> anyhow::Result<()> {

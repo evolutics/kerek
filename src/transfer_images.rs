@@ -32,10 +32,10 @@ pub fn go(
             log::info!("Transferring image {image:?}.");
 
             // TODO: Consider compression.
-            command::piped_ok(
+            command::piped_ok(&mut [
                 source_docker_cli.command().args(["save", "--", &image]),
                 destination_docker_cli.command().arg("load"),
-            )
+            ])
             .with_context(|| format!("Unable to transfer image {image:?}"))?;
         }
     }

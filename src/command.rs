@@ -4,30 +4,34 @@ use std::io::Write;
 use std::process;
 use std::thread;
 
-pub fn piped_ok(
-    writer: &mut process::Command,
-    reader: &mut process::Command,
-) -> anyhow::Result<()> {
-    let mut child = writer
-        .stdout(process::Stdio::piped())
-        .spawn()
-        .context("Unable to spawn")
-        .command_context(writer)?;
-    let stdout = child
-        .stdout
-        .take()
-        .context("Unable to open stdout")
-        .command_context(writer)?;
+pub fn piped_ok(commands: &mut [&mut process::Command]) -> anyhow::Result<()> {
+    let mut children = Vec::<process::Child>::new();
 
-    let last_result = status_ok(reader.stdin(stdout));
+    let mut pipeline = commands.iter_mut().peekable();
+    while let Some(command) = pipeline.next() {
+        (|| {
+            if let Some(previous) = children.last_mut() {
+                let stdout = previous.stdout.take().context("Unable to open stdout")?;
+                command.stdin(stdout);
+            }
+            if pipeline.peek().is_some() {
+                command.stdout(process::Stdio::piped());
+            }
 
-    (|| match child.try_wait().context("Unable to try waiting")? {
-        None => child.kill().context("Unable to kill"),
-        Some(status) => status_result(status),
-    })()
-    .command_context(writer)?;
+            let child = command.spawn().context("Unable to spawn")?;
+            children.push(child);
 
-    last_result
+            Ok(())
+        })()
+        .command_context(command)?;
+    }
+
+    for (index, child) in children.iter_mut().enumerate() {
+        let command = &commands[index];
+        (|| status_result(child.wait()?))().command_context(command)?;
+    }
+
+    Ok(())
 }
 
 pub fn status_ok(command: &mut process::Command) -> anyhow::Result<()> {
@@ -116,17 +120,25 @@ fn status_result(status: process::ExitStatus) -> anyhow::Result<()> {
 mod tests {
     use super::*;
 
-    #[test_case::test_case(invalid_program_(), bash("true"), false; "invalid writer")]
-    #[test_case::test_case(bash("true"), invalid_program_(), false; "invalid reader")]
-    #[test_case::test_case(bash("false"), bash("true"), false; "writer failure")]
-    #[test_case::test_case(bash("true"), bash("false"), false; "reader failure")]
-    #[test_case::test_case(bash("echo 'Hi'"), bash("[[ $(cat) == 'Hi' ]]"), true; "success")]
-    fn piped_ok_handles(
-        mut writer: process::Command,
-        mut reader: process::Command,
-        expected: bool,
-    ) {
-        assert_eq!(piped_ok(&mut writer, &mut reader).is_ok(), expected)
+    #[test_case::test_case(vec![], true; "success 0")]
+    #[test_case::test_case(vec![invalid_program_()], false; "invalid 0/1")]
+    #[test_case::test_case(vec![bash("false")], false; "failure 0/1")]
+    #[test_case::test_case(vec![bash("true")], true; "success 1")]
+    #[test_case::test_case(vec![invalid_program_(), bash("true")], false; "invalid 0/2")]
+    #[test_case::test_case(vec![bash("true"), invalid_program_()], false; "invalid 1/2")]
+    #[test_case::test_case(vec![bash("false"), bash("true")], false; "failure 0/2")]
+    #[test_case::test_case(vec![bash("true"), bash("false")], false; "failure 1/2")]
+    #[test_case::test_case(vec![bash("echo 'Hi'"), bash("[[ $(cat) == 'Hi' ]]")], true; "success 2")]
+    #[test_case::test_case(vec![invalid_program_(), bash("true"), bash("true")], false; "invalid 0/3")]
+    #[test_case::test_case(vec![bash("true"), invalid_program_(), bash("true")], false; "invalid 1/3")]
+    #[test_case::test_case(vec![bash("true"), bash("true"), invalid_program_()], false; "invalid 2/3")]
+    #[test_case::test_case(vec![bash("false"), bash("true"), bash("true")], false; "failure 0/3")]
+    #[test_case::test_case(vec![bash("true"), bash("false"), bash("true")], false; "failure 1/3")]
+    #[test_case::test_case(vec![bash("true"), bash("true"), bash("false")], false; "failure 2/3")]
+    #[test_case::test_case(vec![bash("echo 'Hi'"), bash("rev"), bash("[[ $(cat) == 'iH' ]]")], true; "success 3")]
+    fn piped_ok_handles(mut commands: Vec<process::Command>, expected: bool) {
+        let mut commands = commands.iter_mut().collect::<Vec<_>>();
+        assert_eq!(piped_ok(commands.as_mut_slice()).is_ok(), expected)
     }
 
     #[test_case::test_case(invalid_program_(), false; "invalid program")]

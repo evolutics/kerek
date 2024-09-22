@@ -5,7 +5,7 @@ set -o nounset
 set -o pipefail
 
 if [[ "${CONTAINER_ENGINE}" != 'podman' ]]; then
-  echo "Unsupported container engine: ${CONTAINER_ENGINE}" >&2
+  echo "Unsupported container engine: ${CONTAINER_ENGINE}"
   exit 1
 fi
 

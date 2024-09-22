@@ -174,26 +174,36 @@ fn status_result(status: process::ExitStatus) -> anyhow::Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test_case::test_case(vec![], true; "0")]
-    #[test_case::test_case(vec![invalid_program_()], false; "invalid 1")]
-    #[test_case::test_case(vec![bash("false")], false; "failure 1")]
-    #[test_case::test_case(vec![bash("true")], true; "success 1")]
-    #[test_case::test_case(vec![invalid_program_(), bash("true")], false; "invalid 0/2")]
-    #[test_case::test_case(vec![bash("true"), invalid_program_()], false; "invalid 1/2")]
-    #[test_case::test_case(vec![bash("false"), bash("true")], true; "false, success 2")]
-    #[test_case::test_case(vec![bash("true"), bash("false")], false; "true, failure 2")]
-    #[test_case::test_case(vec![bash("echo 'Hi'"), bash("[[ $(cat) == 'Hi' ]]")], true; "pipe 2")]
-    #[test_case::test_case(vec![bash("yes"), bash("false")], false; "loop, failure 2")]
-    #[test_case::test_case(vec![bash("yes"), bash("true")], true; "loop, success 2")]
-    #[test_case::test_case(vec![invalid_program_(), bash("true"), bash("true")], false; "invalid 0/3")]
-    #[test_case::test_case(vec![bash("true"), invalid_program_(), bash("true")], false; "invalid 1/3")]
-    #[test_case::test_case(vec![bash("true"), bash("true"), invalid_program_()], false; "invalid 2/3")]
-    #[test_case::test_case(vec![bash("false"), bash("false"), bash("true")], true; "false, success 3")]
-    #[test_case::test_case(vec![bash("true"), bash("true"), bash("false")], false; "true, failure 3")]
-    #[test_case::test_case(vec![bash("echo 'Hi'"), bash("rev"), bash("[[ $(cat) == 'iH' ]]")], true; "pipe 3")]
-    #[test_case::test_case(vec![bash("yes"), bash("yes"), bash("false")], false; "loop, failure 3")]
-    #[test_case::test_case(vec![bash("yes"), bash("yes"), bash("true")], true; "loop, success 3")]
-    fn piped_ok_handles(mut commands: Vec<process::Command>, expected: bool) {
+    #[test_case::test_case(&[], true; "0")]
+    #[test_case::test_case(&[""], false; "invalid 1")]
+    #[test_case::test_case(&["false"], false; "failure 1")]
+    #[test_case::test_case(&["true"], true; "success 1")]
+    #[test_case::test_case(&["", "true"], false; "invalid 0/2")]
+    #[test_case::test_case(&["true", ""], false; "invalid 1/2")]
+    #[test_case::test_case(&["false", "true"], true; "false, success 2")]
+    #[test_case::test_case(&["true", "false"], false; "true, failure 2")]
+    #[test_case::test_case(&["echo 'Hi'", "[[ $(cat) == 'Hi' ]]"], true; "pipe 2")]
+    #[test_case::test_case(&["yes", "false"], false; "loop, failure 2")]
+    #[test_case::test_case(&["yes", "true"], true; "loop, success 2")]
+    #[test_case::test_case(&["", "true", "true"], false; "invalid 0/3")]
+    #[test_case::test_case(&["true", "", "true"], false; "invalid 1/3")]
+    #[test_case::test_case(&["true", "true", ""], false; "invalid 2/3")]
+    #[test_case::test_case(&["false", "false", "true"], true; "false, success 3")]
+    #[test_case::test_case(&["true", "true", "false"], false; "true, failure 3")]
+    #[test_case::test_case(&["echo 'Hi'", "rev", "[[ $(cat) == 'iH' ]]"], true; "pipe 3")]
+    #[test_case::test_case(&["yes", "yes", "false"], false; "loop, failure 3")]
+    #[test_case::test_case(&["yes", "yes", "true"], true; "loop, success 3")]
+    fn piped_ok_handles(commands: &[&str], expected: bool) {
+        let mut commands = commands
+            .iter()
+            .map(|command| {
+                if command.is_empty() {
+                    invalid_program_()
+                } else {
+                    bash(command)
+                }
+            })
+            .collect::<Vec<_>>();
         let commands = commands.iter_mut().collect();
         assert_eq!(piped_ok(commands).is_ok(), expected)
     }

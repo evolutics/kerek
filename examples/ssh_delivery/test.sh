@@ -33,22 +33,19 @@ test_container_engine() {
 }
 
 main() {
+  rm --force ssh_config
   vagrant destroy --force
   trap 'vagrant halt' EXIT
   vagrant up
 
+  CONTAINER_ENGINE=docker test_container_engine
+
   (
-    trap 'rm --force ssh_config' EXIT
+    export DOCKER_HOST="unix://${PWD}/podman.sock"
+    podman system service --time 0 "${DOCKER_HOST}" &
+    trap 'kill "$(lsof -t "${PWD}/podman.sock")"' EXIT
 
-    CONTAINER_ENGINE=docker test_container_engine
-
-    (
-      export DOCKER_HOST="unix://${PWD}/podman.sock"
-      podman system service --time 0 "${DOCKER_HOST}" &
-      trap 'kill "$(lsof -t "${PWD}/podman.sock")"' EXIT
-
-      CONTAINER_ENGINE=podman test_container_engine
-    )
+    CONTAINER_ENGINE=podman test_container_engine
   )
 }
 

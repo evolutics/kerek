@@ -9,7 +9,9 @@ main() {
   CONTAINERS_STORAGE_CONF=storage.toml podman system service --time 0 "${box}" &
   trap 'kill "$(lsof -t "${PWD}/box.sock")"' EXIT
 
-  for compress in '' bzip2 gzip xz 'xz -9' zstd; do
+  mapfile -t compresses < <(shuf --echo -- '' bzip2 gzip xz 'xz -9' zstd)
+
+  for compress in "${compresses[@]}"; do
     podman --host "${box}" rmi --ignore docker.io/busybox
     [[ -z "$(podman --host "${box}" images --quiet)" ]]
 

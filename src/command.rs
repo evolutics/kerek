@@ -7,57 +7,58 @@ use std::process;
 use std::thread;
 
 pub fn piped_ok(mut commands: Vec<&mut process::Command>) -> anyhow::Result<()> {
-    let mut processes = Vec::<Process>::new();
+    match commands.split_last_mut() {
+        None => Ok(()),
+        Some((last_command, first_commands)) => {
+            let mut stdio = None;
+            let mut processes = vec![];
 
-    let mut pipeline = commands.iter_mut().peekable();
-    while let Some(command) = pipeline.next() {
-        if let Some(Process {
-            child: previous, ..
-        }) = processes.last_mut()
-        {
-            let stdout = previous
-                .stdout
-                .take()
-                .context("Unable to open stdout")
-                .command_context(command)?;
-            command.stdin(stdout);
-        }
+            for command in first_commands {
+                if let Some(stdin) = stdio {
+                    command.stdin(stdin);
+                }
+                command.stdout(process::Stdio::piped());
 
-        if pipeline.peek().is_some() {
-            command.stdout(process::Stdio::piped());
-        }
+                let mut process = Process {
+                    child: command.spawn().command_context(command)?,
+                    command,
+                };
 
-        processes.push(Process {
-            child: command.spawn().command_context(command)?,
-            command,
-        });
-    }
+                stdio = Some(
+                    process
+                        .child
+                        .stdout
+                        .take()
+                        .context("Unable to open stdout")
+                        .command_context(command)?,
+                );
 
-    let is_pipeline_ok = match processes.last_mut() {
-        None => true,
-        Some(Process {
-            ref mut child,
-            command,
-        }) => child.wait().command_context(command)?.success(),
-    };
-
-    // Status of whole pipeline is status of its last command. However, for
-    // better user-facing error messages, we return first instead of last error
-    // because root cause is usually with first error.
-
-    if is_pipeline_ok {
-        Ok(())
-    } else {
-        for Process {
-            ref mut child,
-            command,
-        } in processes
-        {
-            if let Some(status) = child.try_wait().command_context(command)? {
-                status_result(status).command_context(command)?;
+                processes.push(process);
             }
+
+            if let Some(stdin) = stdio {
+                last_command.stdin(stdin);
+            }
+            let last_status = last_command.status().command_context(last_command)?;
+
+            // Status of whole pipeline is status of its last command. However,
+            // for better user-facing error messages, we return first instead of
+            // last error because root cause is usually with first error.
+
+            if !last_status.success() {
+                for Process {
+                    ref mut child,
+                    command,
+                } in processes
+                {
+                    if let Some(status) = child.try_wait().command_context(command)? {
+                        status_result(status).command_context(command)?;
+                    }
+                }
+            }
+
+            status_result(last_status).command_context(last_command)
         }
-        unreachable!("At least last command should have error");
     }
 }
 

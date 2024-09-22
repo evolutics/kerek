@@ -6,7 +6,7 @@ use std::io::Write;
 use std::process;
 use std::thread;
 
-pub fn piped_ok(commands: &mut [&mut process::Command]) -> anyhow::Result<()> {
+pub fn piped_ok(mut commands: Vec<&mut process::Command>) -> anyhow::Result<()> {
     let mut processes = Vec::<Process>::new();
 
     let mut pipeline = commands.iter_mut().peekable();
@@ -194,8 +194,8 @@ mod tests {
     #[test_case::test_case(vec![bash("yes"), bash("yes"), bash("false")], false; "loop, failure 3")]
     #[test_case::test_case(vec![bash("yes"), bash("yes"), bash("true")], true; "loop, success 3")]
     fn piped_ok_handles(mut commands: Vec<process::Command>, expected: bool) {
-        let mut commands = commands.iter_mut().collect::<Vec<_>>();
-        assert_eq!(piped_ok(commands.as_mut_slice()).is_ok(), expected)
+        let commands = commands.iter_mut().collect();
+        assert_eq!(piped_ok(commands).is_ok(), expected)
     }
 
     #[test_case::test_case(invalid_program_(), false; "invalid program")]

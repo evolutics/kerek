@@ -35,7 +35,10 @@ pub fn piped_ok(commands: &mut [&mut process::Command]) -> anyhow::Result<()> {
 
     let is_pipeline_ok = match processes.last_mut() {
         None => true,
-        Some(Process { ref mut child, .. }) => child.wait()?.success(),
+        Some(Process {
+            ref mut child,
+            command,
+        }) => child.wait().command_context(command)?.success(),
     };
 
     // Status of whole pipeline is status of its last command. However, for
@@ -50,7 +53,7 @@ pub fn piped_ok(commands: &mut [&mut process::Command]) -> anyhow::Result<()> {
             command,
         } in processes
         {
-            match child.try_wait()? {
+            match child.try_wait().command_context(command)? {
                 None => (),
                 Some(status) => status_result(status).command_context(command)?,
             }

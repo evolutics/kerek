@@ -12,11 +12,13 @@ main() {
   mapfile -t compresses < <(shuf --echo -- '' bzip2 gzip xz 'xz -9' zstd)
 
   for compress in "${compresses[@]}"; do
+    echo "Compressing with: '${compress}'"
+
     podman --host "${box}" rmi --ignore docker.io/busybox
     [[ -z "$(podman --host "${box}" images --quiet)" ]]
 
     podman pull docker.io/busybox
-    kerek --container-engine podman --host "${box}" transfer-images \
+    time kerek --container-engine podman --host "${box}" transfer-images \
       ${compress:+--compress "${compress}"} docker.io/busybox
 
     [[ "$(podman --host "${box}" images --format '{{.Repository}}:{{.Tag}}' \

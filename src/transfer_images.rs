@@ -4,9 +4,11 @@ use super::log;
 use anyhow::Context;
 use std::collections::hash_set;
 use std::io;
+use std::process;
 
 pub fn go(
     In {
+        compress,
         docker_cli,
         dry_run,
         force,
@@ -31,11 +33,17 @@ pub fn go(
         } else {
             log::info!("Transferring image {image:?}.");
 
-            // TODO: Consider compression.
-            command::piped_ok(vec![
-                source_docker_cli.command().args(["save", "--", &image]),
-                destination_docker_cli.command().arg("load"),
-            ])
+            let mut save = source_docker_cli.command();
+            save.args(["save", "--", &image]);
+            let mut compress = optional_command(&compress);
+            let mut load = destination_docker_cli.command();
+            load.arg("load");
+
+            command::piped_ok(
+                [Some(&mut save), compress.as_mut(), Some(&mut load)]
+                    .into_iter()
+                    .flatten(),
+            )
             .with_context(|| format!("Unable to transfer image {image:?}"))?;
         }
     }
@@ -44,6 +52,7 @@ pub fn go(
 }
 
 pub struct In<'a> {
+    pub compress: Vec<String>,
     pub docker_cli: docker::Cli<'a>,
     pub dry_run: bool,
     pub force: bool,
@@ -77,4 +86,12 @@ fn get_requested_images(mut argument_images: Vec<String>) -> anyhow::Result<Vec<
             }
         },
     )
+}
+
+fn optional_command(command: &[String]) -> Option<process::Command> {
+    command.split_first().map(|(program, arguments)| {
+        let mut command = process::Command::new(program);
+        command.args(arguments);
+        command
+    })
 }

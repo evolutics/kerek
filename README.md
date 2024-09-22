@@ -432,6 +432,9 @@ Examples:
     DOCKER_CONTEXT=from kerek --context to transfer-images my-img
     docker compose config --images | kerek --host … transfer-images -
 
+    kerek --host … transfer-images --compress zstd my-img
+    kerek --host … transfer-images --compress 'xz -9' my-img
+
 Usage: kerek transfer-images [OPTIONS] [IMAGES]...
 
 Arguments:
@@ -439,6 +442,9 @@ Arguments:
           Images to copy; use `-` to pass image names as stdin lines
 
 Options:
+      --compress <COMPRESS>
+          Compression command to use (`bzip2`, `gzip`, `xz`, `zstd`, etc.)
+
       --force
           Copy images without checking if the destination already has such
           images; useful for replacing images with `latest` tag

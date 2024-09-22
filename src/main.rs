@@ -83,7 +83,12 @@ fn main() -> anyhow::Result<()> {
             ssh_cli: ssh_cli(&docker_arguments, &ssh_arguments),
         }),
 
-        Subcommand::TransferImages { force, images } => transfer_images::go(transfer_images::In {
+        Subcommand::TransferImages {
+            compress,
+            force,
+            images,
+        } => transfer_images::go(transfer_images::In {
+            compress,
             docker_cli: docker::Cli::new(&container_engine, (&docker_arguments).into()),
             dry_run,
             force,
@@ -243,7 +248,14 @@ enum Subcommand {
     ///{n}    DOCKER_HOST=ssh://from kerek --host ssh://to transfer-images my-img
     ///{n}    DOCKER_CONTEXT=from kerek --context to transfer-images my-img
     ///{n}    docker compose config --images | kerek --host … transfer-images -
+    ///{n}
+    ///{n}    kerek --host … transfer-images --compress zstd my-img
+    ///{n}    kerek --host … transfer-images --compress 'xz -9' my-img
     TransferImages {
+        /// Compression command to use (`bzip2`, `gzip`, `xz`, `zstd`, etc.)
+        #[arg(long, value_delimiter = ' ')]
+        compress: Vec<String>,
+
         /// Copy images without checking if the destination already has such
         /// images; useful for replacing images with `latest` tag
         #[arg(long)]

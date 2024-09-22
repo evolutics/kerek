@@ -6,7 +6,11 @@ use std::io::Write;
 use std::process;
 use std::thread;
 
-pub fn piped_ok(mut commands: Vec<&mut process::Command>) -> anyhow::Result<()> {
+pub fn piped_ok<'a, T: IntoIterator<Item = &'a mut process::Command>>(
+    commands: T,
+) -> anyhow::Result<()> {
+    let mut commands = commands.into_iter().collect::<Vec<_>>();
+
     match commands.split_last_mut() {
         None => Ok(()),
         Some((last_command, first_commands)) => {
@@ -204,8 +208,7 @@ mod tests {
                 }
             })
             .collect::<Vec<_>>();
-        let commands = commands.iter_mut().collect();
-        assert_eq!(piped_ok(commands).is_ok(), expected)
+        assert_eq!(piped_ok(commands.iter_mut()).is_ok(), expected)
     }
 
     #[test_case::test_case(invalid_program_(), false; "invalid program")]

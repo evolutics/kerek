@@ -53,9 +53,8 @@ pub fn piped_ok(mut commands: Vec<&mut process::Command>) -> anyhow::Result<()> 
             command,
         } in processes
         {
-            match child.try_wait().command_context(command)? {
-                None => (),
-                Some(status) => status_result(status).command_context(command)?,
+            if let Some(status) = child.try_wait().command_context(command)? {
+                status_result(status).command_context(command)?;
             }
         }
         unreachable!("At least last command should have error");

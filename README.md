@@ -466,7 +466,7 @@ Example:
 
     kerek tunnel-ssh my-ssh-host
     CONTAINER_HOST="unix://${PWD}/kerek.sock" podman ps
-    kill "$(lsof -t "${PWD}/kerek.sock")"
+    fuser --kill -TERM kerek.sock
 
 Usage: kerek tunnel-ssh [OPTIONS] <SSH_HOST>
 

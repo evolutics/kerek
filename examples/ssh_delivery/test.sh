@@ -18,7 +18,7 @@ test_container_engine() {
 
   (
     kerek --container-engine podman tunnel-ssh --ssh-config ssh_config ssh-host
-    trap 'kill "$(lsof -t "${PWD}/kerek.sock")"' EXIT
+    trap 'fuser --kill -TERM kerek.sock' EXIT
 
     docker compose config --images \
       | kerek --host "unix://${PWD}/kerek.sock" transfer-images -
@@ -43,7 +43,7 @@ main() {
   (
     export DOCKER_HOST="unix://${PWD}/podman.sock"
     podman system service --time 0 "${DOCKER_HOST}" &
-    trap 'kill "$(lsof -t "${PWD}/podman.sock")"' EXIT
+    trap 'fuser --kill -TERM podman.sock' EXIT
 
     CONTAINER_ENGINE=podman test_container_engine
   )

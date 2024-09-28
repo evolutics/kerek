@@ -7,7 +7,7 @@ set -o pipefail
 main() {
   local -r box="unix://${PWD}/box.sock"
   CONTAINERS_STORAGE_CONF=storage.toml podman system service --time 0 "${box}" &
-  trap 'kill "$(lsof -t "${PWD}/box.sock")"' EXIT
+  trap 'fuser --kill -TERM box.sock' EXIT
 
   mapfile -t compresses < <(shuf --echo -- '' bzip2 gzip xz 'xz -9' zstd)
 

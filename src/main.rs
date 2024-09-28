@@ -276,7 +276,7 @@ enum Subcommand {
     ///{n}
     ///{n}    kerek tunnel-ssh my-ssh-host
     ///{n}    CONTAINER_HOST="unix://${PWD}/kerek.sock" podman ps
-    ///{n}    kill "$(lsof -t "${PWD}/kerek.sock")"
+    ///{n}    fuser --kill -TERM kerek.sock
     TunnelSsh {
         /// Path to Unix domain socket on localhost to be forwarded
         #[arg(default_value = "kerek.sock", long)]

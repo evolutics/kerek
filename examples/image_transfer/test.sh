@@ -13,15 +13,15 @@ main() {
   export CONTAINER_ENGINE=podman
   local -r image='localhost/kerek:latest'
 
-  podman build --build-arg VERSION=A --tag "${image}" .
+  podman build --build-arg VERSION=0 --tag "${image}" .
   kerek --host "${box}" transfer-images -- "${image}"
-  [[ "$(podman --url "${box}" run --rm "${image}" | tee /dev/stderr)" == 'vA' ]]
+  [[ "$(podman --url "${box}" run --rm "${image}" | tee /dev/stderr)" == 'v0' ]]
 
-  podman build --build-arg VERSION=B --tag "${image}" .
+  podman build --build-arg VERSION=1 --tag "${image}" .
   kerek --host "${box}" transfer-images -- "${image}"
-  [[ "$(podman --url "${box}" run --rm "${image}" | tee /dev/stderr)" == 'vA' ]]
+  [[ "$(podman --url "${box}" run --rm "${image}" | tee /dev/stderr)" == 'v0' ]]
   kerek --host "${box}" transfer-images --force -- "${image}"
-  [[ "$(podman --url "${box}" run --rm "${image}" | tee /dev/stderr)" == 'vB' ]]
+  [[ "$(podman --url "${box}" run --rm "${image}" | tee /dev/stderr)" == 'v1' ]]
 
   for compress in $(shuf --echo -- bzip2 gzip xz zstd); do
     podman build --build-arg "VERSION=${compress}" --tag "${image}" .
@@ -30,10 +30,10 @@ main() {
       | tee /dev/stderr)" == "v${compress}" ]]
   done
 
-  podman build --build-arg VERSION=C --tag "${image}" .
+  podman build --build-arg VERSION=2 --tag "${image}" .
   kerek --host "${box}" transfer-images --compress 'zstd --verbose' --force -- \
     "${image}"
-  [[ "$(podman --url "${box}" run --rm "${image}" | tee /dev/stderr)" == 'vC' ]]
+  [[ "$(podman --url "${box}" run --rm "${image}" | tee /dev/stderr)" == 'v2' ]]
 }
 
 main "$@"

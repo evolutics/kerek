@@ -183,6 +183,8 @@ struct DockerArguments {
 enum Subcommand {
     // Keep following help in sync with this source, where applicable:
     // https://github.com/docker/compose/blob/main/docs/reference/compose_up.md
+    //
+    // TODO: Respect dependencies from `depends_on`.
     /// Create or update services
     ///
     /// Builds, (re)creates, and starts containers for a service.

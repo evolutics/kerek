@@ -1,8 +1,6 @@
 #!/bin/bash
 
-set -o errexit
-set -o nounset
-set -o pipefail
+set -o errexit -o nounset -o pipefail
 
 main() {
   local -r box="unix://${PWD}/box.sock"

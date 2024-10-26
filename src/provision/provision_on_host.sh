@@ -1,8 +1,6 @@
 #!/bin/bash
 
-set -o errexit
-set -o nounset
-set -o pipefail
+set -o errexit -o nounset -o pipefail
 
 if [[ "${CONTAINER_ENGINE}" != 'podman' ]]; then
   echo "Unsupported container engine: ${CONTAINER_ENGINE}"

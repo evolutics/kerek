@@ -43,15 +43,7 @@ kerek_deploy() {
 
 main() {
   CONTAINER_ENGINE=docker test_container_engine
-
-  (
-    export DOCKER_HOST="unix://${PWD}/podman.sock"
-    podman system service --time 0 "${DOCKER_HOST}" &
-    trap 'fuser --kill -TERM podman.sock' EXIT
-    sleep 2s
-
-    CONTAINER_ENGINE=podman test_container_engine
-  )
+  CONTAINER_ENGINE=podman test_container_engine
 }
 
 main "$@"

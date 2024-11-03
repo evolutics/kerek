@@ -37,14 +37,7 @@ main() {
   vagrant up
 
   CONTAINER_ENGINE=docker test_container_engine
-
-  (
-    export DOCKER_HOST="unix://${PWD}/podman.sock"
-    podman system service --time 0 "${DOCKER_HOST}" &
-    trap 'fuser --kill -TERM podman.sock' EXIT
-
-    CONTAINER_ENGINE=podman test_container_engine
-  )
+  CONTAINER_ENGINE=podman test_container_engine
 }
 
 main "$@"

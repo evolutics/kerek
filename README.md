@@ -1,15 +1,37 @@
-# Kerek: Zero-downtime deployments for Docker Compose
+# Kerek: Lightweight continuous delivery for Docker Compose
 
-Kerek is an addition to Docker Compose that helps updating services with zero
-downtime.
+Kerek is a CLI that adds these missing pieces to Docker:
 
-## Motivation
+- Zero-downtime deployments for Docker Compose.
+- Distributing container images via SSH instead of a registry.
+- Using a custom SSH config file when connecting to a remote Docker instance.
 
-Docker Compose offers simple, declarative orchestration of containerized apps.
+## Setup
 
-When updating a service container with Docker Compose using `docker compose up`,
-the old container is stopped _before_ a new container is started
-(**`stop-first`** case):
+### Prerequisites
+
+- Docker or Podman
+- Docker Compose
+
+### Installing
+
+```bash
+cargo install --git https://github.com/evolutics/kerek
+```
+
+### Uninstalling
+
+```bash
+cargo uninstall kerek
+```
+
+## Usage
+
+### Seamless service updates
+
+When updating services with `docker compose up`, the old container of a service
+is stopped before a new container of the service is started (**`stop-first`**
+case):
 
 ```
     Old container          Stop
@@ -31,65 +53,36 @@ Imagine that we could make the container lifetimes overlap instead
                            ├────────────────────────────────────────┄┄┄┄
 ```
 
-If a reverse proxy seamlessly switches traffic over from old to new container,
-then a zero-downtime deployment is achieved.
+Kerek supports both of these cases.
 
-The
-[Compose specification](https://github.com/compose-spec/compose-spec/blob/master/deploy.md)
-in fact defines options to distinguish above two cases: `stop-first` (default)
-and `start-first`. But support for this part of the specification is optional,
-and plain Docker Compose always applies `stop-first` irrespective of what is in
-your Compose files.
+For services where a new container should be started before the old container is
+stopped, configure this in your Compose file:
 
-However, Kerek supports both options. Just run `kerek deploy` in place of
-`docker compose up`. No need to change any other Docker or Docker Compose
-workflows.
-
-## Installation
-
-### Prerequisites
-
-- Docker or Podman
-- Docker Compose
-
-### Installing
-
-```
-cargo install --git https://github.com/evolutics/kerek
-```
-
-### Docker CLI plugin
-
-Optionally, Kerek can be set up as a Docker CLI plugin. With that, calls to
-`kerek deploy` can be replaced by `docker deploy`, which some people prefer.
-Example [setup](https://github.com/docker/cli/issues/1534):
-
-```bash
-mkdir --parents ~/.docker/cli-plugins
-ln --symbolic "$(which kerek)" ~/.docker/cli-plugins/docker-deploy
-```
-
-## Usage
-
-### Quick start
-
-For services whose container lifetimes should overlap during an update,
-configure their update order like so:
-
-```yaml
+```diff
 # compose.yaml
 services:
-  greet:
-    deploy:
-      update_config:
-        order: start-first # Most important line.
-    # …
+  my-service:
+    image: my-image
++   deploy:
++     update_config:
++       order: start-first
 ```
 
-See
-[`examples/zero_downtime_deployment/compose.yaml`](examples/zero_downtime_deployment/compose.yaml)
-for a demo. It defines a service called `greet` made available on localhost:8080
-via a `reverse-proxy`:
+Now just run `kerek deploy` in place of `docker compose up`. No need to change
+any other Docker Compose workflows.
+
+Above config is an optional part of the
+[Compose specification](https://github.com/compose-spec/compose-spec/blob/master/deploy.md).
+But vanilla Docker Compose always updates services in the `stop-first` order,
+even if your Compose file says otherwise.
+
+### Zero-downtime deployments with a reverse proxy
+
+There is a [demo](examples/zero_downtime_deployment/compose.yaml) with an
+example service called `greet`, which should stay available during updates.
+
+For that purpose, traffic on localhost:8080 is proxied trough a second service
+`reverse-proxy`:
 
 ```
     localhost:8080    ╭───────────────╮        ╭───────────────╮
@@ -98,8 +91,10 @@ via a `reverse-proxy`:
                       ╰───────────────╯        ╰───────────────╯
 ```
 
-With this design the service stays available, even during updates. You can play
-with it as follows:
+With `greet` configured in `start-first` update order, the `reverse-proxy` can
+seamlessly switch over traffic from old to new version of the proxied service.
+
+Try it yourself:
 
 ```bash
 cd examples/zero_downtime_deployment
@@ -119,82 +114,6 @@ To see above deployments in action, use a separate shell session to run
 while true; do curl --fail --max-time 0.2 localhost:8080; sleep 0.01s; done
 ```
 
-### Conditions when services are updated
-
-By default, a service is updated only if its service config hash changes. This
-hash is calculated over all service fields in the Compose file except `build`,
-`deploy.replicas`, `pull_policy`, and `scale`
-(see [source](https://github.com/docker/compose/blob/main/pkg/compose/hash.go)).
-
-Note that the service config hash does _not_ depend on the container image
-contents but just the `image` field. Thus, reusing an image tag like `latest`
-does not cause an update.
-
-Using `--force-recreate` always updates services irrespective of config hash
-changes.
-
-| Command                            | Effect                                        |
-| ---------------------------------- | --------------------------------------------- |
-| `kerek deploy`                     | Update all services with changed config hash  |
-| `kerek deploy --dry-run`           | Update nothing but show what would be changed |
-| `kerek deploy x`                   | Update service `x` if its config hash changed |
-| `kerek deploy --force-recreate`    | Always update all services                    |
-| `kerek deploy --force-recreate x`  | Always update service `x`                     |
-| `docker compose config --hash '*'` | Show service config hashes for Compose file   |
-
-### Service update process
-
-Services are updated in alphabetical order (more precisely, in lexicographical
-order by Unicode code point).
-
-For each service, containers are stopped then started (`stop-first`, default) or
-started then stopped (`start-first`), respectively, and this is repeated for
-replicas. The following visualizes the process for a service with 3 replicas.
-
-**`stop-first` case:**
-
-```
-               1. Stop old
-┄┄┄┄───────────┤
-
-                       2. Start new
-                       ├────────────────────────────────────────────┄┄┄┄
-
-                               3. Stop old
-┄┄┄┄───────────────────────────┤
-
-                                       4. Start new
-                                       ├────────────────────────────┄┄┄┄
-
-                                               5. Stop old
-┄┄┄┄───────────────────────────────────────────┤
-
-                                                       6. Start new
-                                                       ├────────────┄┄┄┄
-```
-
-**`start-first` case:**
-
-```
-               1. Start new
-               ├────────────────────────────────────────────────────┄┄┄┄
-
-                       2. Stop old
-┄┄┄┄───────────────────┤
-
-                               3. Start new
-                               ├────────────────────────────────────┄┄┄┄
-
-                                       4. Stop old
-┄┄┄┄───────────────────────────────────┤
-
-                                               5. Start new
-                                               ├────────────────────┄┄┄┄
-
-                                                       6. Stop old
-┄┄┄┄───────────────────────────────────────────────────┤
-```
-
 ### Support for Podman and other container engines
 
 Pass `--container-engine podman` or set the environment variable
@@ -204,11 +123,23 @@ engine-agnostic so you may use any other container engine with a compatible CLI.
 Podman Compose is not supported as it currently lacks some needed features like
 the calculation of service config hashes (`docker compose config --hash '*'`).
 
+### Docker CLI plugin
+
+Kerek may be set up as a Docker CLI plugin. With that, calls to subcommands like
+`kerek deploy` can be replaced by `docker deploy`, which some people prefer.
+Example [setup](https://github.com/docker/cli/issues/1534):
+
+```bash
+mkdir --parents ~/.docker/cli-plugins
+ln --symbolic ~/.cargo/bin/kerek ~/.docker/cli-plugins/docker-deploy
+docker deploy --help
+```
+
 ## Alternatives
 
-Other lightweight options for single-node environments:
+Other lightweight options for continuous delivery of containerized applications:
 
-- [Docker or Podman without Compose](https://github.com/evolutics/zero-downtime-deployments-with-podman)
+- [Docker without Compose](https://github.com/evolutics/zero-downtime-deployments-with-podman)
 - [`docker rollout`](https://github.com/Wowu/docker-rollout)
 - [Docker Swarm mode](https://docs.docker.com/engine/swarm/)
 - [K3s](https://docs.k3s.io)
@@ -220,7 +151,7 @@ Other lightweight options for single-node environments:
 ### `kerek --help`
 
 ```
-Zero-downtime deployments for Docker Compose
+Lightweight continuous delivery for Docker Compose
 
 Usage: kerek [OPTIONS] <COMMAND>
 
@@ -293,16 +224,52 @@ Builds, (re)creates, and starts containers for a service.
 If service names are given as command-line operands, this command does not
 automatically start any of their linked services.
 
-The containers are always started in the background and left running (detached
-mode).
+The containers are always run in the background (detached mode).
 
-If there are existing containers for a service, and the service's configuration
-or image was changed after the container's creation, the changes are picked up
-by recreating the containers (preserving mounted volumes). Whether the old
-containers are stopped before or after the new containers are started is
-controlled via `services.*.deploy.update_config.order` in a Compose file.
+If there are existing containers for a service whose service config has changed
+since the containers' creation, the changes are applied by recreating the
+containers (preserving mounted volumes).
 
-If you want to force recreating all containers, use the `--force-recreate` flag.
+More precisely, a service is updated only if its service config hash changes
+(details in https://github.com/docker/compose/blob/main/pkg/compose/hash.go).
+Note that the service config hash does not depend on the container image
+contents but only the `image` field. Thus, reusing an image tag like `latest`
+does not trigger an update.
+
+To force updating services regardless of config hash changes, use the
+`--force-recreate` flag.
+
+In summary:
+
+| Command                           | Effect                                 |
+| --------------------------------- | -------------------------------------- |
+| `kerek deploy`                    | Update services with changed hash      |
+| `kerek deploy x`                  | Update service `x` if its hash changed |
+| `kerek deploy --force-recreate`   | Always update all services             |
+| `kerek deploy --force-recreate x` | Always update service `x`              |
+| `kerek deploy --dry-run`          | Only show what would be changed        |
+| `docker compose config --hash \*` | Show service config hashes             |
+
+Whether the old containers are stopped before or after the new containers are
+started is controlled via `services.*.deploy.update_config.order` in a Compose
+file. The options are `stop-first` and `start-first`, respectively.
+
+Services are updated in lexicographical order (by Unicode code point). For each
+service, containers are stopped then started (`stop-first`, default) or started
+then stopped (`start-first`), respectively, and this is repeated for replicas:
+
+- `stop-first` case:
+  1. Stop old replica 1
+  2. Start new replica 1
+  3. Stop old replica 2
+  4. Start new replica 2
+  5. …
+- `start-first` case:
+  1. Start new replica 1
+  2. Stop old replica 1
+  3. Start new replica 2
+  4. Stop old replica 2
+  5. …
 
 Usage: kerek deploy [OPTIONS] [SERVICE_NAMES]...
 

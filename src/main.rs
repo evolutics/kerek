@@ -189,21 +189,55 @@ enum Subcommand {
     ///
     /// Builds, (re)creates, and starts containers for a service.
     ///
-    /// If service names are given as command-line operands, this command does
-    /// not automatically start any of their linked services.
+    /// If service names are given as command-line operands, this command does not
+    /// automatically start any of their linked services.
     ///
-    /// The containers are always started in the background and left running
-    /// (detached mode).
+    /// The containers are always run in the background (detached mode).
     ///
-    /// If there are existing containers for a service, and the service's
-    /// configuration or image was changed after the container's creation, the
-    /// changes are picked up by recreating the containers (preserving mounted
-    /// volumes). Whether the old containers are stopped before or after
-    /// the new containers are started is controlled via
-    /// `services.*.deploy.update_config.order` in a Compose file.
+    /// If there are existing containers for a service whose service config has changed
+    /// since the containers' creation, the changes are applied by recreating the
+    /// containers (preserving mounted volumes).
     ///
-    /// If you want to force recreating all containers, use the
+    /// More precisely, a service is updated only if its service config hash changes
+    /// (details in https://github.com/docker/compose/blob/main/pkg/compose/hash.go).
+    /// Note that the service config hash does not depend on the container image
+    /// contents but only the `image` field. Thus, reusing an image tag like `latest`
+    /// does not trigger an update.
+    ///
+    /// To force updating services regardless of config hash changes, use the
     /// `--force-recreate` flag.
+    ///
+    /// In summary:
+    ///{n}
+    ///{n}| Command                           | Effect                                 |
+    ///{n}| --------------------------------- | -------------------------------------- |
+    ///{n}| `kerek deploy`                    | Update services with changed hash      |
+    ///{n}| `kerek deploy x`                  | Update service `x` if its hash changed |
+    ///{n}| `kerek deploy --force-recreate`   | Always update all services             |
+    ///{n}| `kerek deploy --force-recreate x` | Always update service `x`              |
+    ///{n}| `kerek deploy --dry-run`          | Only show what would be changed        |
+    ///{n}| `docker compose config --hash \*` | Show service config hashes             |
+    ///
+    /// Whether the old containers are stopped before or after the new containers are
+    /// started is controlled via `services.*.deploy.update_config.order` in a Compose
+    /// file. The options are `stop-first` and `start-first`, respectively.
+    ///
+    /// Services are updated in lexicographical order (by Unicode code point). For each
+    /// service, containers are stopped then started (`stop-first`, default) or started
+    /// then stopped (`start-first`), respectively, and this is repeated for replicas:
+    ///{n}
+    ///{n}- `stop-first` case:
+    ///{n}  1. Stop old replica 1
+    ///{n}  2. Start new replica 1
+    ///{n}  3. Stop old replica 2
+    ///{n}  4. Start new replica 2
+    ///{n}  5. …
+    ///{n}- `start-first` case:
+    ///{n}  1. Start new replica 1
+    ///{n}  2. Stop old replica 1
+    ///{n}  3. Start new replica 2
+    ///{n}  4. Stop old replica 2
+    ///{n}  5. …
     Deploy {
         #[command(flatten)]
         docker_compose_arguments: DockerComposeArguments,

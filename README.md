@@ -114,6 +114,17 @@ To see above deployments in action, use a separate shell session to run
 while true; do curl --fail --max-time 0.2 localhost:8080; sleep 0.01s; done
 ```
 
+### Continuous delivery via SSH
+
+There is an [example](examples/ssh_delivery/test.sh) of a continuous delivery
+pipeline with these essential steps:
+
+1. Provision a Vagrant VM with Podman, which serves as a staging environment.
+1. Temporarily run an SSH tunnel to the Podman API service on staging.
+1. Transfer container images to staging via this SSH tunnel.
+1. Deploy the Compose application to staging via the SSH tunnel.
+1. Do a smoke test.
+
 ### Support for Podman and other container engines
 
 Pass `--container-engine podman` or set the environment variable

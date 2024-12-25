@@ -132,7 +132,7 @@ Pass `--container-engine podman` or set the environment variable
 engine-agnostic so you may use any other container engine with a compatible CLI.
 
 Podman Compose is not supported as it currently lacks some needed features like
-the calculation of service config hashes (`docker compose config --hash '*'`).
+the calculation of service config hashes (`docker compose config --hash \*`).
 
 ### Docker CLI plugin
 

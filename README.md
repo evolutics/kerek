@@ -169,10 +169,10 @@ Usage: kerek [OPTIONS] <COMMAND>
 Commands:
   deploy           Create or update services
   provision        Provisions host with container engine, making system-wide
-                       changes
+                   changes
   transfer-images  Copies images from default to specified Docker host
-  tunnel-ssh       Forwards local Unix domain socket to remote Docker host
-                       over SSH
+  tunnel-ssh       Forwards local Unix domain socket to remote Docker host over
+                   SSH
   help             Print this message or the help of the given subcommand(s)
 
 Options:

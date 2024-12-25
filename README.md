@@ -86,7 +86,7 @@ services:
     # …
 ```
 
-Se
+See
 [`examples/zero_downtime_deployment/compose.yaml`](examples/zero_downtime_deployment/compose.yaml)
 for a demo. It defines a service called `greet` made available on localhost:8080
 via a `reverse-proxy`:

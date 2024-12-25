@@ -94,7 +94,7 @@ via a `reverse-proxy`:
 ```
     localhost:8080    ╭───────────────╮        ╭───────────────╮
 ──────────────────────┤ reverse-proxy ├────────┤ greet         │
-                  :80 │ (stop-first)  │    :80 │ (start-first) │
+                  :81 │ (stop-first)  │    :80 │ (start-first) │
                       ╰───────────────╯        ╰───────────────╯
 ```
 

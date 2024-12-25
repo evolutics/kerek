@@ -8,7 +8,7 @@ services:
     image: "docker.io/caddy:2-alpine"
 
   reverse-proxy:
-    command: caddy reverse-proxy --from :80 --to greet
+    command: caddy reverse-proxy --from :81 --to greet
     image: "docker.io/caddy:2-alpine"
     ports:
-      - "127.0.0.1:8080:80"
+      - "127.0.0.1:8080:81"

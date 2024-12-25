@@ -73,8 +73,8 @@ any other Docker Compose workflows.
 
 Above config is an optional part of the
 [Compose specification](https://github.com/compose-spec/compose-spec/blob/master/deploy.md).
-But vanilla Docker Compose always updates services in the `stop-first` order,
-even if your Compose file says otherwise.
+But vanilla Docker Compose always updates services in `stop-first` order, even
+if your Compose file says otherwise.
 
 ### Zero-downtime deployments with a reverse proxy
 

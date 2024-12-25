@@ -183,8 +183,6 @@ struct DockerArguments {
 enum Subcommand {
     // Keep following help in sync with this source, where applicable:
     // https://github.com/docker/compose/blob/main/docs/reference/compose_up.md
-    //
-    // TODO: Respect dependencies from `depends_on`.
     /// Create or update services
     ///
     /// Builds, (re)creates, and starts containers for a service.
@@ -222,9 +220,10 @@ enum Subcommand {
     /// started is controlled via `services.*.deploy.update_config.order` in a Compose
     /// file. The options are `stop-first` and `start-first`, respectively.
     ///
-    /// Services are updated in lexicographical order (by Unicode code point). For each
-    /// service, containers are stopped then started (`stop-first`, default) or started
-    /// then stopped (`start-first`), respectively, and this is repeated for replicas:
+    /// Services are updated in lexicographical order (by Unicode code point),
+    /// regardless of dependencies. For each service, containers are stopped then
+    /// started (`stop-first`, default) or started then stopped (`start-first`),
+    /// respectively, and this is repeated for replicas:
     ///{n}
     ///{n}- `stop-first` case:
     ///{n}  1. Stop old replica 1

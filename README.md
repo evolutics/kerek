@@ -254,9 +254,10 @@ Whether the old containers are stopped before or after the new containers are
 started is controlled via `services.*.deploy.update_config.order` in a Compose
 file. The options are `stop-first` and `start-first`, respectively.
 
-Services are updated in lexicographical order (by Unicode code point). For each
-service, containers are stopped then started (`stop-first`, default) or started
-then stopped (`start-first`), respectively, and this is repeated for replicas:
+Services are updated in lexicographical order (by Unicode code point),
+regardless of dependencies. For each service, containers are stopped then
+started (`stop-first`, default) or started then stopped (`start-first`),
+respectively, and this is repeated for replicas:
 
 - `stop-first` case:
   1. Stop old replica 1

@@ -82,7 +82,7 @@ There is a [demo](examples/zero_downtime_deployment/compose.yaml) with an
 example service called `greet`, which should stay available during updates.
 
 For that purpose, traffic on localhost:8080 is proxied trough a second service
-`reverse-proxy`:
+`reverse-proxy` (Caddy):
 
 ```
     localhost:8080    ╭───────────────╮        ╭───────────────╮

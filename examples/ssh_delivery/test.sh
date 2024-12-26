@@ -3,22 +3,23 @@
 set -o errexit -o nounset -o pipefail
 
 test_container_engine() {
-  # Set up VM.
+  echo 'Provisioning VM.'
   if [[ -f ssh_config ]]; then
     vagrant snapshot pop
   else
-    vagrant ssh-config --host ssh-host >ssh_config
+    vagrant ssh-config --host staging >ssh_config
     kerek --container-engine podman \
-      provision --force --ssh-config ssh_config ssh-host
+      provision --force --ssh-config ssh_config staging
     vagrant snapshot push
   fi
 
-  # Get container images; use `docker compose build` if you need to build.
+  echo 'Getting container images.'
   docker compose pull --ignore-buildable
+  # You may need `docker compose build` here.
 
-  # Deploy via SSH tunnel.
+  echo 'Deploying via SSH tunnel.'
   (
-    kerek --container-engine podman tunnel-ssh --ssh-config ssh_config ssh-host
+    kerek --container-engine podman tunnel-ssh --ssh-config ssh_config staging
     trap 'fuser --kill -TERM kerek.sock' EXIT
 
     docker compose config --images \
@@ -28,7 +29,7 @@ test_container_engine() {
       deploy --no-build --pull never --remove-orphans --wait
   )
 
-  # Smoke test.
+  echo 'Smoke testing.'
   [[ "$(curl --fail-with-body --max-time 3 --retry 99 --retry-connrefused \
     --retry-max-time 150 http://192.168.60.159 \
     | tee /dev/stderr)" == 'hello-world' ]]

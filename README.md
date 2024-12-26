@@ -34,10 +34,10 @@ is stopped before a new container of the service is started (**`stop-first`**
 case):
 
 ```
-    Old container          Stop
-┄┄┄┄───────────────────────┤
-                                           Start       New container
-                                           ├────────────────────────┄┄┄┄
+________________________
+Old container           Stop
+                                    ________________________
+                                    Start      New container
 ```
 
 This causes a service interruption as there is a time when neither container is
@@ -47,10 +47,10 @@ Imagine that we could make the container lifetimes overlap instead
 (**`start-first`** case):
 
 ```
-    Old container                          Stop
-┄┄┄┄───────────────────────────────────────┤
-                           Start                       New container
-                           ├────────────────────────────────────────┄┄┄┄
+____________________________________
+Old container                       Stop
+                        ____________________________________
+                        Start                  New container
 ```
 
 Kerek supports both of these cases.

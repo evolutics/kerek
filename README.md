@@ -84,11 +84,9 @@ example service called `greet`, which should stay available during updates.
 For that purpose, traffic on localhost:8080 is proxied trough a second service
 `reverse-proxy` (Caddy):
 
-```
-    localhost:8080    ╭───────────────╮        ╭───────────────╮
-──────────────────────┤ reverse-proxy ├────────┤ greet         │
-                  :81 │ (stop-first)  │    :80 │ (start-first) │
-                      ╰───────────────╯        ╰───────────────╯
+```mermaid
+flowchart LR
+    localhost:8080 ---|:81| reverse-proxy ---|:80| greet
 ```
 
 With `greet` configured in `start-first` update order, the `reverse-proxy` can

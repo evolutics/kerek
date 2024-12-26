@@ -71,10 +71,10 @@ services:
 Now just run `kerek deploy` in place of `docker compose up`. No need to change
 any other Docker Compose workflows.
 
-Above config is an optional part of the
+Note that above config is an official (but optional) part of the
 [Compose specification](https://github.com/compose-spec/compose-spec/blob/main/deploy.md).
-But vanilla Docker Compose always updates services in `stop-first` order, even
-if your Compose file says otherwise.
+However, vanilla Docker Compose always updates services in `stop-first` order,
+even if your Compose file says otherwise.
 
 ### Zero-downtime deployments with a reverse proxy
 

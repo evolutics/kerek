@@ -13,9 +13,10 @@ test_container_engine() {
     vagrant snapshot push
   fi
 
-  echo 'Getting container images.'
+  echo 'Building container images.'
+  docker compose build
+  echo 'Pulling container images.'
   docker compose pull --ignore-buildable
-  # You may need `docker compose build` here.
 
   echo 'Deploying via SSH tunnel.'
   (
@@ -30,9 +31,11 @@ test_container_engine() {
   )
 
   echo 'Smoke testing.'
-  [[ "$(curl --fail-with-body --max-time 3 --retry 99 --retry-connrefused \
-    --retry-max-time 150 http://192.168.60.159 \
-    | tee /dev/stderr)" == 'hello-world' ]]
+  for port in 80 81; do
+    [[ "$(curl --fail-with-body --max-time 3 --retry 99 --retry-connrefused \
+      --retry-max-time 150 "http://192.168.60.159:${port}" \
+      | tee /dev/stderr)" == "Hi from ${port}" ]]
+  done
 }
 
 main() {

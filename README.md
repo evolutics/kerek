@@ -125,6 +125,7 @@ sequenceDiagram
     participant Staging VM
 
     Pipeline->>Staging VM: Provision Vagrant VM with Podman
+    Pipeline->>Pipeline: Build/pull container images
     Pipeline->>SSH tunnel: Tunnel SSH to Podman service on staging
     activate SSH tunnel
     Pipeline->>Staging VM: Transfer container images

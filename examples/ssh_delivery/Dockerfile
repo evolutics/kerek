@@ -1,2 +1,2 @@
 FROM hashicorp/http-echo:1.0
-ENV ECHO_TEXT='Hi from 81'
+CMD ["-text=Hi from 81"]

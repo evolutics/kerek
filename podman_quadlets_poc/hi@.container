@@ -2,7 +2,7 @@
 Description=Hi version %i
 
 [Container]
-Exec=caddy respond --listen :80 "Hi from %i\n"
+Exec=-listen=:8282 -text="Hi from %i"
 Image=docker.io/caddy:2-alpine
 Network=test-net.network
 NetworkAlias=greet

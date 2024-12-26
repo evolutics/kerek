@@ -86,7 +86,7 @@ For that purpose, traffic on localhost:8080 is proxied trough a second service
 
 ```mermaid
 flowchart LR
-    localhost:8080 ---|:81| reverse-proxy ---|:80| greet
+    localhost:8080 ---|:81| reverse-proxy ---|:8282| greet
 ```
 
 With `greet` configured in `start-first` update order, the `reverse-proxy` can

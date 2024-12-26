@@ -2,7 +2,7 @@
 Description=Reverse proxy
 
 [Container]
-Exec=caddy reverse-proxy --from :81 --to greet
+Exec=caddy reverse-proxy --from :81 --to greet:8282
 Image=docker.io/caddy:2-alpine
 Network=test-net.network
 PublishPort=127.0.0.1:8080:81

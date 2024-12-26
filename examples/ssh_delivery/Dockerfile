@@ -1,2 +1,2 @@
-FROM hashicorp/http-echo:1.0
+FROM docker.io/hashicorp/http-echo:1.0
 CMD ["-text=Hi from 81"]

@@ -13,9 +13,9 @@ test_container_engine() {
     vagrant snapshot push
   fi
 
-  echo 'Building container images.'
+  echo 'Building buildable container images.'
   docker compose build
-  echo 'Pulling container images.'
+  echo 'Pulling non-buildable container images.'
   docker compose pull --ignore-buildable
 
   echo 'Deploying via SSH tunnel.'

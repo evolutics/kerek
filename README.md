@@ -1,10 +1,14 @@
 # Kerek: Lightweight continuous delivery for Docker Compose
 
-Kerek is a CLI that adds these missing pieces to Docker:
+Kerek is a CLI that adds features to Docker for people who like to keep
+continuous delivery light and not deal with Kubernetes or a container registry.
+
+## Key features
 
 - Zero-downtime deployments for Docker Compose.
-- Distributing container images via SSH instead of a registry.
-- Using a custom SSH config file when connecting to a remote Docker instance.
+- Distributing images over SSH instead of a registry.
+- Custom SSH config files supported for remote Docker instances.
+- Compatible with Docker and Podman.
 
 ## Setup
 
@@ -30,8 +34,8 @@ cargo uninstall kerek
 ### Seamless service updates
 
 When updating services with `docker compose up`, the old container of a service
-is stopped before a new container of the service is started (**`stop-first`**
-case):
+is stopped before a new container of the service is started, causing a service
+interruption (**`stop-first`** case):
 
 ```
 ________________________
@@ -40,11 +44,8 @@ Old container           Stop
                                     Start      New container
 ```
 
-This causes a service interruption as there is a time when neither container is
-available.
-
-Imagine that we could make the container lifetimes overlap instead
-(**`start-first`** case):
+Imagine we could make the container lifetimes overlap instead (**`start-first`**
+case):
 
 ```
 ____________________________________
@@ -78,29 +79,30 @@ even if your Compose file says otherwise.
 
 ### Zero-downtime deployments with a reverse proxy
 
-There is a [demo](examples/zero_downtime_deployment/compose.yaml) with an
-example service called `greet`, which should stay available during updates.
+To switch over traffic from old to new version of an application during an
+update, it is common to use a reverse proxy.
 
-For that purpose, traffic on localhost:8080 is proxied trough a second service
-`reverse-proxy` (Caddy):
+See this [demo](examples/zero_downtime_deployment/compose.yaml) with an example
+`greet` service, which is behind a `reverse-proxy` service (Caddy) for this
+purpose:
 
 ```mermaid
 flowchart LR
     localhost:8080 ---|:81| reverse-proxy ---|:8282| greet
 ```
 
-With `greet` configured in `start-first` update order, the `reverse-proxy` can
-seamlessly switch over traffic from old to new version of the proxied service.
+As `greet` is configured in `start-first` update order, the `reverse-proxy` can
+seamlessly switch over traffic from old to new container during their overlap.
 
 Try it yourself:
 
 ```bash
 cd examples/zero_downtime_deployment
+
 kerek deploy --wait
 curl localhost:8080 # … prints "Hi from A"
 
-export GREET_VERSION=B
-kerek deploy --wait
+GREET_VERSION=B kerek deploy --wait
 curl localhost:8080 # … prints "Hi from B"
 
 docker compose down
@@ -116,7 +118,7 @@ while true; do curl --fail --max-time 0.2 localhost:8080; sleep 0.01s; done
 
 There is an [example](examples/ssh_delivery/test.sh) of a pipeline that delivers
 a Compose application to a staging environment. It does not need a container
-registry but instead transfers images via SSH. Visual summary of the process:
+registry but instead transfers images via SSH. Summary of the process:
 
 ```mermaid
 sequenceDiagram

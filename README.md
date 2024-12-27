@@ -115,7 +115,8 @@ while true; do curl --fail --max-time 0.2 localhost:8080; sleep 0.01s; done
 ### Continuous delivery via SSH
 
 There is an [example](examples/ssh_delivery/test.sh) of a pipeline that delivers
-a Compose application to a staging environment, summarized visually as follows:
+a Compose application to a staging environment. It does not need a container
+registry but instead transfers images via SSH. Visual summary of the process:
 
 ```mermaid
 sequenceDiagram

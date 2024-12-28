@@ -3,6 +3,8 @@
 Kerek is a CLI that adds features to Docker for people who like to keep
 continuous delivery light and not deal with Kubernetes or a container registry.
 
+![Kerek logo](logo.svg)
+
 ## Key features
 
 - Zero-downtime deployments for Docker Compose.

@@ -33,7 +33,7 @@ cargo uninstall kerek
 
 ## Usage
 
-### Seamless service updates
+### Service update order
 
 When updating services with `docker compose up`, the old container of a service
 is stopped before a new container of the service is started, causing a service

@@ -120,7 +120,7 @@ while true; do curl --fail --max-time 0.2 localhost:8080; sleep 0.01s; done
 
 There is an [example](examples/ssh_delivery/test.sh) of a pipeline that delivers
 a Compose application to a staging environment. It does not need a container
-registry but instead transfers images via SSH. Summary of the process:
+registry but instead transfers images via SSH. Summary of the whole process:
 
 ```mermaid
 sequenceDiagram

@@ -35,7 +35,7 @@ mod tests {
             metadata,
             r#"{
   "SchemaVersion": "0.1.0",
-  "ShortDescription": "Lightweight continuous delivery for Docker Compose",
+  "ShortDescription": "Light continuous delivery for Docker Compose",
   "URL": "https://github.com/evolutics/kerek",
   "Vendor": "Benjamin Fischer",
   "Version": "1.0.0"

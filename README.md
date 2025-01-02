@@ -1,4 +1,4 @@
-# Kerek: Lightweight continuous delivery for Docker Compose
+# Kerek: Light continuous delivery for Docker Compose
 
 Kerek is a CLI that adds features to Docker for people who like to keep
 continuous delivery light and not deal with Kubernetes or a container registry.
@@ -163,7 +163,7 @@ docker deploy --help
 
 ## Alternatives
 
-Other lightweight options for continuous delivery of containerized applications:
+Other light options for continuous delivery of containerized applications:
 
 - [Docker without Compose](https://github.com/evolutics/zero-downtime-deployments-with-podman)
 - [`docker rollout`](https://github.com/Wowu/docker-rollout)
@@ -177,7 +177,7 @@ Other lightweight options for continuous delivery of containerized applications:
 ### `kerek --help`
 
 ```
-Lightweight continuous delivery for Docker Compose
+Light continuous delivery for Docker Compose
 
 Usage: kerek [OPTIONS] <COMMAND>
 

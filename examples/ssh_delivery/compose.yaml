@@ -1,10 +1,10 @@
 services:
   web-no-build:
-    command: ["-text=Hi from 80"]
+    command: ["-text=Hi from 8080"]
     image: docker.io/hashicorp/http-echo:1.0
     ports:
-      - "80:5678"
+      - "8080:5678"
   web-with-build:
     build: .
     ports:
-      - "81:5678"
+      - "8181:5678"

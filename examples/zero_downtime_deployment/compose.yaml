@@ -8,7 +8,7 @@ services:
     image: "docker.io/hashicorp/http-echo:1.0"
 
   reverse-proxy:
-    command: caddy reverse-proxy --from :81 --to greet:8282
+    command: caddy reverse-proxy --from :8181 --to greet:8282
     image: "docker.io/caddy:2"
     ports:
-      - "127.0.0.1:8080:81"
+      - "127.0.0.1:8080:8181"

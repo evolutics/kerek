@@ -31,7 +31,7 @@ test_container_engine() {
   )
 
   echo 'Smoke testing.'
-  for port in 80 81; do
+  for port in 8080 8181; do
     [[ "$(curl --fail-with-body --max-time 3 --retry 99 --retry-connrefused \
       --retry-max-time 150 "http://192.168.60.159:${port}" \
       | tee /dev/stderr)" == "Hi from ${port}" ]]

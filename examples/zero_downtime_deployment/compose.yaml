@@ -1,14 +1,14 @@
 name: example
 services:
   greet:
+    image: "docker.io/hashicorp/http-echo:1.0"
     command: ["-listen=:8282", "-text=Hi from ${GREET_VERSION-A}"]
     deploy:
       update_config:
         order: start-first
-    image: "docker.io/hashicorp/http-echo:1.0"
 
   reverse-proxy:
-    command: ["caddy", "reverse-proxy", "--from", ":8181", "--to", "greet:8282"]
     image: "docker.io/caddy:2"
+    command: ["caddy", "reverse-proxy", "--from", ":8181", "--to", "greet:8282"]
     ports:
       - "127.0.0.1:8080:8181"

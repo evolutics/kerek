@@ -165,7 +165,7 @@ docker deploy --help
 
 Other light options for continuous delivery of containerized applications:
 
-- [Docker without Compose](https://github.com/evolutics/zero-downtime-deployments-with-podman)
+- [Docker without Compose](https://github.com/evolutics/zero-downtime-deployments-with-podman-docker-or-docker-compose)
 - [`docker rollout`](https://github.com/Wowu/docker-rollout)
 - [Docker Swarm mode](https://docs.docker.com/engine/swarm/)
 - [K3s](https://docs.k3s.io)

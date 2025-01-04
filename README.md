@@ -34,9 +34,9 @@ is stopped before a new container of the service is started, causing a service
 interruption (**`stop-first`** case):
 
 ```
-________________________
+_______________________.
 Old container           Stop
-                                    ________________________
+                                    ._______________________
                                     Start      New container
 ```
 
@@ -44,9 +44,9 @@ Imagine we could make the container lifetimes overlap instead (**`start-first`**
 case):
 
 ```
-____________________________________
+___________________________________.
 Old container                       Stop
-                        ____________________________________
+                        .___________________________________
                         Start                  New container
 ```
 

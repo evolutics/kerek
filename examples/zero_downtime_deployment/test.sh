@@ -23,13 +23,13 @@ test_container_engine() {
     kill %%
 
     for greet_version in 'A' 'B'; do
-      if ! grep --quiet "Hi from ${greet_version}" test.log; then
+      if ! grep --quiet "^Hi from ${greet_version}$" test.log; then
         echo "No successful ping for greet version: ${greet_version}"
         exit 1
       fi
     done
 
-    local -r ping_errors="$(grep Error test.log)"
+    local -r ping_errors="$(grep '^Error ' test.log)"
     if [[ -n "${ping_errors}" ]]; then
       printf 'Failed pings:\n%s\n' "${ping_errors}"
       exit 1

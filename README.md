@@ -90,7 +90,7 @@ purpose:
 
 ```mermaid
 flowchart LR
-    localhost:8080 ---|:8181| reverse-proxy ---|:8282| greet
+    localhost:8080 -->|:8181| reverse-proxy -->|:8282| greet
 ```
 
 As `greet` is configured in `start-first` update order, the `reverse-proxy` can

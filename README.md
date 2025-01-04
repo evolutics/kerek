@@ -19,16 +19,10 @@ continuous delivery light and not deal with Kubernetes or a container registry.
 - Docker or Podman
 - Docker Compose
 
-### Installing
+### Installation
 
 ```bash
 cargo install --git https://github.com/evolutics/kerek
-```
-
-### Uninstalling
-
-```bash
-cargo uninstall kerek
 ```
 
 ## Usage

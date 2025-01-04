@@ -29,7 +29,7 @@ test_container_engine() {
       fi
     done
 
-    local -r ping_errors="$(grep '^Error ' test.log)"
+    local -r ping_errors="$(grep --invert-match '^Hi from ' test.log)"
     if [[ -n "${ping_errors}" ]]; then
       printf 'Failed pings:\n%s\n' "${ping_errors}"
       exit 1

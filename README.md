@@ -5,11 +5,11 @@ continuous delivery light and not deal with Kubernetes or a container registry.
 
 ![Kerek logo](logo.svg)
 
-## Key features
+## Features
 
-- Zero-downtime deployments for Docker Compose.
-- Distributing images over SSH instead of a registry.
-- Custom SSH config files supported for remote Docker instances.
+- Zero-downtime deployments for Docker Compose (`kerek deploy`).
+- Distributing images over SSH instead of a registry (`kerek transfer-images`).
+- Custom SSH config files for remote Docker instances (`kerek tunnel-ssh`).
 - Compatible with Docker and Podman.
 
 ## Setup

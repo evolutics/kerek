@@ -157,7 +157,7 @@ Example [setup](https://github.com/docker/cli/issues/1534):
 
 ```bash
 mkdir --parents ~/.docker/cli-plugins
-ln --symbolic ~/.cargo/bin/kerek ~/.docker/cli-plugins/docker-deploy
+ln --symbolic "$(which kerek)" ~/.docker/cli-plugins/docker-deploy
 docker deploy --help
 ```
 

@@ -33,7 +33,7 @@ cargo install --git https://github.com/evolutics/kerek
 Usage: kerek [OPTIONS] <COMMAND>
 
 Commands:
-  deploy           Create or update services
+  deploy           Create or update Docker Compose services
   provision        Provisions host with container engine, making system-wide
                    changes
   transfer-images  Copies images from default to specified Docker host
@@ -191,7 +191,7 @@ Light continuous delivery for Docker Compose
 Usage: kerek [OPTIONS] <COMMAND>
 
 Commands:
-  deploy           Create or update services
+  deploy           Create or update Docker Compose services
   provision        Provisions host with container engine, making system-wide
                    changes
   transfer-images  Copies images from default to specified Docker host
@@ -252,9 +252,9 @@ Options:
 ### `kerek deploy --help`
 
 ```
-Create or update services
+Create or update Docker Compose services
 
-Builds, (re)creates, and starts containers for a service.
+Builds, (re)creates, and starts containers for a Docker Compose service.
 
 If service names are given as command-line operands, this command does not
 automatically start any of their linked services.

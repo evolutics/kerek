@@ -183,9 +183,9 @@ struct DockerArguments {
 enum Subcommand {
     // Keep following help in sync with this source, where applicable:
     // https://github.com/docker/compose/blob/main/docs/reference/compose_up.md
-    /// Create or update services
+    /// Create or update Docker Compose services
     ///
-    /// Builds, (re)creates, and starts containers for a service.
+    /// Builds, (re)creates, and starts containers for a Docker Compose service.
     ///
     /// If service names are given as command-line operands, this command does not
     /// automatically start any of their linked services.

@@ -7,7 +7,7 @@ description = "Light continuous delivery for Docker Compose"
 homepage = "https://github.com/evolutics/kerek"
 repository = "https://github.com/evolutics/kerek"
 license = "MIT"
-keywords = ["compose", "deployment", "docker", "docker-compose", "podman"]
+keywords = ["compose", "delivery", "deployment", "docker", "podman"]
 categories = ["command-line-utilities", "virtualization", "web-programming"]
 
 [dependencies]

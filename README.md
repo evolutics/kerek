@@ -16,6 +16,7 @@ continuous delivery light and not deal with Kubernetes or a container registry.
 
 ### Prerequisites
 
+- Unix-like operating system
 - Docker or Podman
 - Docker Compose
 

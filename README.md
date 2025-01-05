@@ -304,6 +304,7 @@ Examples:
     kerek deploy --force-recreate
 - Always update service `x`:
     kerek deploy --force-recreate x
+
 - Only show what would be changed:
     kerek deploy --dry-run
 - Show service config hashes:
@@ -401,6 +402,13 @@ Install container engine on host, making system-wide changes
 This targets a host via SSH, unless host `localhost` and no SSH config file are
 passed as arguments, in which case the current machine is targeted.
 
+Examples:
+
+- Provision Podman on SSH host:
+    kerek --container-engine podman provision my-ssh-host
+- Provision Podman on localhost:
+    kerek --container-engine podman provision localhost
+
 Usage: kerek provision [OPTIONS] <HOST>
 
 Arguments:
@@ -432,13 +440,19 @@ image is considered present if the provided name matches one of these forms:
 
 Examples:
 
-    kerek --host ssh://192.0.2.1 transfer-images my-img
-    DOCKER_HOST=ssh://from kerek --host ssh://to transfer-images my-img
-    DOCKER_CONTEXT=from kerek --context to transfer-images my-img
-    docker compose config --images | kerek --host … transfer-images -
+- Transfer image `img` from default Docker host to 192.0.2.1 over SSH:
+    kerek --host ssh://192.0.2.1 transfer-images img
+- Transfer image from Docker host `ssh://src` to `ssh://dest`:
+    DOCKER_HOST=ssh://src kerek --host ssh://dest transfer-images img
+- Transfer image from Docker context `src` to `dest`:
+    DOCKER_CONTEXT=src kerek --context dest transfer-images img
 
-    kerek --host … transfer-images --compress zstd my-img
-    kerek --host … transfer-images --compress 'xz -9' my-img
+- Always transfer image, even if already present under same name:
+    kerek --host … transfer-images --force img:latest
+- Transfer images of Compose file:
+    docker compose config --images | kerek --host … transfer-images -
+- Transfer image, compressing it in transit with Zstandard:
+    kerek --host … transfer-images --compress zstd img
 
 Usage: kerek transfer-images [OPTIONS] [IMAGES]...
 
@@ -467,11 +481,14 @@ This runs an SSH tunnel in the background. Meanwhile, you can connect to the
 remote Docker host using `DOCKER_HOST=unix:///path/to/kerek.sock` locally. Note
 that a custom SSH config file can be specified, unlike with vanilla Docker.
 
-Example:
+Examples:
 
+- Use temporary SSH tunnel to show containers running on SSH host:
     kerek tunnel-ssh my-ssh-host
     CONTAINER_HOST="unix://${PWD}/kerek.sock" podman ps
     fuser --kill -TERM kerek.sock
+- Tunnel to SSH host of custom SSH config file:
+    kerek tunnel-ssh --ssh-config ssh_config my-ssh-host
 
 Usage: kerek tunnel-ssh [OPTIONS] <SSH_HOST>
 

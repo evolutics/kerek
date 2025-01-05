@@ -551,10 +551,10 @@ mod tests {
         let description = env!("CARGO_PKG_DESCRIPTION");
         let top_level_heading = format!("# Kerek: {description}\n\n");
 
-        assert!(get_readme().starts_with(&top_level_heading));
+        assert!(readme().starts_with(&top_level_heading));
     }
 
-    fn get_readme() -> &'static str {
+    fn readme() -> &'static str {
         include_str!("../README.md")
     }
 
@@ -565,7 +565,7 @@ mod tests {
         let relevant_help = relevant_parts.join("\n\n");
         let section = format!("\n\n### CLI overview\n\n```\n{relevant_help}\n```\n");
 
-        assert!(get_readme().contains(&section), "{section}")
+        assert!(readme().contains(&section), "{section}")
     }
 
     #[test_case::test_case(&[]; "")]
@@ -580,7 +580,7 @@ mod tests {
         let help_message = render_help_message(subcommands);
         let help_section = format!("\n\n### `{help_command}`\n\n```\n{help_message}\n```\n");
 
-        assert!(get_readme().contains(&help_section), "{help_section}")
+        assert!(readme().contains(&help_section), "{help_section}")
     }
 
     fn render_help_message(subcommands: &[&str]) -> String {

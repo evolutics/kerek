@@ -22,6 +22,11 @@ continuous delivery light and not deal with Kubernetes or a container registry.
 
 ### Installation
 
+Download a pre-built executable from the
+[latest release](https://github.com/evolutics/kerek/releases/latest).
+
+Alternatively, build from source with
+
 ```bash
 cargo install --git https://github.com/evolutics/kerek
 ```

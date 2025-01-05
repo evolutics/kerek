@@ -297,18 +297,18 @@ respectively, and this is repeated for replicas:
 Examples:
 
 - Update services with changed hash:
-    kerek deploy
+    $ kerek deploy
 - Update service `x` if its hash changed:
-    kerek deploy x
+    $ kerek deploy x
 - Always update all services:
-    kerek deploy --force-recreate
+    $ kerek deploy --force-recreate
 - Always update service `x`:
-    kerek deploy --force-recreate x
+    $ kerek deploy --force-recreate x
 
 - Only show what would be changed:
-    kerek deploy --dry-run
+    $ kerek deploy --dry-run
 - Show service config hashes:
-    docker compose config --hash \*
+    $ docker compose config --hash \*
 
 Usage: kerek deploy [OPTIONS] [SERVICE_NAMES]...
 
@@ -405,9 +405,9 @@ passed as arguments, in which case the current machine is targeted.
 Examples:
 
 - Provision Podman on SSH host:
-    kerek --container-engine podman provision my-ssh-host
+    $ kerek --container-engine podman provision my-ssh-host
 - Provision Podman on localhost:
-    kerek --container-engine podman provision localhost
+    $ kerek --container-engine podman provision localhost
 
 Usage: kerek provision [OPTIONS] <HOST>
 
@@ -441,18 +441,18 @@ image is considered present if the provided name matches one of these forms:
 Examples:
 
 - Transfer image `img` from default Docker host to 192.0.2.1 over SSH:
-    kerek --host ssh://192.0.2.1 transfer-images img
+    $ kerek --host ssh://192.0.2.1 transfer-images img
 - Transfer image from Docker host `ssh://src` to `ssh://dest`:
-    DOCKER_HOST=ssh://src kerek --host ssh://dest transfer-images img
+    $ DOCKER_HOST=ssh://src kerek --host ssh://dest transfer-images img
 - Transfer image from Docker context `src` to `dest`:
-    DOCKER_CONTEXT=src kerek --context dest transfer-images img
+    $ DOCKER_CONTEXT=src kerek --context dest transfer-images img
 
 - Always transfer image, even if already present under same name:
-    kerek --host … transfer-images --force img:latest
+    $ kerek --host … transfer-images --force img:latest
 - Transfer images of Compose file:
-    docker compose config --images | kerek --host … transfer-images -
+    $ docker compose config --images | kerek --host … transfer-images -
 - Transfer image, compressing it in transit with Zstandard:
-    kerek --host … transfer-images --compress zstd img
+    $ kerek --host … transfer-images --compress zstd img
 
 Usage: kerek transfer-images [OPTIONS] [IMAGES]...
 
@@ -484,11 +484,11 @@ that a custom SSH config file can be specified, unlike with vanilla Docker.
 Examples:
 
 - Use temporary SSH tunnel to show containers running on SSH host:
-    kerek tunnel-ssh my-ssh-host
-    CONTAINER_HOST="unix://${PWD}/kerek.sock" podman ps
-    fuser --kill -TERM kerek.sock
+    $ kerek tunnel-ssh my-ssh-host
+    $ CONTAINER_HOST="unix://${PWD}/kerek.sock" podman ps
+    $ fuser --kill -TERM kerek.sock
 - Tunnel to SSH host of custom SSH config file:
-    kerek tunnel-ssh --ssh-config ssh_config my-ssh-host
+    $ kerek tunnel-ssh --ssh-config ssh_config my-ssh-host
 
 Usage: kerek tunnel-ssh [OPTIONS] <SSH_HOST>
 

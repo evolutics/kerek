@@ -230,18 +230,18 @@ enum Subcommand {
     /// Examples:
     ///{n}
     ///{n}- Update services with changed hash:
-    ///{n}    kerek deploy
+    ///{n}    $ kerek deploy
     ///{n}- Update service `x` if its hash changed:
-    ///{n}    kerek deploy x
+    ///{n}    $ kerek deploy x
     ///{n}- Always update all services:
-    ///{n}    kerek deploy --force-recreate
+    ///{n}    $ kerek deploy --force-recreate
     ///{n}- Always update service `x`:
-    ///{n}    kerek deploy --force-recreate x
+    ///{n}    $ kerek deploy --force-recreate x
     ///{n}
     ///{n}- Only show what would be changed:
-    ///{n}    kerek deploy --dry-run
+    ///{n}    $ kerek deploy --dry-run
     ///{n}- Show service config hashes:
-    ///{n}    docker compose config --hash \*
+    ///{n}    $ docker compose config --hash \*
     Deploy {
         #[command(flatten)]
         docker_compose_arguments: DockerComposeArguments,
@@ -265,9 +265,9 @@ enum Subcommand {
     /// Examples:
     ///{n}
     ///{n}- Provision Podman on SSH host:
-    ///{n}    kerek --container-engine podman provision my-ssh-host
+    ///{n}    $ kerek --container-engine podman provision my-ssh-host
     ///{n}- Provision Podman on localhost:
-    ///{n}    kerek --container-engine podman provision localhost
+    ///{n}    $ kerek --container-engine podman provision localhost
     Provision {
         /// Go ahead without prompting user to confirm
         #[arg(long)]
@@ -292,18 +292,18 @@ enum Subcommand {
     /// Examples:
     ///{n}
     ///{n}- Transfer image `img` from default Docker host to 192.0.2.1 over SSH:
-    ///{n}    kerek --host ssh://192.0.2.1 transfer-images img
+    ///{n}    $ kerek --host ssh://192.0.2.1 transfer-images img
     ///{n}- Transfer image from Docker host `ssh://src` to `ssh://dest`:
-    ///{n}    DOCKER_HOST=ssh://src kerek --host ssh://dest transfer-images img
+    ///{n}    $ DOCKER_HOST=ssh://src kerek --host ssh://dest transfer-images img
     ///{n}- Transfer image from Docker context `src` to `dest`:
-    ///{n}    DOCKER_CONTEXT=src kerek --context dest transfer-images img
+    ///{n}    $ DOCKER_CONTEXT=src kerek --context dest transfer-images img
     ///{n}
     ///{n}- Always transfer image, even if already present under same name:
-    ///{n}    kerek --host … transfer-images --force img:latest
+    ///{n}    $ kerek --host … transfer-images --force img:latest
     ///{n}- Transfer images of Compose file:
-    ///{n}    docker compose config --images | kerek --host … transfer-images -
+    ///{n}    $ docker compose config --images | kerek --host … transfer-images -
     ///{n}- Transfer image, compressing it in transit with Zstandard:
-    ///{n}    kerek --host … transfer-images --compress zstd img
+    ///{n}    $ kerek --host … transfer-images --compress zstd img
     TransferImages {
         /// Compression command to use (`bzip2`, `gzip`, `xz`, `zstd`, etc.)
         #[arg(long, value_delimiter = ' ')]
@@ -328,11 +328,11 @@ enum Subcommand {
     /// Examples:
     ///{n}
     ///{n}- Use temporary SSH tunnel to show containers running on SSH host:
-    ///{n}    kerek tunnel-ssh my-ssh-host
-    ///{n}    CONTAINER_HOST="unix://${PWD}/kerek.sock" podman ps
-    ///{n}    fuser --kill -TERM kerek.sock
+    ///{n}    $ kerek tunnel-ssh my-ssh-host
+    ///{n}    $ CONTAINER_HOST="unix://${PWD}/kerek.sock" podman ps
+    ///{n}    $ fuser --kill -TERM kerek.sock
     ///{n}- Tunnel to SSH host of custom SSH config file:
-    ///{n}    kerek tunnel-ssh --ssh-config ssh_config my-ssh-host
+    ///{n}    $ kerek tunnel-ssh --ssh-config ssh_config my-ssh-host
     TunnelSsh {
         /// Path to Unix domain socket on localhost to be forwarded
         #[arg(default_value = "kerek.sock", long)]

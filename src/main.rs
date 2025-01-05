@@ -205,17 +205,6 @@ enum Subcommand {
     /// To force updating services regardless of config hash changes, use the
     /// `--force-recreate` flag.
     ///
-    /// In summary:
-    ///{n}
-    ///{n}| Command                           | Effect                                 |
-    ///{n}| --------------------------------- | -------------------------------------- |
-    ///{n}| `kerek deploy`                    | Update services with changed hash      |
-    ///{n}| `kerek deploy x`                  | Update service `x` if its hash changed |
-    ///{n}| `kerek deploy --force-recreate`   | Always update all services             |
-    ///{n}| `kerek deploy --force-recreate x` | Always update service `x`              |
-    ///{n}| `kerek deploy --dry-run`          | Only show what would be changed        |
-    ///{n}| `docker compose config --hash \*` | Show service config hashes             |
-    ///
     /// Whether the old containers are stopped before or after the new containers are
     /// started is controlled via `services.*.deploy.update_config.order` in a Compose
     /// file. The options are `stop-first` and `start-first`, respectively.
@@ -237,6 +226,21 @@ enum Subcommand {
     ///{n}  3. Start new replica 2
     ///{n}  4. Stop old replica 2
     ///{n}  5. …
+    ///
+    /// Examples:
+    ///{n}
+    ///{n}- Update services with changed hash:
+    ///{n}    kerek deploy
+    ///{n}- Update service `x` if its hash changed:
+    ///{n}    kerek deploy x
+    ///{n}- Always update all services:
+    ///{n}    kerek deploy --force-recreate
+    ///{n}- Always update service `x`:
+    ///{n}    kerek deploy --force-recreate x
+    ///{n}- Only show what would be changed:
+    ///{n}    kerek deploy --dry-run
+    ///{n}- Show service config hashes:
+    ///{n}    docker compose config --hash \*
     Deploy {
         #[command(flatten)]
         docker_compose_arguments: DockerComposeArguments,

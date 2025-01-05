@@ -272,17 +272,6 @@ does not trigger an update per se.
 To force updating services regardless of config hash changes, use the
 `--force-recreate` flag.
 
-In summary:
-
-| Command                           | Effect                                 |
-| --------------------------------- | -------------------------------------- |
-| `kerek deploy`                    | Update services with changed hash      |
-| `kerek deploy x`                  | Update service `x` if its hash changed |
-| `kerek deploy --force-recreate`   | Always update all services             |
-| `kerek deploy --force-recreate x` | Always update service `x`              |
-| `kerek deploy --dry-run`          | Only show what would be changed        |
-| `docker compose config --hash \*` | Show service config hashes             |
-
 Whether the old containers are stopped before or after the new containers are
 started is controlled via `services.*.deploy.update_config.order` in a Compose
 file. The options are `stop-first` and `start-first`, respectively.
@@ -304,6 +293,21 @@ respectively, and this is repeated for replicas:
   3. Start new replica 2
   4. Stop old replica 2
   5. …
+
+Examples:
+
+- Update services with changed hash:
+    kerek deploy
+- Update service `x` if its hash changed:
+    kerek deploy x
+- Always update all services:
+    kerek deploy --force-recreate
+- Always update service `x`:
+    kerek deploy --force-recreate x
+- Only show what would be changed:
+    kerek deploy --dry-run
+- Show service config hashes:
+    docker compose config --hash \*
 
 Usage: kerek deploy [OPTIONS] [SERVICE_NAMES]...
 

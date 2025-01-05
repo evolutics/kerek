@@ -200,7 +200,7 @@ enum Subcommand {
     /// (details in https://github.com/docker/compose/blob/main/pkg/compose/hash.go).
     /// Note that the service config hash does not depend on the container image
     /// contents but only the `image` field. Thus, reusing an image tag like `latest`
-    /// does not trigger an update.
+    /// does not trigger an update per se.
     ///
     /// To force updating services regardless of config hash changes, use the
     /// `--force-recreate` flag.
@@ -270,8 +270,8 @@ enum Subcommand {
 
     /// Copies images from default to specified Docker host
     ///
-    /// By default, only images absent on the destination host are transferred.
-    /// An image is considered present if the name matches one of these forms:
+    /// By default, only images not present on the destination host are transferred. An
+    /// image is considered present if the provided name matches one of these forms:
     ///{n}
     ///{n}- `<namespace>:<tag>`
     ///{n}- `<namespace>@<digest>`

@@ -9,7 +9,7 @@ continuous delivery light and not deal with Kubernetes or a container registry.
 
 - Zero-downtime deployments for Docker Compose.
 - Distributing images over SSH instead of a registry.
-- Custom SSH config files for remote Docker instances.
+- Custom SSH config files supported for remote Docker instances.
 - Compatible with Docker and Podman.
 
 ## Setup
@@ -88,7 +88,7 @@ Note that above config is an official (but optional) part of the
 However, vanilla Docker Compose always updates services in `stop-first` order,
 even if your Compose file says otherwise.
 
-### Zero-downtime deployments with a reverse proxy
+### Zero-downtime deployments
 
 To switch over traffic from old to new version of an application during an
 update, it is common to use a reverse proxy.
@@ -128,8 +128,8 @@ while true; do curl --fail --max-time 0.2 localhost:8080; sleep 0.01s; done
 ### Continuous delivery via SSH
 
 There is an [example](examples/ssh_delivery/test.sh) of a pipeline that delivers
-a Compose application to a staging environment. It does not need a container
-registry but instead transfers images via SSH. Summary of the whole process:
+a Compose application to a staging environment via SSH. Summary of the whole
+process:
 
 ```mermaid
 sequenceDiagram
@@ -269,7 +269,7 @@ More precisely, a service is updated only if its service config hash changes
 (details in https://github.com/docker/compose/blob/main/pkg/compose/hash.go).
 Note that the service config hash does not depend on the container image
 contents but only the `image` field. Thus, reusing an image tag like `latest`
-does not trigger an update.
+does not trigger an update per se.
 
 To force updating services regardless of config hash changes, use the
 `--force-recreate` flag.
@@ -421,8 +421,8 @@ Options:
 ```
 Copies images from default to specified Docker host
 
-By default, only images absent on the destination host are transferred. An image
-is considered present if the name matches one of these forms:
+By default, only images not present on the destination host are transferred. An
+image is considered present if the provided name matches one of these forms:
 
 - `<namespace>:<tag>`
 - `<namespace>@<digest>`

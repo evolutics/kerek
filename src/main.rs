@@ -558,6 +558,16 @@ mod tests {
         include_str!("../README.md")
     }
 
+    #[test]
+    fn readme_includes_cli_overview() {
+        let full_help = render_help_message(&[]);
+        let relevant_parts = full_help.split("\n\n").skip(1).take(2).collect::<Vec<_>>();
+        let relevant_help = relevant_parts.join("\n\n");
+        let section = format!("\n\n### CLI overview\n\n```\n{relevant_help}\n```\n");
+
+        assert!(get_readme().contains(&section), "{section}")
+    }
+
     #[test_case::test_case(&[]; "")]
     #[test_case::test_case(&["deploy"]; "deploy")]
     #[test_case::test_case(&["provision"]; "provision")]
@@ -567,20 +577,24 @@ mod tests {
         let help_command = [&[env!("CARGO_BIN_NAME")], subcommands, &["--help"]]
             .concat()
             .join(" ");
+        let help_message = render_help_message(subcommands);
+        let help_section = format!("\n\n### `{help_command}`\n\n```\n{help_message}\n```\n");
+
+        assert!(get_readme().contains(&help_section), "{help_section}")
+    }
+
+    fn render_help_message(subcommands: &[&str]) -> String {
         let mut root = Cli::command().term_width(80);
         root.build();
         let leaf = subcommands.iter().fold(&mut root, |node, subcommand| {
             node.find_subcommand_mut(subcommand).expect(subcommand)
         });
         let help_message = leaf.render_long_help();
-        let help_message = help_message
+        help_message
             .to_string()
             .lines()
             .map(|line| line.trim_end())
             .collect::<Vec<_>>()
-            .join("\n");
-        let help_section = format!("\n\n### `{help_command}`\n\n```\n{help_message}\n```\n");
-
-        assert!(get_readme().contains(&help_section), "{help_section}")
+            .join("\n")
     }
 }

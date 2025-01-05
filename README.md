@@ -7,9 +7,9 @@ continuous delivery light and not deal with Kubernetes or a container registry.
 
 ## Features
 
-- Zero-downtime deployments for Docker Compose (`kerek deploy`).
-- Distributing images over SSH instead of a registry (`kerek transfer-images`).
-- Custom SSH config files for remote Docker instances (`kerek tunnel-ssh`).
+- Zero-downtime deployments for Docker Compose.
+- Distributing images over SSH instead of a registry.
+- Custom SSH config files for remote Docker instances.
 - Compatible with Docker and Podman.
 
 ## Setup
@@ -26,6 +26,21 @@ cargo install --git https://github.com/evolutics/kerek
 ```
 
 ## Usage
+
+### CLI overview
+
+```
+Usage: kerek [OPTIONS] <COMMAND>
+
+Commands:
+  deploy           Create or update services
+  provision        Provisions host with container engine, making system-wide
+                   changes
+  transfer-images  Copies images from default to specified Docker host
+  tunnel-ssh       Forwards local Unix domain socket to remote Docker host over
+                   SSH
+  help             Print this message or the help of the given subcommand(s)
+```
 
 ### Service update order
 

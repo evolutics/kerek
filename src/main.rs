@@ -251,7 +251,7 @@ enum Subcommand {
     #[command(hide = true)]
     DockerCliPluginMetadata,
 
-    /// Provisions host with container engine, making system-wide changes
+    /// Install container engine on host, making system-wide changes
     ///
     /// This targets a host via SSH, unless host `localhost` and no SSH config
     /// file are passed as arguments, in which case the current machine is
@@ -268,7 +268,7 @@ enum Subcommand {
         host: String,
     },
 
-    /// Copies images from default to specified Docker host
+    /// Copy images from default to specified Docker host
     ///
     /// By default, only images not present on the destination host are transferred. An
     /// image is considered present if the provided name matches one of these forms:
@@ -300,7 +300,7 @@ enum Subcommand {
         images: Vec<String>,
     },
 
-    /// Forwards local Unix domain socket to remote Docker host over SSH
+    /// Forward local Unix domain socket to remote Docker host over SSH
     ///
     /// This runs an SSH tunnel in the background. Meanwhile, you can connect to
     /// the remote Docker host using `DOCKER_HOST=unix:///path/to/kerek.sock`

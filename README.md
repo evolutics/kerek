@@ -34,10 +34,9 @@ Usage: kerek [OPTIONS] <COMMAND>
 
 Commands:
   deploy           Create or update Docker Compose services
-  provision        Provisions host with container engine, making system-wide
-                   changes
-  transfer-images  Copies images from default to specified Docker host
-  tunnel-ssh       Forwards local Unix domain socket to remote Docker host over
+  provision        Install container engine on host, making system-wide changes
+  transfer-images  Copy images from default to specified Docker host
+  tunnel-ssh       Forward local Unix domain socket to remote Docker host over
                    SSH
   help             Print this message or the help of the given subcommand(s)
 ```
@@ -192,10 +191,9 @@ Usage: kerek [OPTIONS] <COMMAND>
 
 Commands:
   deploy           Create or update Docker Compose services
-  provision        Provisions host with container engine, making system-wide
-                   changes
-  transfer-images  Copies images from default to specified Docker host
-  tunnel-ssh       Forwards local Unix domain socket to remote Docker host over
+  provision        Install container engine on host, making system-wide changes
+  transfer-images  Copy images from default to specified Docker host
+  tunnel-ssh       Forward local Unix domain socket to remote Docker host over
                    SSH
   help             Print this message or the help of the given subcommand(s)
 
@@ -394,7 +392,7 @@ Options:
 ### `kerek provision --help`
 
 ```
-Provisions host with container engine, making system-wide changes
+Install container engine on host, making system-wide changes
 
 This targets a host via SSH, unless host `localhost` and no SSH config file are
 passed as arguments, in which case the current machine is targeted.
@@ -419,7 +417,7 @@ Options:
 ### `kerek transfer-images --help`
 
 ```
-Copies images from default to specified Docker host
+Copy images from default to specified Docker host
 
 By default, only images not present on the destination host are transferred. An
 image is considered present if the provided name matches one of these forms:
@@ -459,7 +457,7 @@ Options:
 ### `kerek tunnel-ssh --help`
 
 ```
-Forwards local Unix domain socket to remote Docker host over SSH
+Forward local Unix domain socket to remote Docker host over SSH
 
 This runs an SSH tunnel in the background. Meanwhile, you can connect to the
 remote Docker host using `DOCKER_HOST=unix:///path/to/kerek.sock` locally. Note

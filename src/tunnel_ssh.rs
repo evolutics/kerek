@@ -18,7 +18,7 @@ pub fn go(
     let local_socket = path::absolute(&local_socket)
         .with_context(|| format!("Unable to make {local_socket:?} absolute"))?;
     let remote_socket = match remote_socket {
-        None => infer_remote_socket(RemoteConfiguration {
+        None => infer_remote_socket(RemoteConfig {
             container_engine: &container_engine,
             ssh_cli: &ssh_cli,
             ssh_host: &ssh_host,
@@ -56,18 +56,18 @@ pub struct In<'a> {
     pub ssh_host: String,
 }
 
-struct RemoteConfiguration<'a> {
+struct RemoteConfig<'a> {
     container_engine: &'a str,
     ssh_cli: &'a ssh::Cli<'a>,
     ssh_host: &'a str,
 }
 
 fn infer_remote_socket(
-    RemoteConfiguration {
+    RemoteConfig {
         container_engine,
         ssh_cli,
         ssh_host,
-    }: RemoteConfiguration,
+    }: RemoteConfig,
 ) -> anyhow::Result<String> {
     let mut command = ssh_cli.command();
     command.arg(ssh_host);

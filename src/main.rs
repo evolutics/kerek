@@ -239,7 +239,7 @@ enum Subcommand {
     ///{n}    $ kerek deploy --force-recreate x
     ///{n}
     ///{n}- Only show what would be changed:
-    ///{n}    $ kerek deploy --dry-run
+    ///{n}    $ kerek --dry-run deploy
     ///{n}- Show service config hashes:
     ///{n}    $ docker compose config --hash \*
     Deploy {

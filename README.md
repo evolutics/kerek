@@ -312,7 +312,7 @@ Examples:
     $ kerek deploy --force-recreate x
 
 - Only show what would be changed:
-    $ kerek deploy --dry-run
+    $ kerek --dry-run deploy
 - Show service config hashes:
     $ docker compose config --hash \*
 

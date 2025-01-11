@@ -42,7 +42,7 @@ pub fn go(
         log::info!("Would execute: {command:?}");
         Ok(())
     } else {
-        // Use `exec` so that SSH process is terminated on signals like TERM.
+        // Use `exec` so that SSH tunnel is ready when main process returns.
         Err(command.exec()).with_context(|| format!("Unable to execute: {command:?}"))?
     }
 }

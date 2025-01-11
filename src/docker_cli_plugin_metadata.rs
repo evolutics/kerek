@@ -38,7 +38,7 @@ mod tests {
   "ShortDescription": "Light continuous delivery for Docker Compose",
   "URL": "https://github.com/evolutics/kerek",
   "Vendor": "Benjamin Fischer",
-  "Version": "2.0.0"
+  "Version": "2.0.1"
 }"#,
         );
         Ok(())

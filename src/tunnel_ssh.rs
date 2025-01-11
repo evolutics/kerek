@@ -2,8 +2,8 @@ use super::command;
 use super::log;
 use super::ssh;
 use anyhow::Context;
-use std::os::unix::process::CommandExt;
 use std::path;
+use std::process;
 
 pub fn go(
     In {
@@ -43,8 +43,19 @@ pub fn go(
         Ok(())
     } else {
         // Use `exec` so that SSH tunnel is ready when main process returns.
-        Err(command.exec()).with_context(|| format!("Unable to execute: {command:?}"))?
+        exec(command)
     }
+}
+
+#[cfg(not(unix))]
+fn exec(mut _command: process::Command) -> anyhow::Result<()> {
+    Err(anyhow::anyhow!("`exec` not supported"))
+}
+
+#[cfg(unix)]
+fn exec(mut command: process::Command) -> anyhow::Result<()> {
+    use std::os::unix::process::CommandExt;
+    Err(command.exec()).with_context(|| format!("Unable to execute: {command:?}"))?
 }
 
 pub struct In<'a> {

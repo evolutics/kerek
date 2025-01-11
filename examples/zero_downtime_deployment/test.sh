@@ -7,7 +7,7 @@ test_container_engine() {
     docker compose down
     trap 'docker compose down' EXIT
 
-    kerek_deploy
+    GREET_VERSION=A kerek_deploy
 
     while true; do
       curl --fail --max-time 0.2 --silent localhost:8080 || echo "Error $?"

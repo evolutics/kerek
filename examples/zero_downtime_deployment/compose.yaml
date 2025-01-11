@@ -2,7 +2,7 @@ name: example
 services:
   greet:
     image: "docker.io/hashicorp/http-echo:1.0"
-    command: ["-listen=:8282", "-text=Hi from ${GREET_VERSION-A}"]
+    command: ["-listen=:8282", "-text=Hi from ${GREET_VERSION-A/B}"]
     deploy:
       update_config:
         order: start-first

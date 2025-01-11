@@ -114,7 +114,7 @@ Try it yourself:
 ```bash
 cd examples/zero_downtime_deployment
 
-kerek deploy --wait
+GREET_VERSION=A kerek deploy --wait
 curl localhost:8080 # … prints "Hi from A"
 
 GREET_VERSION=B kerek deploy --wait

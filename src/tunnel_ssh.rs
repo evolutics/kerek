@@ -47,17 +47,6 @@ pub fn go(
     }
 }
 
-#[cfg(not(unix))]
-fn exec(mut _command: process::Command) -> anyhow::Result<()> {
-    Err(anyhow::anyhow!("`exec` not supported"))
-}
-
-#[cfg(unix)]
-fn exec(mut command: process::Command) -> anyhow::Result<()> {
-    use std::os::unix::process::CommandExt;
-    Err(command.exec()).with_context(|| format!("Unable to execute: {command:?}"))?
-}
-
 pub struct In<'a> {
     pub container_engine: String,
     pub dry_run: bool,
@@ -101,4 +90,15 @@ fn infer_remote_socket(
 
     log::info!("Inferred remote socket: {socket:?}");
     Ok(socket.into())
+}
+
+#[cfg(not(unix))]
+fn exec(mut _command: process::Command) -> anyhow::Result<()> {
+    Err(anyhow::anyhow!("`exec` not supported"))
+}
+
+#[cfg(unix)]
+fn exec(mut command: process::Command) -> anyhow::Result<()> {
+    use std::os::unix::process::CommandExt;
+    Err(command.exec()).with_context(|| format!("Unable to execute: {command:?}"))?
 }

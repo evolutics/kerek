@@ -301,14 +301,14 @@ respectively, and this is repeated for replicas:
 
 Examples:
 
-- Update services with changed hash:
+- Update services whose config hash has changed:
     $ kerek deploy
-- Update service `x` if its hash changed:
-    $ kerek deploy x
+- Update service `my-service` if its config hash has changed:
+    $ kerek deploy my-service
 - Always update all services:
     $ kerek deploy --force-recreate
-- Always update service `x`:
-    $ kerek deploy --force-recreate x
+- Always update service `my-service`:
+    $ kerek deploy --force-recreate my-service
 
 - Only show what would be changed:
     $ kerek --dry-run deploy
@@ -445,19 +445,19 @@ image is considered present if the provided name matches one of these forms:
 
 Examples:
 
-- Transfer image `img` from default Docker host to 192.0.2.1 over SSH:
-    $ kerek --host ssh://192.0.2.1 transfer-images img
+- Transfer image `img:tag` from default Docker host to 192.0.2.1 over SSH:
+    $ kerek --host ssh://192.0.2.1 transfer-images img:tag
 - Transfer image from Docker host `ssh://src` to `ssh://dest`:
-    $ DOCKER_HOST=ssh://src kerek --host ssh://dest transfer-images img
+    $ DOCKER_HOST=ssh://src kerek --host ssh://dest transfer-images img:tag
 - Transfer image from Docker context `src` to `dest`:
-    $ DOCKER_CONTEXT=src kerek --context dest transfer-images img
+    $ DOCKER_CONTEXT=src kerek --context dest transfer-images img:tag
 
-- Always transfer image, even if already present under same name:
-    $ kerek --host … transfer-images --force img:latest
+- Always transfer image, even if already present under same name `img:tag`:
+    $ kerek --host … transfer-images --force img:tag
 - Transfer images of Compose file:
     $ docker compose config --images | kerek --host … transfer-images -
 - Transfer image, compressing it in transit with Zstandard:
-    $ kerek --host … transfer-images --compress zstd img
+    $ kerek --host … transfer-images --compress zstd img:tag
 
 Usage: kerek transfer-images [OPTIONS] [IMAGES]...
 
@@ -490,10 +490,10 @@ Examples:
 
 - Use temporary SSH tunnel to show containers running on SSH host:
     $ kerek tunnel-ssh my-ssh-host
-    $ CONTAINER_HOST="unix://${PWD}/kerek.sock" podman ps
+    $ DOCKER_HOST="unix://${PWD}/kerek.sock" docker ps
     $ fuser --kill -TERM kerek.sock
 - Tunnel to SSH host of custom SSH config file:
-    $ kerek tunnel-ssh --ssh-config ssh_config my-ssh-host
+    $ kerek tunnel-ssh --ssh-config my_ssh_config my-ssh-host
 
 Usage: kerek tunnel-ssh [OPTIONS] <SSH_HOST>
 

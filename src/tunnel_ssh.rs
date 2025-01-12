@@ -3,7 +3,6 @@ use super::log;
 use super::ssh;
 use anyhow::Context;
 use std::path;
-use std::process;
 
 pub fn go(
     In {
@@ -39,11 +38,10 @@ pub fn go(
     ]);
 
     if dry_run {
-        log::info!("Would execute: {command:?}");
+        log::info!("Would run: {command:?}");
         Ok(())
     } else {
-        // Use `exec` so that SSH tunnel is ready when main process returns.
-        exec(command)
+        command::status_ok(&mut command)
     }
 }
 
@@ -90,15 +88,4 @@ fn infer_remote_socket(
 
     log::info!("Inferred remote socket: {socket:?}");
     Ok(socket.into())
-}
-
-#[cfg(not(unix))]
-fn exec(mut _command: process::Command) -> anyhow::Result<()> {
-    Err(anyhow::anyhow!("`exec` not supported"))
-}
-
-#[cfg(unix)]
-fn exec(mut command: process::Command) -> anyhow::Result<()> {
-    use std::os::unix::process::CommandExt;
-    Err(command.exec()).with_context(|| format!("Unable to execute: {command:?}"))?
 }

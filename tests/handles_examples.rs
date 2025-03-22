@@ -5,6 +5,7 @@ use std::path;
 use std::process;
 
 #[test_case::test_case("examples/image_transfer")]
+#[test_case::test_case("examples/service_dependencies")]
 #[test_case::test_case("examples/ssh_delivery")]
 #[test_case::test_case("examples/zero_downtime_deployment")]
 fn go(folder: &str) -> anyhow::Result<()> {

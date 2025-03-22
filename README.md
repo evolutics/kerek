@@ -367,6 +367,9 @@ Options:
       --no-build
           Don't build an image, even if it's policy
 
+      --no-deps
+          Don't start linked services
+
       --no-start
           Don't start the services after creating them
 

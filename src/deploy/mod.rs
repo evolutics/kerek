@@ -16,6 +16,7 @@ pub fn go(
         dry_run,
         force_recreate,
         no_build,
+        no_deps,
         no_start,
         pull,
         quiet_pull,
@@ -28,7 +29,7 @@ pub fn go(
     }: In,
 ) -> anyhow::Result<()> {
     let actual_containers = get_actual_state::go(&service_names, &docker_cli, &docker_compose_cli)?;
-    let desired_services = get_desired_state::go(&service_names, &docker_compose_cli)?;
+    let desired_services = get_desired_state::go(&service_names, &docker_compose_cli, no_deps)?;
     let changes = plan_changes::go(&actual_containers, &desired_services, force_recreate);
 
     apply_changes::go(apply_changes::In {
@@ -58,6 +59,7 @@ pub struct In<'a> {
     pub dry_run: bool,
     pub force_recreate: bool,
     pub no_build: bool,
+    pub no_deps: bool,
     pub no_start: bool,
     pub pull: Option<String>,
     pub quiet_pull: bool,

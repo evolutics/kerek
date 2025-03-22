@@ -6,6 +6,7 @@ use std::collections;
 pub fn go(
     service_names: &collections::BTreeSet<String>,
     docker_compose_cli: &docker_compose::Cli,
+    no_deps: bool,
 ) -> anyhow::Result<model::DesiredServices> {
     let compose_app_definition = get_compose_app_definition(service_names, docker_compose_cli)?;
     let service_config_hashes = get_service_config_hashes(docker_compose_cli)?;
@@ -13,6 +14,7 @@ pub fn go(
     Ok(compose_app_definition
         .services
         .into_iter()
+        .filter(|(service_name, _)| !no_deps || service_names.contains(service_name))
         .map(|(service_name, service_definition)| {
             let service_config_hash = service_config_hashes[&service_name].clone();
             (

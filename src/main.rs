@@ -33,6 +33,7 @@ fn main() -> anyhow::Result<()> {
                     build,
                     force_recreate,
                     no_build,
+                    no_deps,
                     no_start,
                     pull,
                     quiet_pull,
@@ -53,6 +54,7 @@ fn main() -> anyhow::Result<()> {
             dry_run,
             force_recreate,
             no_build,
+            no_deps,
             no_start,
             pull,
             quiet_pull,
@@ -424,7 +426,6 @@ struct DockerComposeArguments {
 //   - `--exit-code-from`
 //   - `--menu`
 //   - `--watch`
-// - `--no-deps` (for simplicity)
 // - `--no-recreate`, which is incompatible with:
 //   - `--always-recreate-deps`
 // - `--scale`
@@ -450,6 +451,10 @@ struct DockerComposeUpArgumentsForDeploy {
     /// Don't build an image, even if it's policy
     #[arg(long)]
     no_build: bool,
+
+    /// Don't start linked services
+    #[arg(long)]
+    no_deps: bool,
 
     /// Don't start the services after creating them
     #[arg(long)]

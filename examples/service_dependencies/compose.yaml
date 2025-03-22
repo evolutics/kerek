@@ -1,0 +1,9 @@
+services:
+  my-service-a:
+    image: "docker.io/hashicorp/http-echo:1.0"
+    depends_on:
+      - my-service-b
+  my-service-b:
+    image: "docker.io/hashicorp/http-echo:1.0"
+  my-service-c:
+    image: "docker.io/hashicorp/http-echo:1.0"

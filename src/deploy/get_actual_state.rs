@@ -5,7 +5,7 @@ use crate::docker_compose;
 use std::collections;
 
 pub fn go(
-    service_names: &collections::BTreeSet<String>,
+    service_names: &[&String],
     docker_cli: &docker::Cli,
     docker_compose_cli: &docker_compose::Cli,
 ) -> anyhow::Result<model::ActualContainers> {

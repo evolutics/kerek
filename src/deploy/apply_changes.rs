@@ -76,7 +76,7 @@ pub struct In<'a> {
     pub quiet_pull: bool,
     pub remove_orphans: bool,
     pub renew_anon_volumes: bool,
-    pub service_names: &'a collections::BTreeSet<String>,
+    pub service_names: &'a [&'a String],
     pub timeout: Option<&'a str>,
     pub wait: bool,
     pub wait_timeout: Option<&'a str>,
@@ -114,7 +114,7 @@ fn new_rolling_state(actual_containers: &model::ActualContainers) -> RollingStat
 }
 
 fn build_images(
-    service_names: &collections::BTreeSet<String>,
+    service_names: &[&String],
     dry_run: bool,
     docker_compose_cli: &docker_compose::Cli,
 ) -> anyhow::Result<()> {

@@ -28,8 +28,11 @@ pub fn go(
         wait_timeout,
     }: In,
 ) -> anyhow::Result<()> {
-    let actual_containers = get_actual_state::go(&service_names, &docker_cli, &docker_compose_cli)?;
     let desired_services = get_desired_state::go(&service_names, &docker_compose_cli, no_deps)?;
+    let service_names = (!service_names.is_empty())
+        .then(|| desired_services.keys().collect::<Vec<_>>())
+        .unwrap_or_default();
+    let actual_containers = get_actual_state::go(&service_names, &docker_cli, &docker_compose_cli)?;
     let changes = plan_changes::go(&actual_containers, &desired_services, force_recreate);
 
     apply_changes::go(apply_changes::In {

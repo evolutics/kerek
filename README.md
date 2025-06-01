@@ -22,7 +22,8 @@ continuous delivery light and not deal with Kubernetes or a container registry.
 ### Installation
 
 Download a pre-built executable from the
-[latest release](https://github.com/evolutics/kerek/releases/latest).
+[latest release](https://github.com/evolutics/kerek/releases/latest). If you see
+an error with glibc ("version … not found"), try the musl executable instead.
 
 Alternatively, build from source with
 

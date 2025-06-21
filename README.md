@@ -47,6 +47,11 @@ Commands:
   help             Print this message or the help of the given subcommand(s)
 ```
 
+See the [CLI reference](#command-line-arguments-reference) (also available via
+`kerek <COMMAND> --help`) for many quick **examples**.
+
+The following explains common CI/CD scenarios.
+
 ### Service update order
 
 When updating services with `docker compose up`, the old container of a service

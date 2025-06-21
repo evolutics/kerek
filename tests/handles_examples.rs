@@ -17,10 +17,12 @@ fn go(folder: &str) -> anyhow::Result<()> {
         iter::once(executable_folder.into()).chain(env::split_paths(&original_path)),
     )?;
 
-    assert!(process::Command::new("./test.sh")
-        .env("PATH", path_with_executable_under_test)
-        .current_dir(folder)
-        .status()?
-        .success());
+    assert!(
+        process::Command::new("./test.sh")
+            .env("PATH", path_with_executable_under_test)
+            .current_dir(folder)
+            .status()?
+            .success(),
+    );
     Ok(())
 }

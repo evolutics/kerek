@@ -577,7 +577,11 @@ mod tests {
         let description = env!("CARGO_PKG_DESCRIPTION");
         let top_level_heading = format!("# Kerek: {description}\n\n");
 
-        assert!(readme().starts_with(&top_level_heading));
+        assert!(
+            readme()
+                .to_lowercase()
+                .starts_with(&top_level_heading.to_lowercase()),
+        );
     }
 
     fn readme() -> &'static str {

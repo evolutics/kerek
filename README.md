@@ -1,4 +1,4 @@
-# Kerek: Light continuous delivery for Docker Compose
+# Kerek: Light Continuous Delivery for Docker Compose
 
 Kerek is a CLI that adds features to Docker for people who like to keep
 continuous delivery light and not deal with Kubernetes or a container registry.

@@ -1,7 +1,6 @@
 [package]
 name = "kerek"
 version = "2.2.0"
-authors = ["Benjamin Fischer <benjamin.fischer@evolutics.info>"]
 edition = "2024"
 description = "Light continuous delivery for Docker Compose"
 homepage = "https://github.com/evolutics/kerek"

@@ -1,14 +1,9 @@
 pub fn go() -> anyhow::Result<String> {
-    let authors = env!("CARGO_PKG_AUTHORS");
-    let first_author_name = authors
-        .split_once(" <")
-        .ok_or(anyhow::anyhow!("{authors}"))?
-        .0;
     Ok(serde_json::to_string_pretty(&Metadata {
         schema_version: "0.1.0".into(),
         short_description: env!("CARGO_PKG_DESCRIPTION").into(),
         url: env!("CARGO_PKG_HOMEPAGE").into(),
-        vendor: first_author_name.into(),
+        vendor: "Benjamin Fischer".into(),
         version: env!("CARGO_PKG_VERSION").into(),
     })?)
 }

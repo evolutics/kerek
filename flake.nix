@@ -1,3 +1,4 @@
+# Update-worthy: `flake.lock` file.
 {
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";

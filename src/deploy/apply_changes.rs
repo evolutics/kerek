@@ -98,7 +98,7 @@ struct ChangeOptions<'a> {
     wait_timeout: Option<&'a str>,
 }
 
-fn new_rolling_state(actual_containers: &model::ActualContainers) -> RollingState {
+fn new_rolling_state(actual_containers: &model::ActualContainers) -> RollingState<'_> {
     let mut service_container_count = collections::BTreeMap::new();
 
     for container in actual_containers {

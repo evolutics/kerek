@@ -29,9 +29,11 @@ pub fn go(
     }: In,
 ) -> anyhow::Result<()> {
     let desired_services = get_desired_state::go(&service_names, &docker_compose_cli, no_deps)?;
-    let service_names = (!service_names.is_empty())
-        .then(|| desired_services.keys().collect::<Vec<_>>())
-        .unwrap_or_default();
+    let service_names = if service_names.is_empty() {
+        vec![]
+    } else {
+        desired_services.keys().collect()
+    };
     let actual_containers = get_actual_state::go(&service_names, &docker_cli, &docker_compose_cli)?;
     let changes = plan_changes::go(&actual_containers, &desired_services, force_recreate);
 

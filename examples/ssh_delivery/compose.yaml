@@ -1,6 +1,6 @@
 services:
   web-no-build:
-    image: docker.io/hashicorp/http-echo:1.0 # Update-worthy.
+    image: "docker.io/hashicorp/http-echo:1.0" # Update-worthy.
     command: ["-text=Hi from 8080"]
     ports:
       - "8080:5678"

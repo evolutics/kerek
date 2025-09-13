@@ -1,6 +1,6 @@
 [package]
 name = "kerek"
-version = "2.2.0"
+version = "2.2.1"
 edition = "2024"                                                             # Update-worthy.
 description = "Light continuous delivery for Docker Compose"
 homepage = "https://github.com/evolutics/kerek"

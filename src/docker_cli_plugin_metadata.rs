@@ -1,6 +1,6 @@
 pub fn go() -> anyhow::Result<String> {
     Ok(serde_json::to_string_pretty(&Metadata {
-        schema_version: "0.1.0".into(),
+        schema_version: "0.1.0".into(), // Update-worthy.
         short_description: env!("CARGO_PKG_DESCRIPTION").into(),
         url: env!("CARGO_PKG_HOMEPAGE").into(),
         vendor: "Benjamin Fischer".into(),

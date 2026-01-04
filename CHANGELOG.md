@@ -8,6 +8,12 @@ All notable changes to this project are documented here in a format based on
 
 –
 
+## [2.2.2] - 2026-01-04
+
+### Changed
+
+- Update dependencies.
+
 ## [2.2.1] - 2025-09-13
 
 ### Changed
